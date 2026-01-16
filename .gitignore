@@ -1,6 +1,5 @@
 # Build output
 build/
-wasm-output/
 *.wasm.map
 
 # CMake
