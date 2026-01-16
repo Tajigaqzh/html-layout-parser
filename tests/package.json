@@ -1,0 +1,19 @@
+{
+  "name": "@html-layout-parser/tests",
+  "version": "0.2.0",
+  "private": true,
+  "description": "Property-based tests for HTML Layout Parser v2.0 WASM module",
+  "type": "module",
+  "scripts": {
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "fast-check": "^3.14.0",
+    "typescript": "^5.3.0",
+    "vitest": "^1.0.0"
+  }
+}

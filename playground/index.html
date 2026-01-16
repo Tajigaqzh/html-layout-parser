@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML Layout Parser v2.0 - Playground</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📐</text></svg>">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --primary-color: #4f46e5;
+      --primary-hover: #4338ca;
+      --success-color: #10b981;
+      --error-color: #ef4444;
+      --warning-color: #f59e0b;
+      --bg-color: #f8fafc;
+      --panel-bg: #ffffff;
+      --border-color: #e2e8f0;
+      --text-color: #1e293b;
+      --text-muted: #64748b;
+      --code-bg: #1e293b;
+      --code-text: #e2e8f0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-color);
+      line-height: 1.5;
+    }
+
+    .header {
+      background: linear-gradient(135deg, var(--primary-color), #7c3aed);
+      color: white;
+      padding: 16px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .header h1 {
+      font-size: 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .header-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .btn {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--primary-hover);
+    }
+
+    .btn-secondary {
+      background-color: white;
+      color: var(--text-color);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-color);
+    }
+
+    .btn-success {
+      background-color: var(--success-color);
+      color: white;
+    }
+
+    .btn-success:hover {
+      background-color: #059669;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .main-container {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 16px;
+      height: calc(100vh - 64px);
+    }
+
+    .panel {
+      background: var(--panel-bg);
+      border-radius: 8px;
+      border: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--bg-color);
+    }
+
+    .panel-title {
+      font-weight: 600;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-content {
+      flex: 1;
+      overflow: auto;
+      position: relative;
+    }
+
+    .editor-container {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-color);
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      cursor: pointer;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-muted);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .tab:hover {
+      color: var(--text-color);
+    }
+
+    .tab.active {
+      color: var(--primary-color);
+      border-bottom-color: var(--primary-color);
+    }
+
+    .editor {
+      flex: 1;
+      width: 100%;
+      border: none;
+      resize: none;
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 13px;
+      line-height: 1.6;
+      padding: 16px;
+      background: var(--panel-bg);
+      color: var(--text-color);
+    }
+
+    .editor:focus {
+      outline: none;
+    }
+
+    .options-bar {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      align-items: center;
+      background: var(--bg-color);
+    }
+
+    .option-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .option-label {
+      font-size: 13px;
+      color: var(--text-muted);
+    }
+
+    .option-select, .option-input {
+      padding: 6px 10px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      font-size: 13px;
+      background: white;
+    }
+
+    .option-input {
+      width: 80px;
+    }
+
+    .output-tabs {
+      display: flex;
+      gap: 8px;
+    }
+
+    .output-tab {
+      padding: 6px 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      background: white;
+      cursor: pointer;
+      font-size: 12px;
+      transition: all 0.2s;
+    }
+
+    .output-tab:hover {
+      border-color: var(--primary-color);
+    }
+
+    .output-tab.active {
+      background: var(--primary-color);
+      color: white;
+      border-color: var(--primary-color);
+    }
+
+    .json-output {
+      font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      padding: 16px;
+      white-space: pre-wrap;
+      word-break: break-all;
+      background: var(--code-bg);
+      color: var(--code-text);
+      height: 100%;
+      overflow: auto;
+    }
+
+    .canvas-container {
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      height: 100%;
+    }
+
+    .canvas-wrapper {
+      flex: 1;
+      border: 1px solid var(--border-color);
+      border-radius: 4px;
+      overflow: auto;
+      background: white;
+    }
+
+    #renderCanvas {
+      display: block;
+    }
+
+    .metrics-bar {
+      display: flex;
+      gap: 24px;
+      padding: 8px 12px;
+      background: var(--bg-color);
+      border-radius: 4px;
+      font-size: 12px;
+    }
+
+    .metric {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .metric-label {
+      color: var(--text-muted);
+    }
+
+    .metric-value {
+      font-weight: 600;
+      color: var(--text-color);
+    }
+
+    .status-bar {
+      padding: 8px 16px;
+      border-top: 1px solid var(--border-color);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 12px;
+      background: var(--bg-color);
+    }
+
+    .status-indicator {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: var(--success-color);
+    }
+
+    .status-dot.loading {
+      background: var(--warning-color);
+      animation: pulse 1s infinite;
+    }
+
+    .status-dot.error {
+      background: var(--error-color);
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .error-message {
+      color: var(--error-color);
+      padding: 16px;
+      background: #fef2f2;
+      border-radius: 4px;
+      margin: 16px;
+    }
+
+    .loading-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 3px solid var(--border-color);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .font-status {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .font-badge {
+      padding: 2px 8px;
+      background: var(--success-color);
+      color: white;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    /* Responsive */
+    @media (max-width: 1024px) {
+      .main-container {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+
+      .panel {
+        min-height: 400px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>📐 HTML Layout Parser v2.0 Playground</h1>
+    <div class="header-actions">
+      <button class="btn btn-secondary" id="loadFontBtn">
+        📁 Load Font
+      </button>
+      <button class="btn btn-success" id="parseBtn">
+        ▶️ Parse
+      </button>
+      <button class="btn btn-secondary" id="exportBtn">
+        💾 Export JSON
+      </button>
+    </div>
+  </header>
+
+  <main class="main-container">
+    <!-- Input Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📝 Input</span>
+        <div class="font-status">
+          <span id="fontStatus">No font loaded</span>
+        </div>
+      </div>
+      <div class="panel-content editor-container">
+        <div class="tabs">
+          <button class="tab active" data-tab="html">HTML</button>
+          <button class="tab" data-tab="css">CSS</button>
+        </div>
+        <textarea id="htmlEditor" class="editor" data-editor="html" placeholder="Enter HTML here..."></textarea>
+        <textarea id="cssEditor" class="editor hidden" data-editor="css" placeholder="Enter CSS here (optional)..."></textarea>
+      </div>
+      <div class="options-bar">
+        <div class="option-group">
+          <span class="option-label">Viewport:</span>
+          <input type="number" id="viewportWidth" class="option-input" value="800" min="100" max="2000">
+          <span class="option-label">px</span>
+        </div>
+        <div class="option-group">
+          <span class="option-label">Mode:</span>
+          <select id="outputMode" class="option-select">
+            <option value="flat">Flat (Characters)</option>
+            <option value="byRow">By Row</option>
+            <option value="simple">Simple (Lines)</option>
+            <option value="full">Full (Document)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- Output Panel -->
+    <div class="panel">
+      <div class="panel-header">
+        <span class="panel-title">📊 Output</span>
+        <div class="output-tabs">
+          <button class="output-tab active" data-output="canvas">Canvas</button>
+          <button class="output-tab" data-output="json">JSON</button>
+        </div>
+      </div>
+      <div class="panel-content" id="outputContent">
+        <div id="canvasOutput" class="canvas-container">
+          <div class="canvas-wrapper">
+            <canvas id="renderCanvas" width="800" height="600"></canvas>
+          </div>
+          <div class="metrics-bar" id="metricsBar">
+            <div class="metric">
+              <span class="metric-label">Characters:</span>
+              <span class="metric-value" id="charCount">0</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Parse Time:</span>
+              <span class="metric-value" id="parseTime">0ms</span>
+            </div>
+            <div class="metric">
+              <span class="metric-label">Memory:</span>
+              <span class="metric-value" id="memoryUsage">0 KB</span>
+            </div>
+          </div>
+        </div>
+        <div id="jsonOutput" class="json-output hidden"></div>
+        <div id="loadingOverlay" class="loading-overlay hidden">
+          <div class="spinner"></div>
+        </div>
+      </div>
+      <div class="status-bar">
+        <div class="status-indicator">
+          <div class="status-dot" id="statusDot"></div>
+          <span id="statusText">Ready</span>
+        </div>
+        <span id="versionInfo">v2.0.0</span>
+      </div>
+    </div>
+  </main>
+
+  <!-- Hidden file input for font loading -->
+  <input type="file" id="fontFileInput" accept=".ttf,.otf,.woff,.woff2" style="display: none;">
+
+  <script type="module">
+    // ============================================================================
+    // State Management
+    // ============================================================================
+    
+    const state = {
+      module: null,
+      fontId: 0,
+      fontName: '',
+      lastResult: null,
+      isLoading: false,
+      error: null
+    };
+
+    // ============================================================================
+    // DOM Elements
+    // ============================================================================
+    
+    const elements = {
+      htmlEditor: document.getElementById('htmlEditor'),
+      cssEditor: document.getElementById('cssEditor'),
+      viewportWidth: document.getElementById('viewportWidth'),
+      outputMode: document.getElementById('outputMode'),
+      parseBtn: document.getElementById('parseBtn'),
+      loadFontBtn: document.getElementById('loadFontBtn'),
+      exportBtn: document.getElementById('exportBtn'),
+      fontFileInput: document.getElementById('fontFileInput'),
+      fontStatus: document.getElementById('fontStatus'),
+      canvasOutput: document.getElementById('canvasOutput'),
+      jsonOutput: document.getElementById('jsonOutput'),
+      renderCanvas: document.getElementById('renderCanvas'),
+      loadingOverlay: document.getElementById('loadingOverlay'),
+      statusDot: document.getElementById('statusDot'),
+      statusText: document.getElementById('statusText'),
+      versionInfo: document.getElementById('versionInfo'),
+      charCount: document.getElementById('charCount'),
+      parseTime: document.getElementById('parseTime'),
+      memoryUsage: document.getElementById('memoryUsage')
+    };
+
+    // ============================================================================
+    // Default Content
+    // ============================================================================
+    
+    const defaultHtml = `<div class="container">
+  <h1 class="title">Hello, World!</h1>
+  <p class="content">
+    This is a <strong>demo</strong> of the 
+    <em>HTML Layout Parser v2.0</em>.
+  </p>
+  <p class="highlight">
+    It supports <span class="red">multiple</span> 
+    <span class="blue">colors</span> and 
+    <span class="underline">text decorations</span>.
+  </p>
+</div>`;
+
+    const defaultCss = `.container {
+  padding: 20px;
+}
+
+.title {
+  font-size: 32px;
+  color: #1e293b;
+  margin-bottom: 16px;
+}
+
+.content {
+  font-size: 16px;
+  color: #475569;
+  line-height: 1.6;
+}
+
+.highlight {
+  font-size: 18px;
+  margin-top: 12px;
+}
+
+.red {
+  color: #ef4444;
+}
+
+.blue {
+  color: #3b82f6;
+}
+
+.underline {
+  text-decoration: underline;
+}
+
+strong {
+  font-weight: bold;
+}
+
+em {
+  font-style: italic;
+}`;
+
+    // ============================================================================
+    // WASM Module Loading
+    // ============================================================================
+    
+    async function loadWasmModule() {
+      setStatus('loading', 'Loading WASM module...');
+      
+      try {
+        // Try to load from various paths
+        const paths = [
+          '../build/html_layout_parser.js',
+          '../dist/html_layout_parser.js',
+          './html_layout_parser.js'
+        ];
+        
+        let moduleFactory = null;
+        
+        for (const path of paths) {
+          try {
+            const module = await import(path);
+            moduleFactory = module.default || module.createModule || module;
+            if (typeof moduleFactory === 'function') {
+              break;
+            }
+          } catch (e) {
+            console.log(`Failed to load from ${path}:`, e.message);
+          }
+        }
+        
+        // Check global
+        if (!moduleFactory && typeof window.createHtmlLayoutParserModule === 'function') {
+          moduleFactory = window.createHtmlLayoutParserModule;
+        }
+        
+        if (!moduleFactory) {
+          throw new Error('Could not load WASM module. Make sure html_layout_parser.js is available.');
+        }
+        
+        state.module = await moduleFactory();
+        
+        // Get version
+        const versionPtr = state.module._getVersion();
+        if (versionPtr) {
+          const version = state.module.UTF8ToString(versionPtr);
+          state.module._freeString(versionPtr);
+          elements.versionInfo.textContent = `v${version}`;
+        }
+        
+        setStatus('ready', 'Ready');
+        return true;
+      } catch (error) {
+        console.error('Failed to load WASM module:', error);
+        setStatus('error', `Failed to load WASM: ${error.message}`);
+        return false;
+      }
+    }
+
+    // ============================================================================
+    // Font Management
+    // ============================================================================
+    
+    async function loadFont(fontData, fontName) {
+      if (!state.module) {
+        throw new Error('WASM module not loaded');
+      }
+      
+      // Unload previous font
+      if (state.fontId > 0) {
+        state.module._unloadFont(state.fontId);
+        state.fontId = 0;
+      }
+      
+      // Allocate memory for font data
+      const dataPtr = state.module._malloc(fontData.length);
+      if (dataPtr === 0) {
+        throw new Error('Failed to allocate memory for font data');
+      }
+      
+      // Allocate memory for font name
+      const nameBytes = state.module.lengthBytesUTF8(fontName) + 1;
+      const namePtr = state.module._malloc(nameBytes);
+      if (namePtr === 0) {
+        state.module._free(dataPtr);
+        throw new Error('Failed to allocate memory for font name');
+      }
+      
+      try {
+        // Copy data to WASM memory
+        state.module.HEAPU8.set(fontData, dataPtr);
+        state.module.stringToUTF8(fontName, namePtr, nameBytes);
+        
+        // Load font
+        const fontId = state.module._loadFont(dataPtr, fontData.length, namePtr);
+        
+        if (fontId <= 0) {
+          throw new Error('Failed to load font');
+        }
+        
+        // Set as default font
+        state.module._setDefaultFont(fontId);
+        
+        state.fontId = fontId;
+        state.fontName = fontName;
+        
+        updateFontStatus();
+        return fontId;
+      } finally {
+        state.module._free(dataPtr);
+        state.module._free(namePtr);
+      }
+    }
+
+    function updateFontStatus() {
+      if (state.fontId > 0) {
+        elements.fontStatus.innerHTML = `<span class="font-badge">${state.fontName}</span>`;
+      } else {
+        elements.fontStatus.textContent = 'No font loaded';
+      }
+    }
+
+    // ============================================================================
+    // HTML Parsing
+    // ============================================================================
+    
+    function parseHTML(html, css, viewportWidth, mode) {
+      if (!state.module) {
+        throw new Error('WASM module not loaded');
+      }
+      
+      // Allocate HTML string
+      const htmlBytes = state.module.lengthBytesUTF8(html) + 1;
+      const htmlPtr = state.module._malloc(htmlBytes);
+      if (htmlPtr === 0) {
+        throw new Error('Failed to allocate memory for HTML');
+      }
+      
+      // Allocate mode string
+      const modeBytes = state.module.lengthBytesUTF8(mode) + 1;
+      const modePtr = state.module._malloc(modeBytes);
+      if (modePtr === 0) {
+        state.module._free(htmlPtr);
+        throw new Error('Failed to allocate memory for mode');
+      }
+      
+      // Allocate CSS string if provided
+      let cssPtr = 0;
+      if (css && css.trim()) {
+        const cssBytes = state.module.lengthBytesUTF8(css) + 1;
+        cssPtr = state.module._malloc(cssBytes);
+        if (cssPtr !== 0) {
+          state.module.stringToUTF8(css, cssPtr, cssBytes);
+        }
+      }
+      
+      try {
+        state.module.stringToUTF8(html, htmlPtr, htmlBytes);
+        state.module.stringToUTF8(mode, modePtr, modeBytes);
+        
+        const resultPtr = state.module._parseHTML(
+          htmlPtr,
+          cssPtr,
+          viewportWidth,
+          modePtr,
+          0
+        );
+        
+        if (resultPtr === 0) {
+          throw new Error('Parse returned null');
+        }
+        
+        const resultJson = state.module.UTF8ToString(resultPtr);
+        state.module._freeString(resultPtr);
+        
+        return JSON.parse(resultJson);
+      } finally {
+        state.module._free(htmlPtr);
+        state.module._free(modePtr);
+        if (cssPtr !== 0) {
+          state.module._free(cssPtr);
+        }
+      }
+    }
+
+    // ============================================================================
+    // Canvas Rendering
+    // ============================================================================
+    
+    function renderToCanvas(data, mode) {
+      const canvas = elements.renderCanvas;
+      const ctx = canvas.getContext('2d');
+      
+      // Get all characters based on mode
+      let characters = [];
+      
+      if (mode === 'flat') {
+        characters = data;
+      } else if (mode === 'byRow') {
+        characters = data.flatMap(row => row.children || []);
+      } else if (mode === 'simple') {
+        characters = (data.lines || []).flatMap(line => line.characters || []);
+      } else if (mode === 'full') {
+        for (const page of (data.pages || [])) {
+          for (const block of (page.blocks || [])) {
+            for (const line of (block.lines || [])) {
+              if (line.runs) {
+                for (const run of line.runs) {
+                  characters.push(...(run.characters || []));
+                }
+              } else if (line.characters) {
+                characters.push(...line.characters);
+              }
+            }
+          }
+        }
+      }
+      
+      // Calculate canvas size
+      let maxX = 0, maxY = 0;
+      for (const char of characters) {
+        maxX = Math.max(maxX, char.x + char.width);
+        maxY = Math.max(maxY, char.y + char.height);
+      }
+      
+      canvas.width = Math.max(800, maxX + 40);
+      canvas.height = Math.max(400, maxY + 40);
+      
+      // Clear canvas
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      
+      // Render characters
+      for (const char of characters) {
+        // Background
+        if (char.backgroundColor && char.backgroundColor !== '#00000000') {
+          ctx.fillStyle = parseColor(char.backgroundColor);
+          ctx.fillRect(char.x, char.y, char.width, char.height);
+        }
+        
+        // Text shadow
+        if (char.textShadow && char.textShadow.length > 0) {
+          const shadow = char.textShadow[0];
+          ctx.shadowOffsetX = shadow.offsetX;
+          ctx.shadowOffsetY = shadow.offsetY;
+          ctx.shadowBlur = shadow.blurRadius;
+          ctx.shadowColor = parseColor(shadow.color);
+        } else {
+          ctx.shadowOffsetX = 0;
+          ctx.shadowOffsetY = 0;
+          ctx.shadowBlur = 0;
+        }
+        
+        // Font
+        const fontStyle = char.fontStyle || 'normal';
+        const fontWeight = char.fontWeight || 400;
+        const fontSize = char.fontSize || 16;
+        const fontFamily = char.fontFamily || 'sans-serif';
+        ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+        
+        // Text color
+        ctx.fillStyle = parseColor(char.color);
+        
+        // Draw text
+        ctx.fillText(char.character, char.x, char.baseline || (char.y + char.height * 0.8));
+        
+        // Reset shadow
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        ctx.shadowBlur = 0;
+        
+        // Text decoration
+        if (char.textDecoration) {
+          const dec = char.textDecoration;
+          ctx.strokeStyle = parseColor(dec.color || char.color);
+          ctx.lineWidth = dec.thickness || 1;
+          
+          if (dec.underline) {
+            const y = (char.baseline || (char.y + char.height * 0.8)) + 2;
+            ctx.beginPath();
+            ctx.moveTo(char.x, y);
+            ctx.lineTo(char.x + char.width, y);
+            ctx.stroke();
+          }
+          
+          if (dec.lineThrough) {
+            const y = char.y + char.height / 2;
+            ctx.beginPath();
+            ctx.moveTo(char.x, y);
+            ctx.lineTo(char.x + char.width, y);
+            ctx.stroke();
+          }
+          
+          if (dec.overline) {
+            ctx.beginPath();
+            ctx.moveTo(char.x, char.y);
+            ctx.lineTo(char.x + char.width, char.y);
+            ctx.stroke();
+          }
+        }
+      }
+      
+      return characters.length;
+    }
+
+    function parseColor(color) {
+      if (!color || color === 'transparent' || color === '#00000000') {
+        return 'transparent';
+      }
+      
+      // Handle #RRGGBBAA format
+      if (color.startsWith('#') && color.length === 9) {
+        const r = parseInt(color.slice(1, 3), 16);
+        const g = parseInt(color.slice(3, 5), 16);
+        const b = parseInt(color.slice(5, 7), 16);
+        const a = parseInt(color.slice(7, 9), 16) / 255;
+        return `rgba(${r}, ${g}, ${b}, ${a.toFixed(3)})`;
+      }
+      
+      return color;
+    }
+
+    // ============================================================================
+    // UI Helpers
+    // ============================================================================
+    
+    function setStatus(type, message) {
+      elements.statusDot.className = 'status-dot';
+      if (type === 'loading') {
+        elements.statusDot.classList.add('loading');
+      } else if (type === 'error') {
+        elements.statusDot.classList.add('error');
+      }
+      elements.statusText.textContent = message;
+    }
+
+    function showLoading(show) {
+      state.isLoading = show;
+      elements.loadingOverlay.classList.toggle('hidden', !show);
+      elements.parseBtn.disabled = show;
+    }
+
+    function updateMetrics(charCount, parseTime, memoryUsage) {
+      elements.charCount.textContent = charCount.toLocaleString();
+      elements.parseTime.textContent = `${parseTime.toFixed(2)}ms`;
+      elements.memoryUsage.textContent = memoryUsage ? `${(memoryUsage / 1024).toFixed(1)} KB` : 'N/A';
+    }
+
+    function showOutput(type) {
+      elements.canvasOutput.classList.toggle('hidden', type !== 'canvas');
+      elements.jsonOutput.classList.toggle('hidden', type !== 'json');
+      
+      document.querySelectorAll('.output-tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.output === type);
+      });
+    }
+
+    function showEditor(type) {
+      elements.htmlEditor.classList.toggle('hidden', type !== 'html');
+      elements.cssEditor.classList.toggle('hidden', type !== 'css');
+      
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.classList.toggle('active', tab.dataset.tab === type);
+      });
+    }
+
+    // ============================================================================
+    // Event Handlers
+    // ============================================================================
+    
+    async function handleParse() {
+      if (state.isLoading) return;
+      
+      showLoading(true);
+      setStatus('loading', 'Parsing...');
+      
+      try {
+        const html = elements.htmlEditor.value;
+        const css = elements.cssEditor.value;
+        const viewportWidth = parseInt(elements.viewportWidth.value) || 800;
+        const mode = elements.outputMode.value;
+        
+        const startTime = performance.now();
+        const result = parseHTML(html, css, viewportWidth, mode);
+        const endTime = performance.now();
+        
+        state.lastResult = result;
+        
+        // Render to canvas
+        const charCount = renderToCanvas(result, mode);
+        
+        // Update JSON output
+        elements.jsonOutput.textContent = JSON.stringify(result, null, 2);
+        
+        // Get memory usage
+        let memoryUsage = 0;
+        if (state.module._getTotalMemoryUsage) {
+          memoryUsage = state.module._getTotalMemoryUsage();
+        }
+        
+        updateMetrics(charCount, endTime - startTime, memoryUsage);
+        setStatus('ready', `Parsed ${charCount} characters`);
+      } catch (error) {
+        console.error('Parse error:', error);
+        setStatus('error', `Error: ${error.message}`);
+        elements.jsonOutput.textContent = `Error: ${error.message}`;
+      } finally {
+        showLoading(false);
+      }
+    }
+
+    async function handleLoadFont() {
+      elements.fontFileInput.click();
+    }
+
+    async function handleFontFileSelected(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      
+      showLoading(true);
+      setStatus('loading', 'Loading font...');
+      
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+        const fontData = new Uint8Array(arrayBuffer);
+        const fontName = file.name.replace(/\.[^.]+$/, '');
+        
+        await loadFont(fontData, fontName);
+        setStatus('ready', `Font "${fontName}" loaded`);
+      } catch (error) {
+        console.error('Font load error:', error);
+        setStatus('error', `Failed to load font: ${error.message}`);
+      } finally {
+        showLoading(false);
+        event.target.value = '';
+      }
+    }
+
+    function handleExport() {
+      if (!state.lastResult) {
+        alert('No data to export. Parse HTML first.');
+        return;
+      }
+      
+      const json = JSON.stringify(state.lastResult, null, 2);
+      const blob = new Blob([json], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `layout-${elements.outputMode.value}-${Date.now()}.json`;
+      a.click();
+      
+      URL.revokeObjectURL(url);
+    }
+
+    // ============================================================================
+    // Initialization
+    // ============================================================================
+    
+    async function init() {
+      // Set default content
+      elements.htmlEditor.value = defaultHtml;
+      elements.cssEditor.value = defaultCss;
+      
+      // Tab switching
+      document.querySelectorAll('.tab').forEach(tab => {
+        tab.addEventListener('click', () => showEditor(tab.dataset.tab));
+      });
+      
+      // Output tab switching
+      document.querySelectorAll('.output-tab').forEach(tab => {
+        tab.addEventListener('click', () => showOutput(tab.dataset.output));
+      });
+      
+      // Button handlers
+      elements.parseBtn.addEventListener('click', handleParse);
+      elements.loadFontBtn.addEventListener('click', handleLoadFont);
+      elements.exportBtn.addEventListener('click', handleExport);
+      elements.fontFileInput.addEventListener('change', handleFontFileSelected);
+      
+      // Keyboard shortcut
+      document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+          handleParse();
+        }
+      });
+      
+      // Load WASM module
+      await loadWasmModule();
+    }
+
+    // Start
+    init();
+  </script>
+</body>
+</html>

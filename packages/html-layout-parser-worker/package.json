@@ -1,0 +1,66 @@
+{
+  "name": "html-layout-parser-worker",
+  "version": "0.2.0",
+  "description": "HTML Layout Parser for Web Worker environments - compiled to WebAssembly. Supports multi-font management, CSS separation, and OffscreenCanvas rendering.",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./wasm": "./dist/html_layout_parser.wasm",
+    "./wasm-js": "./dist/html_layout_parser.js",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup && pnpm run copy:wasm",
+    "copy:wasm": "cp ../../wasm-output/html_layout_parser.wasm dist/ && cp ../../wasm-output/html_layout_parser.js dist/",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "pnpm run clean && pnpm run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "html",
+    "layout",
+    "parser",
+    "wasm",
+    "webassembly",
+    "canvas",
+    "worker",
+    "web-worker",
+    "offscreen-canvas",
+    "text-rendering",
+    "typography"
+  ],
+  "author": "Tajigaqzh <201267151@qq.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Tajigaqzh/html-layout-parser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Tajigaqzh/html-layout-parser/issues"
+  },
+  "homepage": "https://Tajigaqzh.github.io/html-layout-parser/",
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.3.0"
+  },
+  "sideEffects": false
+}
