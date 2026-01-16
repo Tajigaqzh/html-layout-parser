@@ -180,12 +180,12 @@ export default defineConfig({
     logo: '/logo.svg',
     
     socialLinks: [
-      { icon: 'github', link: 'https://github.com/nwyzx1011/html-layout-parser' }
+      { icon: 'github', link: 'https://github.com/Tajigaqzh/html-layout-parser' }
     ],
 
     footer: {
       message: 'Released under the MIT License.',
-      copyright: 'Copyright © 2026 nwyzx1011'
+      copyright: 'Copyright © 2026 Tajigaqzh'
     },
 
     search: {
