@@ -14,11 +14,16 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
  * @returns Promise resolving to the WASM module instance
  */
 export async function loadWasmModule(): Promise<HtmlLayoutParserModule> {
-  const wasmJsPath = join(__dirname, '../../wasm-output/html_layout_parser.js');
-  
-  if (!existsSync(wasmJsPath)) {
+  const wasmCandidates = [
+    join(__dirname, '../../wasm-output/html_layout_parser.js'),
+    join(__dirname, '../../build/html_layout_parser.js')
+  ];
+
+  const wasmJsPath = wasmCandidates.find((candidate) => existsSync(candidate));
+
+  if (!wasmJsPath) {
     throw new Error(
-      `WASM module not found at ${wasmJsPath}. ` +
+      `WASM module not found at ${wasmCandidates.join(' or ')}. ` +
       'Please run the build script first: cd html-layout-parser && ./build.sh'
     );
   }
