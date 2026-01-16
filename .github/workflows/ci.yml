@@ -64,9 +64,18 @@ jobs:
         with:
           node-version: 20
 
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          version: latest
+
       - name: Install dependencies
         run: |
           pnpm install
+
+      - name: Build WASM
+        run: |
+          ./build.sh --debug --no-wasm-opt
 
       - name: Build packages
         run: |
