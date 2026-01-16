@@ -195,5 +195,10 @@ export default defineConfig({
     outline: {
       level: [2, 3]
     }
-  }
+  },
+
+  // Ignore dead links for localhost URLs
+  ignoreDeadLinks: [
+    /^http:\/\/localhost/
+  ]
 })

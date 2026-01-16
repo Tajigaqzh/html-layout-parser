@@ -64,7 +64,7 @@ pnpm install
 pnpm dev
 ```
 
-访问 http://localhost:5173 查看文档。
+访问 http://localhost:4000 查看文档。
 
 ### 构建文档
 
@@ -132,7 +132,7 @@ pnpm preview
 
 ## 📄 许可证
 
-MIT License - 详见 [LICENSE](../LICENSE) 文件
+MIT License - 详见 [LICENSE](https://github.com/Tajigaqzh/html-layout-parser/blob/main/LICENSE) 文件
 
 ## 💬 获取帮助
 
