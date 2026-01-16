@@ -5,7 +5,7 @@
 
 基于 WebAssembly 的高性能 HTML 布局解析器，支持多字体管理、丰富的文本属性和标准化 JSON 输出。专为 Canvas 渲染应用设计。
 
-[English Documentation](./README.md)
+📚 **[在线文档](https://tajigaqzh.github.io/html-layout-parser/)** | [English Documentation](./README.md)
 
 ## 特性
 

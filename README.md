@@ -5,7 +5,7 @@
 
 A high-performance WebAssembly-based HTML layout parser with multi-font support, rich text attributes, and standardized JSON output. Perfect for Canvas rendering applications.
 
-[中文文档](./README_ZH.md)
+📚 **[Documentation](https://tajigaqzh.github.io/html-layout-parser/)** | [中文文档](./README_ZH.md)
 
 ## Features
 
