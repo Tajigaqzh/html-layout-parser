@@ -9,7 +9,7 @@ export default defineConfig([
     format: ['esm', 'cjs'],
     dts: true,
     clean: true,
-    sourcemap: true,
+    sourcemap: false,
     outDir: 'dist',
     external: ['fs', 'path', 'module', 'fs/promises'],
     esbuildOptions(options) {
@@ -23,7 +23,7 @@ export default defineConfig([
     },
     format: ['esm', 'cjs'],
     dts: true,
-    sourcemap: true,
+    sourcemap: false,
     outDir: 'dist',
     external: [],
     esbuildOptions(options) {
@@ -37,7 +37,7 @@ export default defineConfig([
     },
     format: ['esm', 'cjs'],
     dts: true,
-    sourcemap: true,
+    sourcemap: false,
     outDir: 'dist',
     external: [],
     esbuildOptions(options) {
@@ -51,7 +51,7 @@ export default defineConfig([
     },
     format: ['esm', 'cjs'],
     dts: true,
-    sourcemap: true,
+    sourcemap: false,
     outDir: 'dist',
     external: ['fs', 'path', 'module', 'fs/promises'],
     esbuildOptions(options) {
