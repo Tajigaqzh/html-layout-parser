@@ -6,6 +6,7 @@
   "type": "module",
   "scripts": {
     "build:wasm": "./build.sh",
+    "build:packages": "cd packages/html-layout-parser && pnpm run build",
     "build": "pnpm run build:wasm && cd packages/html-layout-parser && pnpm run build",
     "clean": "cd packages/html-layout-parser && pnpm run clean && rm -rf dist",
     "clean:all": "pnpm run clean && rm -rf node_modules packages/*/node_modules",
