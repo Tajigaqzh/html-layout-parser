@@ -6,6 +6,14 @@ HTML Layout Parser 基于 [litehtml](https://github.com/litehtml/litehtml) 构�
 HTML Layout Parser 专为**布局计算和文本测量**而设计，而非完整的 Web 渲染。许多现代 CSS 特性（尤其是动画、变换和高级选择器）不受支持。
 :::
 
+::: info 字符级属性提取限制
+虽然 litehtml 支持下列许多 CSS 属性用于布局计算，但 **HTML Layout Parser 当前仅提取部分属性到 `CharLayout` 对象中**（主要包括字符位置、尺寸、字体属性、颜色和文本装饰）。
+
+litehtml 支持但 HTML Layout Parser 当前未提取的其他属性（如透明度、间距、变换、边框、内外边距等）将在**后续版本中逐步支持**。
+
+完整的 CSS 支持列表请参考 [litehtml 文档](https://github.com/litehtml/litehtml)。
+:::
+
 ## 支持的 CSS 属性
 
 ### 布局属性

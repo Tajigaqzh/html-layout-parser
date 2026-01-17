@@ -1,6 +1,6 @@
-# HTML Layout Parser v2.0 - Usage Examples
+# HTML Layout Parser v0.0.1 - Usage Examples
 
-This directory contains comprehensive usage examples for HTML Layout Parser v2.0.
+This directory contains comprehensive usage examples for HTML Layout Parser v0.0.1.
 
 ## Example Categories
 

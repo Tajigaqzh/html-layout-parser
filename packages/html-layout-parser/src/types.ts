@@ -365,33 +365,6 @@ export interface TextDecoration {
 }
 
 /** 
- * Text shadow information
- * 文本阴影信息
- */
-export interface TextShadow {
-  /** 
-   * Horizontal offset in pixels
-   * 水平偏移量（像素）
-   */
-  offsetX: number;
-  /** 
-   * Vertical offset in pixels
-   * 垂直偏移量（像素）
-   */
-  offsetY: number;
-  /** 
-   * Blur radius in pixels
-   * 模糊半径（像素）
-   */
-  blurRadius: number;
-  /** 
-   * Shadow color (#RRGGBBAA format)
-   * 阴影颜色（#RRGGBBAA 格式）
-   */
-  color: string;
-}
-
-/** 
  * Transform information
  * 变换信息
  */
@@ -527,11 +500,6 @@ export interface CharLayout {
    * 词间距（像素）
    */
   wordSpacing: number;
-  /** 
-   * Text shadows (array for multiple shadows)
-   * 文本阴影（数组支持多重阴影）
-   */
-  textShadow: TextShadow[];
   /** 
    * CSS transform information
    * CSS 变换信息

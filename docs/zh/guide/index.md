@@ -18,7 +18,7 @@ HTML Layout Parser 是一个高性能的 HTML/CSS 布局解析器，编译为 We
 
 **相比浏览器 Range API、Canvas `measureText()` 和 SVG foreignObject 的关键优势**：解析器在**所有平台和浏览器上提供 100% 一致的结果**。
 
-与基于浏览器的方法不同，后者在以下环境中会有差异：
+与基于浏览器的方法不同（基于浏览器的方法在以下环境中会有差异）：
 - Chrome vs Safari vs Firefox
 - Windows vs macOS vs Linux
 - 不同浏览器版本
@@ -68,7 +68,7 @@ const layouts = parser.parse(html, { viewportWidth: 800 });
 基于 litehtml C++ 库构建，通过 Emscripten 编译为 WebAssembly，提供接近原生的性能。
 
 ### 🔤 多字体管理
-- 加载多个 TTF/OTF/WOFF 字体
+- 加载多个 TTF/OTF 字体
 - 自动字体回退链
 - 内存高效的字体存储
 - 字体指标缓存
@@ -83,7 +83,6 @@ const layouts = parser.parse(html, { viewportWidth: 800 });
 - 字体样式：family、size、weight、style
 - 颜色：文本色、背景色、透明度
 - 装饰：下划线、删除线、上划线
-- 阴影：多重文本阴影
 - 变换：缩放、倾斜、旋转
 
 ### 🌐 跨环境支持

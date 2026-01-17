@@ -217,23 +217,9 @@ async function canvasRenderingExample() {
       ctx.font = `${char.fontStyle} ${char.fontWeight} ${char.fontSize}px ${char.fontFamily}`;
       ctx.globalAlpha = char.opacity ?? 1;
 
-      // Draw text shadow
-      if (char.textShadow?.length > 0) {
-        const shadow = char.textShadow[0];
-        ctx.shadowOffsetX = shadow.offsetX;
-        ctx.shadowOffsetY = shadow.offsetY;
-        ctx.shadowBlur = shadow.blurRadius;
-        ctx.shadowColor = parseColor(shadow.color);
-      }
-
       // Draw character
       ctx.fillStyle = parseColor(char.color);
       ctx.fillText(char.character, char.x, char.baseline);
-
-      // Reset shadow
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-      ctx.shadowBlur = 0;
 
       // Draw underline
       if (char.textDecoration?.underline) {

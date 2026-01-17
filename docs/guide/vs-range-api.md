@@ -48,20 +48,6 @@ The same browser on different platforms produces different results:
 - Anti-aliasing settings
 - DPI scaling
 
-### 3. Version Drift
-
-Browser updates can change text measurement:
-
-```typescript
-// Chrome 120
-{ width: 66.5 }
-
-// Chrome 121 (after update)
-{ width: 66.7 }
-```
-
-This breaks applications that rely on precise positioning.
-
 ## HTML Layout Parser Solution
 
 ### 100% Consistent Results

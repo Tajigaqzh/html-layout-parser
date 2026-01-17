@@ -244,6 +244,8 @@ ctx.fillText(char.character, char.x, char.y);
 
 | Feature | SVG foreignObject | HTML Layout Parser |
 |---------|------------------|-------------------|
+| **System fonts** | ✅ Automatic access | ⚠️ Must load fonts manually |
+| **Font setup** | ✅ No setup needed | ⚠️ Requires explicit font loading |
 | **Small font clarity (10-14px)** | ❌ Very blurry when zoomed | ✅ Better clarity when zoomed |
 | **Empty tag handling** | ❌ Black backgrounds (Android) | ✅ No artifacts |
 | **Web Worker support** | ❌ Requires DOM | ✅ Full support |
@@ -251,7 +253,6 @@ ctx.fillText(char.character, char.x, char.y);
 | **Rendering control** | ❌ Browser-controlled | ✅ Developer-controlled |
 | **Performance** | ⚠️ Slow for large content | ✅ Fast WASM execution |
 | **Zoom quality** | ❌ Scales pre-rendered bitmap | ✅ Re-renders at target scale |
-| **Production ready** | ⚠️ Has edge cases | ✅ Battle-tested |
 
 ## Real-World Issues
 
@@ -425,12 +426,15 @@ class CanvasRenderer {
 ## When SVG foreignObject Works Well
 
 SVG foreignObject is a good choice for:
+- ✅ **System fonts only** - no need to load custom fonts
 - ✅ Large fonts (> 16px) without zoom requirements
 - ✅ Static, non-interactive content
 - ✅ Desktop-only applications
 - ✅ Simple layouts without empty tags
 - ✅ Main thread rendering only
 - ✅ Quick prototypes and demos
+
+**Key Advantage**: SVG foreignObject can use system fonts automatically without any setup, making it very convenient for simple use cases.
 
 ## When to Consider HTML Layout Parser
 
@@ -452,6 +456,11 @@ SVG foreignObject is a solid choice in many cases, especially for simple layouts
 4. ⚠️ **Security restrictions** on external resources
 5. ⚠️ **No rendering control** - browser decides quality and timing
 
+**SVG foreignObject Advantages**:
+- ✅ **System fonts work automatically** - no font loading required
+- ✅ **Simple setup** - works out of the box
+- ✅ **Convenient for prototyping** - minimal code needed
+
 HTML Layout Parser provides **an excellent alternative** when you need:
 
 - ✅ **Better small font rendering** - clearer 10-14px text when zoomed (re-renders at target scale)
@@ -460,7 +469,21 @@ HTML Layout Parser provides **an excellent alternative** when you need:
 - ✅ **Complete control** over fonts and rendering
 - ✅ **Developer-controlled quality** - you decide when and how to render
 
-**Choose based on your needs**: SVG foreignObject for simple cases with large fonts, HTML Layout Parser for applications requiring **better small text quality when zoomed** or **zoomable interfaces**.
+**Trade-off**: HTML Layout Parser requires **manual font loading** (you must explicitly load font files), while SVG foreignObject can use system fonts automatically. This makes SVG foreignObject more convenient for simple cases, but HTML Layout Parser provides better control and consistency across platforms.
+
+::: tip Important Recommendation
+**If your application runs on the main thread (not in Web Worker/Node.js environment)**, we **strongly recommend using SVG foreignObject first**. It's simpler, requires no font loading, and works out of the box.
+
+Only consider HTML Layout Parser when you need:
+- ✅ Rendering in **Web Workers** (SVG foreignObject doesn't support this)
+- ✅ Rendering in **Node.js** environment
+- ✅ **Significant zoom levels** with high clarity requirements for small fonts
+- ✅ Complete control over rendering process and fonts
+:::
+
+**Choose based on your needs**: 
+- **SVG foreignObject**: Simple cases with large fonts, system fonts only, and no significant zoom
+- **HTML Layout Parser**: Applications requiring **better small text quality when zoomed**, **custom fonts**, or **significant zoom levels**
 
 ## See Also
 

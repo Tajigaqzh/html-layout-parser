@@ -197,6 +197,33 @@ public:
     int getCharWidth(int fontId, uint32_t codepoint, int fontSize);
 
     /**
+     * @brief Calculate character width with font-family fallback chain (带字体族回退链的字符宽度计算)
+     * 
+     * Implements browser-like fallback: tries fonts in font-family order.
+     * 
+     * @param fontFamily CSS font-family string (e.g., "Arial, Helvetica, sans-serif")
+     * @param codepoint Unicode codepoint
+     * @param fontSize Font size in pixels
+     * @param outUsedFontId Output parameter for the font ID that was actually used
+     * @return int Character width in pixels
+     */
+    int getCharWidthWithFontFamily(const std::string& fontFamily, uint32_t codepoint, int fontSize, int* outUsedFontId = nullptr);
+
+    /**
+     * @brief Calculate character width with font fallback (带字体回退的字符宽度计算)
+     * 
+     * Similar to browser behavior: if the primary font doesn't have the glyph,
+     * try other loaded fonts to find one that does.
+     * 
+     * @param fontId Primary font ID
+     * @param codepoint Unicode codepoint
+     * @param fontSize Font size in pixels
+     * @param outUsedFontId Output parameter for the font ID that was actually used
+     * @return int Character width in pixels
+     */
+    int getCharWidthWithFallback(int fontId, uint32_t codepoint, int fontSize, int* outUsedFontId = nullptr);
+
+    /**
      * @brief Calculate text width (计算文本宽度)
      * @param fontId Font ID
      * @param text UTF-8 encoded text

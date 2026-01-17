@@ -38,19 +38,6 @@ struct TextDecoration {
 };
 
 /**
- * @brief Text shadow information (文本阴影信息)
- * 
- * Contains single text shadow definition for Canvas rendering.
- * Maps to CSS text-shadow property (can have multiple shadows).
- */
-struct TextShadow {
-    float offsetX = 0.0f;           // Horizontal offset in pixels (水平偏移)
-    float offsetY = 0.0f;           // Vertical offset in pixels (垂直偏移)
-    float blurRadius = 0.0f;        // Blur radius in pixels (模糊半径)
-    std::string color;              // Shadow color (#RRGGBBAA) (阴影颜色)
-};
-
-/**
  * @brief Transform information (变换信息)
  * 
  * Contains CSS transform values for Canvas rendering.
@@ -72,7 +59,7 @@ struct Transform {
  * All position and size values are in pixels.
  * All colors are in #RRGGBBAA format for Canvas compatibility.
  * 
- * @note Requirements: 2.1, 2.2, 2.3, 2.4, 2.5, 2.6, 2.7, 2.8, 6.1-6.5
+ * @note Requirements: 2.1, 2.2, 2.3, 2.5, 2.6, 2.7, 2.8, 6.1-6.5
  */
 struct CharLayout {
     // ========== Basic Position Properties ==========
@@ -102,12 +89,6 @@ struct CharLayout {
     // future compatibility and can be populated if custom CSS parsing is added.
     float letterSpacing = 0.0f;     // Letter spacing (pixels) (字间距)
     float wordSpacing = 0.0f;       // Word spacing (pixels) (词间距)
-    
-    // ========== Shadow (Req 2.4) ==========
-    // Note: text-shadow CSS property is not fully parsed by litehtml.
-    // This field is defined for future compatibility and can be populated
-    // if custom CSS parsing is added. Supports multiple shadows.
-    std::vector<TextShadow> textShadow;  // Multiple shadows supported (多重阴影)
     
     // ========== Transform (Req 2.8) ==========
     Transform transform;            // CSS transform values (变换参数)

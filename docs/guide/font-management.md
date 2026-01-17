@@ -40,7 +40,14 @@ const fontId = await parser.loadFontFromFile('./fonts/arial.ttf', 'Arial');
 
 - **TTF** (TrueType Font)
 - **OTF** (OpenType Font)
-- **WOFF** (Web Open Font Format)
+
+::: warning Unsupported Formats
+- WOFF/WOFF2 (Web Open Font Format)
+- EOT (Embedded OpenType)
+- SVG fonts
+
+Currently, if you need to use WOFF fonts, please convert them to TTF or OTF format first. **Future versions are planned to support WOFF/WOFF2 formats**.
+:::
 
 ## Setting Default Font
 
@@ -83,7 +90,9 @@ if (defaultId) {
 
 ### Font Fallback Chain
 
-CSS font-family supports fallback chains:
+### Browser-Like Fallback Behavior
+
+The parser implements **CSS font-family fallback** exactly like browsers:
 
 ```typescript
 const html = `
@@ -92,10 +101,144 @@ const html = `
   </div>
 `;
 
-// If 'Custom Font' is not loaded, Arial will be used
-// If Arial is also not loaded, the default font will be used
+// Fallback order (per character):
+// 1. Try 'Custom Font' (first in font-family)
+// 2. Try 'Arial' (second in font-family)
+// 3. Try default font (set via setDefaultFont)
+// 4. Use intelligent fallback (character-type based)
 const layouts = parser.parse(html, { viewportWidth: 800 });
 ```
+
+**Key Features:**
+- ✅ **Per-Character Fallback**: Each character can use a different font from the fallback chain
+- ✅ **Ordered Search**: Fonts are tried in the exact order specified in `font-family`
+- ✅ **Accurate Width**: Uses actual character width from the fallback font
+- ✅ **Performance**: Results are cached to avoid repeated lookups
+
+### System Font Fallback Limitation
+
+::: warning Why We Can't Match Browser Behavior Exactly
+**WASM Sandbox Restriction**: WebAssembly runs in a sandboxed environment and **cannot directly access system fonts** for security reasons. This is a fundamental limitation of the WASM platform, not a design choice.
+
+**Key Differences from Browsers:**
+- ❌ **Cannot access** system fonts (Arial, Times New Roman, etc. installed on user's OS)
+- ❌ **Cannot query** available system fonts
+- ❌ **Cannot load** fonts from the operating system automatically
+
+**Our Solution**: The parser uses a **user-specified default font** instead of system fonts for final fallback. You must explicitly load and set this font.
+:::
+
+**Comparison with Browser Behavior:**
+
+| Aspect | Browser | Our Implementation |
+|--------|---------|-------------------|
+| Fallback Order | font-family list order | ✅ Same |
+| Per-Character | Yes, per character | ✅ Same |
+| Actual Width | Uses fallback font width | ✅ Same |
+| System Fonts | Falls back to system | ⚠️ Uses default font* |
+| Font Access | Direct OS access | ⚠️ User must load fonts |
+
+**\*Workaround**: Load a comprehensive fallback font (like Noto Sans) and set it as the default font to replace system font functionality.
+
+### Best Practice: Comprehensive Fallback Font
+
+To achieve browser-like behavior, load a font with wide character coverage:
+
+```typescript
+const parser = new HtmlLayoutParser();
+await parser.init();
+
+// Load fonts in order of preference
+const arialId = parser.loadFont(arialData, 'Arial');
+const helveticaId = parser.loadFont(helveticaData, 'Helvetica');
+
+// Load a comprehensive fallback font (acts like system font)
+const notoSansId = parser.loadFont(notoSansData, 'Noto Sans');
+
+// Set as default font (replaces system font fallback)
+parser.setDefaultFont(notoSansId);
+
+// Use in CSS with proper fallback chain
+const html = `
+  <div style="font-family: 'Arial', 'Helvetica', 'Noto Sans', sans-serif;">
+    Text with multiple languages: Hello 你好 こんにちは
+  </div>
+`;
+
+const layouts = parser.parse(html, { viewportWidth: 800 });
+```
+
+### Recommended Fallback Fonts
+
+For best cross-language support:
+
+| Font | Coverage | Use Case |
+|------|----------|----------|
+| **Noto Sans** | Latin, Greek, Cyrillic | Western languages |
+| **Noto Sans CJK** | Chinese, Japanese, Korean | East Asian languages |
+| **Noto Sans Arabic** | Arabic script | Middle Eastern languages |
+| **Roboto** | Latin, Greek, Cyrillic | Modern UI design |
+| **Arial Unicode MS** | Wide coverage | General purpose (if available) |
+
+**Example: Multi-Language Support**
+
+```typescript
+// Load comprehensive font set
+const notoSansId = parser.loadFont(notoSansData, 'Noto Sans');
+const notoSansCJKId = parser.loadFont(notoSansCJKData, 'Noto Sans CJK');
+const notoSansArabicId = parser.loadFont(notoSansArabicData, 'Noto Sans Arabic');
+
+// Set CJK as default (widest coverage)
+parser.setDefaultFont(notoSansCJKId);
+
+// Use in CSS
+const html = `
+  <div style="font-family: 'Noto Sans', 'Noto Sans CJK', 'Noto Sans Arabic', sans-serif;">
+    English 中文 日本語 한국어 العربية
+  </div>
+`;
+```
+
+### Intelligent Fallback (Last Resort)
+
+When a character is not found in any loaded font, the parser uses intelligent fallback:
+
+| Character Type | Fallback Strategy | Example |
+|----------------|------------------|---------|
+| **CJK Characters** (U+4E00-U+9FFF) | Use '中' (U+4E2D) width | 你好 → uses '中' width |
+| **CJK Punctuation** (U+3000-U+303F) | Use half-width (fontSize / 2) | 、。→ fontSize/2 |
+| **Latin Punctuation** | Use half-width (fontSize / 2) | ,.;: → fontSize/2 |
+| **Other Characters** | Try '0' or space | abc → uses '0' width |
+
+**Debug Output Example:**
+
+```typescript
+const layouts = parser.parse(html, {
+  viewportWidth: 800,
+  isDebug: true
+});
+
+// Console output:
+// [WASM] Character U+8005 (者) not found in font ID 2
+// [HtmlLayoutParser] Found character U+8005 in font-family font: aliBaBaFont65 (ID 1)
+// [HtmlLayoutParser] Char U+8005 metrics: horiAdvance=20, finalWidth=20, usedFont=1
+```
+
+### Why This Approach?
+
+| Aspect | System Fonts (Browser) | Default Font (Our Approach) |
+|--------|----------------------|---------------------------|
+| Access | Direct OS access | User-loaded fonts only |
+| Consistency | Varies by OS | ✅ Consistent across platforms |
+| Control | Limited | ✅ Full control over fonts |
+| Performance | Fast (cached) | ✅ Fast (pre-loaded) |
+| Character Coverage | Depends on OS | ✅ Guaranteed (if you load it) |
+
+**Advantages:**
+- ✅ **Consistent rendering** across all platforms (Windows, macOS, Linux)
+- ✅ **Predictable output** - no surprises from OS font differences
+- ✅ **Full control** - you choose exactly which fonts to use
+- ✅ **Better testing** - same fonts in development and production
 
 ## Query Loaded Fonts
 

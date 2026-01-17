@@ -241,7 +241,7 @@ function parseWithFont(html: string, fontId: number) {
 - OTF (OpenType Font)
 
 **不支持的格式：**
-- WOFF/WOFF2
+- WOFF/WOFF2（**后续版本计划支持**）
 - EOT
 - SVG 字体
 
@@ -274,7 +274,7 @@ function checkFontFormat(fontData: Uint8Array): string {
 const format = checkFontFormat(fontData);
 if (format !== 'ttf' && format !== 'otf') {
   console.error(`不支持的字体格式: ${format}`);
-  // 尝试转换或使用备用字体
+  // 目前需要转换为 TTF/OTF 格式，或等待后续版本支持
 }
 ```
 
@@ -458,7 +458,7 @@ async function parseWithTimeout(html: string, timeoutMs: number = 10000) {
 **支持的主要属性：**
 - 字体：font-family, font-size, font-weight, font-style
 - 颜色：color, background-color
-- 文本：text-decoration, text-shadow, letter-spacing
+- 文本：text-decoration, letter-spacing
 - 布局：display, position, width, height, margin, padding
 
 **解决方案：**
@@ -468,7 +468,7 @@ function filterSupportedCSS(css: string): string {
   const supportedProperties = [
     'font-family', 'font-size', 'font-weight', 'font-style',
     'color', 'background-color', 'opacity',
-    'text-decoration', 'text-shadow', 'letter-spacing', 'word-spacing',
+    'text-decoration', 'letter-spacing', 'word-spacing',
     'display', 'position', 'width', 'height',
     'margin', 'padding', 'border'
   ];

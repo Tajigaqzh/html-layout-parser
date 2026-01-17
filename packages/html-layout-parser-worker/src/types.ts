@@ -94,13 +94,6 @@ export interface TextDecoration {
   thickness: number;
 }
 
-export interface TextShadow {
-  offsetX: number;
-  offsetY: number;
-  blurRadius: number;
-  color: string;
-}
-
 export interface Transform {
   scaleX: number;
   scaleY: number;
@@ -129,7 +122,6 @@ export interface CharLayout {
   textDecoration: TextDecoration;
   letterSpacing: number;
   wordSpacing: number;
-  textShadow: TextShadow[];
   transform: Transform;
   baseline: number;
   direction: string;

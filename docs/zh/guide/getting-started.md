@@ -4,6 +4,10 @@
 
 ## 安装
 
+### 主包（推荐）
+
+主包会自动检测运行环境并加载相应的代码：
+
 ::: code-group
 
 ```bash [npm]
@@ -20,26 +24,77 @@ pnpm add html-layout-parser
 
 :::
 
-## 按平台单独引入
+### 环境特定包
 
-::: tip 减小打包体积
-只引入所需平台的代码可以显著减小打包体积：
+为了更好地服务不同的使用场景，我们除了发布 `html-layout-parser` 完整包外，还为特定环境单独打了包。如果你只需要特定环境的支持，可以安装对应的单独包来减小打包体积：
 
-```typescript
-// 自动检测（默认）- 自动检测运行环境
-import { HtmlLayoutParser } from 'html-layout-parser';
+::: code-group
 
-// Web 浏览器（显式指定）
-import { HtmlLayoutParser } from 'html-layout-parser/web';
-
-// Web Worker
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
-
-// Node.js
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+```bash [Web 浏览器]
+npm install html-layout-parser-web
 ```
 
-每个平台特定的构建版本只包含该环境所需的代码。
+```bash [Node.js]
+npm install html-layout-parser-node
+```
+
+```bash [Web Worker]
+npm install html-layout-parser-worker
+```
+
+:::
+
+::: info 包发布策略说明
+我们采用了多包发布策略：
+- **主包** (`html-layout-parser`)：包含所有环境的代码，自动检测运行环境
+- **环境特定包**：每个包都是独立发布到 npm 的单独包，只包含特定环境的代码
+
+这样设计的好处：
+- 🎯 **按需选择**：根据项目需求选择合适的包
+- 📦 **体积优化**：环境特定包体积更小
+- 🔄 **向后兼容**：主包提供完整功能和自动检测
+:::
+
+::: tip 包大小对比
+- `html-layout-parser`: ~2.5MB（包含所有环境）
+- `html-layout-parser-web`: ~2.2MB（单独 npm 包，仅 Web 浏览器）
+- `html-layout-parser-node`: ~2.2MB（单独 npm 包，仅 Node.js）
+- `html-layout-parser-worker`: ~2.2MB（单独 npm 包，仅 Web Worker）
+:::
+
+## 按平台单独引入
+
+### 使用主包
+
+::: tip 自动环境检测
+主包会自动检测运行环境并加载相应的代码：
+
+```typescript
+// 自动检测（推荐）- 自动检测运行环境
+import { HtmlLayoutParser } from 'html-layout-parser';
+
+// 也可以显式指定环境
+import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
+import { HtmlLayoutParser } from 'html-layout-parser/node';
+```
+:::
+
+### 使用环境特定包
+
+```typescript
+// Web 浏览器专用包
+import { HtmlLayoutParser } from 'html-layout-parser-web';
+
+// Node.js 专用包
+import { HtmlLayoutParser } from 'html-layout-parser-node';
+
+// Web Worker 专用包
+import { HtmlLayoutParser } from 'html-layout-parser-worker';
+```
+
+::: warning 注意
+环境特定包只能在对应的环境中使用。例如，`html-layout-parser-node` 只能在 Node.js 环境中使用，在浏览器中会报错。
 :::
 
 ## 字体文件设置

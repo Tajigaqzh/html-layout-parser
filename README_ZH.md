@@ -124,7 +124,7 @@ await parser.init('/custom/path.js');   // 自定义 WASM 路径
 
 parser.isInitialized();                 // 检查是否就绪
 parser.getEnvironment();                // 'web' | 'worker' | 'node' | 'unknown'
-parser.getVersion();                    // '2.0.0'
+parser.getVersion();                    // '0.0.1'
 ```
 
 ### 字体管理
@@ -236,7 +236,7 @@ const metrics = parser.getDetailedMetrics();
 
 | 模式 | 类型 | 描述 | 使用场景 |
 |------|------|------|----------|
-| `flat` | `CharLayout[]` | 扁平字符数组 | 简单渲染，v1 兼容 |
+| `flat` | `CharLayout[]` | 扁平字符数组 | 简单渲染，v1（未发布）兼容 |
 | `byRow` | `Row[]` | 按行分组的字符 | 逐行渲染 |
 | `simple` | `SimpleOutput` | 带字符的行结构 | 基本结构和行信息 |
 | `full` | `LayoutDocument` | 完整层级结构 | 复杂布局，调试 |
@@ -291,14 +291,6 @@ interface CharLayout {
   // 间距
   letterSpacing: number;      // 字间距
   wordSpacing: number;        // 词间距
-  
-  // 阴影（数组支持多重阴影）
-  textShadow: Array<{
-    offsetX: number;
-    offsetY: number;
-    blurRadius: number;
-    color: string;
-  }>;
   
   // 变换
   transform: {
@@ -370,24 +362,12 @@ function renderToCanvas(ctx: CanvasRenderingContext2D, layouts: CharLayout[]) {
       ctx.fillRect(char.x, char.y, char.width, char.height);
     }
     
-    // 应用文本阴影
-    if (char.textShadow.length > 0) {
-      const shadow = char.textShadow[0];
-      ctx.shadowOffsetX = shadow.offsetX;
-      ctx.shadowOffsetY = shadow.offsetY;
-      ctx.shadowBlur = shadow.blurRadius;
-      ctx.shadowColor = shadow.color;
-    }
-    
     // 绘制文本
     ctx.fillStyle = char.color;
     ctx.globalAlpha = char.opacity;
     ctx.fillText(char.character, char.x, char.baseline);
     
-    // 重置
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.shadowBlur = 0;
+    // 重置透明度
     ctx.globalAlpha = 1;
     
     // 绘制下划线
@@ -531,7 +511,7 @@ if (result.metrics) {
 
 ## 智能缓存
 
-v2.0 包含智能字体度量缓存，显著提升性能：
+v0.0.1 包含智能字体度量缓存，显著提升性能：
 
 ### 缓存性能
 
@@ -784,11 +764,11 @@ html-layout-parser/
 - [Node.js 示例](./docs/examples/node-examples.md)
 - [Worker 示例](./docs/examples/worker-examples.md)
 
-## 与 v1 的区别
+## 与 v1（未发布）的区别
 
-v2 是一个独立项目，有显著改进：
+v0.0.1 是一个独立项目，相比未发布的 v1 有显著改进：
 
-| 特性 | v1 | v2 |
+| 特性 | v1（未发布） | v0.0.1 |
 |------|----|----|
 | 字体支持 | 单字体 | 多字体 + 回退链 |
 | 输出模式 | 2 种 (flat, byRow) | 4 种 (flat, byRow, simple, full) |

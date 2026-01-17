@@ -20,7 +20,7 @@ export default defineConfig({
           { text: 'Examples', link: '/examples/' },
           { text: 'Acknowledgments', link: '/acknowledgments' },
           {
-            text: 'v0.2.0',
+            text: 'v0.0.1',
             items: [
               { text: 'Changelog', link: '/changelog' },
               { text: 'GitHub', link: 'https://github.com/Tajigaqzh/html-layout-parser' }
@@ -99,7 +99,7 @@ export default defineConfig({
           { text: '示例', link: '/zh/examples/' },
           { text: '鸣谢', link: '/zh/acknowledgments' },
           {
-            text: 'v0.2.0',
+            text: 'v0.0.1',
             items: [
               { text: '更新日志', link: '/zh/changelog' },
               { text: 'GitHub', link: 'https://github.com/Tajigaqzh/html-layout-parser' }

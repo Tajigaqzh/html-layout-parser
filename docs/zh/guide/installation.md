@@ -82,7 +82,10 @@ module.exports = {
 解析器需要字体文件来计算字符布局。支持的格式：
 - TTF (TrueType)
 - OTF (OpenType)
-- WOFF (Web Open Font Format)
+
+::: warning 注意
+不支持 WOFF/WOFF2、EOT 和 SVG 字体格式。目前如需使用这些格式，请先转换为 TTF 或 OTF。**后续版本计划支持 WOFF/WOFF2 格式**。
+:::
 
 ### 字体加载示例
 

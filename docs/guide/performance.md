@@ -37,10 +37,12 @@ pnpm bench:performance -- --warmup=10 --iterations=50
 | Metric | Target | Actual |
 |--------|--------|--------|
 | Parse Speed | > 1,000 chars/sec | 9,442 - 129,121 chars/sec ✅ |
-| Memory Usage | < 50MB | ~8MB (1 font), ~40MB (5 fonts) ✅ |
+| Memory Usage | < 50MB | ~8MB (1 font*), ~40MB (5 fonts*) ✅ |
 | WASM Size | < 2.5MB | 2.25MB ✅ |
 | Startup Time | < 100ms | ~7ms (warm), ~17ms (cold) ✅ |
 | Cache Hit Rate | > 80% | 91.2% ✅ |
+
+**\*Note**: Font memory usage equals the font file size. The values shown are based on test fonts averaging ~8MB each.
 
 ## Optimization Strategies
 
@@ -241,7 +243,7 @@ processor.destroy();
 
 ## Smart Caching
 
-v2.0 includes smart font metrics caching that significantly improves performance:
+v0.0.1 includes smart font metrics caching that significantly improves performance:
 
 ### Cache Performance
 

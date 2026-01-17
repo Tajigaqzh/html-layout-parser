@@ -48,20 +48,6 @@ const html = '<div style="font-size: 16px;">Hello World</div>';
 - 抗锯齿设置
 - DPI 缩放
 
-### 3. 版本漂移
-
-浏览器更新可能改变文本测量：
-
-```typescript
-// Chrome 120
-{ width: 66.5 }
-
-// Chrome 121（更新后）
-{ width: 66.7 }
-```
-
-这会破坏依赖精确定位的应用程序。
-
 ## HTML Layout Parser 解决方案
 
 ### 100% 一致的结果

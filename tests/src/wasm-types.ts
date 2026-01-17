@@ -87,16 +87,6 @@ export interface TextDecoration {
 }
 
 /**
- * Text shadow information
- */
-export interface TextShadow {
-  offsetX: number;
-  offsetY: number;
-  blurRadius: number;
-  color: string;
-}
-
-/**
  * Transform information
  */
 export interface Transform {
@@ -135,9 +125,6 @@ export interface CharLayout {
   // Spacing
   letterSpacing: number;
   wordSpacing: number;
-  
-  // Shadow
-  textShadow: TextShadow[];
   
   // Transform
   transform: Transform;

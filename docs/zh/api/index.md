@@ -231,37 +231,6 @@ if (!result.success) {
 }
 ```
 
-## 版本兼容性
-
-当前版本：**0.2.0**
-
-### 与 v1 的主要差异
-
-| 功能 | v1 | v2 |
-|------|----|----|
-| 字体支持 | 单字体 | 多字体 + 回退 |
-| 输出模式 | 2 种 | 4 种 |
-| CSS 分离 | ❌ | ✅ |
-| 内存管理 | 基础 | 严格监控 |
-| TypeScript | 部分 | 完整 |
-| 跨环境 | 有限 | 完整支持 |
-
-### 迁移指南
-
-从 v1 迁移到 v2：
-
-```typescript
-// v1 代码
-const parser = new HtmlLayoutParser();
-const layouts = parser.parse(html, 800);
-
-// v2 代码
-const parser = new HtmlLayoutParser();
-await parser.init(); // 新增：需要初始化
-const layouts = parser.parse(html, { viewportWidth: 800 }); // 新增：选项对象
-parser.destroy(); // 新增：需要清理
-```
-
 ## 相关链接
 
 - [快速开始指南](../guide/getting-started.md)

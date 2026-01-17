@@ -1,176 +1,135 @@
-# HTML Layout Parser v2.0 - Playground
+# HTML Layout Parser Playground
 
-An interactive web-based playground for testing and exploring the HTML Layout Parser v2.0.
+Interactive playground for testing and demonstrating HTML Layout Parser v0.0.1 features.
 
-## Features
+## Prerequisites
 
-- **Real-time HTML/CSS editing** - Edit HTML and CSS in separate tabs
-- **Multiple output modes** - Switch between flat, byRow, simple, and full modes
-- **Canvas rendering** - Visual preview of parsed layout
-- **JSON output** - View raw JSON output for debugging
-- **Font loading** - Load custom TTF/OTF/WOFF fonts
-- **Export** - Download parsed results as JSON
-- **Performance metrics** - View parse time, character count, and memory usage
+1. **Build WASM module first**:
+   ```bash
+   cd ..
+   ./build.sh
+   ```
 
-## Quick Start
+2. **Install dependencies**:
+   ```bash
+   pnpm install
+   ```
 
-### Option 1: Using the built-in server
-
-```bash
-# From the playground directory
-cd html-layout-parser/playground
-node serve.js
-
-# Or specify a custom port
-node serve.js 8080
-```
-
-Then open http://localhost:3000 in your browser.
-
-### Option 2: Using any static file server
-
-```bash
-# Using Python
-cd html-layout-parser
-python -m http.server 3000
-
-# Using Node.js http-server
-npx http-server html-layout-parser -p 3000
-
-# Using PHP
-cd html-layout-parser
-php -S localhost:3000
-```
-
-Then open http://localhost:3000/playground/ in your browser.
-
-## Usage
-
-1. **Load a font** (optional but recommended)
-   - Click "Load Font" button
-   - Select a TTF, OTF, or WOFF font file
-   - The font will be used for text rendering
-
-2. **Enter HTML**
-   - Type or paste HTML in the HTML tab
-   - The playground includes default sample HTML
-
-3. **Enter CSS** (optional)
-   - Switch to the CSS tab
-   - Add CSS styles that will be applied to the HTML
-
-4. **Configure options**
-   - Set viewport width (default: 800px)
-   - Choose output mode:
-     - `flat` - Array of characters
-     - `byRow` - Characters grouped by row
-     - `simple` - Lines with characters
-     - `full` - Complete document structure
-
-5. **Parse**
-   - Click "Parse" button or press Ctrl+Enter
-   - View results in Canvas or JSON tab
-
-6. **Export**
-   - Click "Export JSON" to download the parsed result
-
-## Keyboard Shortcuts
-
-- `Ctrl+Enter` / `Cmd+Enter` - Parse HTML
-
-## Output Modes
-
-### Flat Mode
-Returns a flat array of character layouts:
-```json
-[
-  { "character": "H", "x": 0, "y": 0, "width": 12, ... },
-  { "character": "e", "x": 12, "y": 0, "width": 8, ... },
-  ...
-]
-```
-
-### By Row Mode
-Returns characters grouped by row:
-```json
-[
-  { "rowIndex": 0, "y": 0, "children": [...] },
-  { "rowIndex": 1, "y": 24, "children": [...] },
-  ...
-]
-```
-
-### Simple Mode
-Returns lines with characters:
-```json
-{
-  "version": "2.0",
-  "viewport": { "width": 800, "height": 600 },
-  "lines": [
-    { "lineIndex": 0, "y": 0, "characters": [...] },
-    ...
-  ]
-}
-```
-
-### Full Mode
-Returns complete document structure:
-```json
-{
-  "version": "2.0",
-  "parserVersion": "2.0.0",
-  "viewport": { "width": 800, "height": 600 },
-  "pages": [
-    {
-      "pageIndex": 0,
-      "blocks": [
-        {
-          "blockIndex": 0,
-          "type": "div",
-          "lines": [
-            {
-              "lineIndex": 0,
-              "runs": [
-                { "characters": [...] }
-              ]
-            }
-          ]
-        }
-      ]
-    }
-  ]
-}
-```
-
-## Requirements
-
-- Modern web browser (Chrome, Firefox, Safari, Edge)
-- WASM module built (`html_layout_parser.wasm` and `html_layout_parser.js`)
-
-## Troubleshooting
-
-### "Could not load WASM module"
-Make sure the WASM module is built:
-```bash
-cd html-layout-parser
-./build.sh
-```
-
-### Font not rendering correctly
-- Ensure you've loaded a font file
-- Check that the font supports the characters in your HTML
-- Try a different font file
-
-### Canvas is blank
-- Check the browser console for errors
-- Ensure the HTML is valid
-- Try with simpler HTML first
+3. **Copy WASM files** (automatic on first run, or manually):
+   ```bash
+   pnpm run copy-wasm
+   ```
 
 ## Development
 
-The playground is a single HTML file with embedded CSS and JavaScript. To modify:
+```bash
+pnpm dev
+```
 
-1. Edit `index.html`
-2. Refresh the browser to see changes
+The WASM files will be automatically copied from `../wasm-output/` to `public/wasm/`.
 
-No build step is required.
+Open http://localhost:5173
+
+## Features
+
+### 🏠 Home
+- Overview of all features
+- Quick start guide
+
+### 🎯 Basic Demo
+- Compare DOM rendering vs Canvas rendering
+- Load custom fonts
+- Edit HTML and CSS in real-time
+- See parsing metrics
+
+### 🔤 Multi-Font Demo (Coming Soon)
+- Load multiple fonts
+- Test font fallback chains
+- Compare different fonts
+
+### 🎨 CSS Separation Demo (Coming Soon)
+- Separate HTML from CSS
+- Switch themes dynamically
+- Test CSS specificity
+
+### 📦 Output Modes Demo (Coming Soon)
+- Compare all 4 output modes
+- Visualize data structures
+- Performance comparison
+
+### ⚡ Performance Demo (Coming Soon)
+- Benchmark parsing speed
+- Test with different document sizes
+- Memory usage monitoring
+
+## Usage
+
+1. **Load a Font**:
+   - Click "Load Font" button
+   - Select a `.ttf` or `.otf` font file
+   - Font will be loaded into WASM module
+
+2. **Edit HTML/CSS**:
+   - Modify the HTML and CSS in the editors
+   - Use the default examples or write your own
+
+3. **Parse & Render**:
+   - Click "Parse & Render" button
+   - See DOM rendering on the left
+   - See Canvas rendering on the right
+   - Compare the results
+
+4. **View Metrics**:
+   - Character count
+   - Parse time
+   - Memory usage
+
+## Project Structure
+
+```
+playground/
+├── src/
+│   ├── components/
+│   │   └── ComparisonView.vue    # DOM vs Canvas comparison
+│   ├── composables/
+│   │   └── useParser.ts           # WASM module wrapper
+│   ├── router/
+│   │   └── index.ts               # Vue Router config
+│   ├── views/
+│   │   ├── HomeView.vue           # Home page
+│   │   ├── BasicDemo.vue          # Basic demo
+│   │   ├── MultiFontDemo.vue      # Multi-font demo
+│   │   ├── CssSeparationDemo.vue  # CSS separation demo
+│   │   ├── OutputModesDemo.vue    # Output modes demo
+│   │   └── PerformanceDemo.vue    # Performance demo
+│   ├── App.vue                    # Main app component
+│   └── main.ts                    # App entry point
+├── public/                        # Static assets
+├── vite.config.ts                 # Vite configuration
+└── package.json                   # Dependencies
+```
+
+## Notes
+
+- Make sure WASM module is built before running the playground
+- Font files should be in TTF or OTF format
+- The playground uses local WASM files (not published npm package)
+- WASM files are loaded from `../wasm-output/` directory
+
+## Troubleshooting
+
+### WASM module not found
+```bash
+# Build WASM first
+cd ..
+./build.sh
+```
+
+### Font loading fails
+- Make sure the font file is valid TTF/OTF format
+- Check browser console for detailed error messages
+
+### Canvas rendering issues
+- Ensure font is loaded before parsing
+- Check that HTML/CSS is valid
+- Verify viewport width is reasonable (100-2000px)

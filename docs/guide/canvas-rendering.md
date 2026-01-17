@@ -87,30 +87,16 @@ function renderCharacter(ctx: CanvasRenderingContext2D, char: CharLayout) {
   // 3. Apply opacity
   ctx.globalAlpha = char.opacity ?? 1;
 
-  // 4. Draw text shadow
-  if (char.textShadow && char.textShadow.length > 0) {
-    const shadow = char.textShadow[0];
-    ctx.shadowOffsetX = shadow.offsetX;
-    ctx.shadowOffsetY = shadow.offsetY;
-    ctx.shadowBlur = shadow.blurRadius;
-    ctx.shadowColor = parseColor(shadow.color);
-  }
-
-  // 5. Draw character
+  // 4. Draw character
   ctx.fillStyle = parseColor(char.color);
   ctx.fillText(char.character, char.x, char.baseline);
 
-  // 6. Reset shadow
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
-  ctx.shadowBlur = 0;
-
-  // 7. Draw text decoration
+  // 5. Draw text decoration
   if (char.textDecoration) {
     drawTextDecoration(ctx, char);
   }
 
-  // 8. Reset opacity
+  // 6. Reset opacity
   ctx.globalAlpha = 1;
 }
 
@@ -282,7 +268,6 @@ class CanvasRenderer {
   }
 
   render(layouts: CharLayout[], options: {
-    enableShadows?: boolean;
     enableDecorations?: boolean;
     enableTransforms?: boolean;
     clipToViewport?: boolean;
@@ -311,23 +296,11 @@ class CanvasRenderer {
     this.ctx.font = `${char.fontStyle} ${char.fontWeight} ${char.fontSize}px ${char.fontFamily}`;
     this.ctx.globalAlpha = char.opacity ?? 1;
 
-    // Shadow
-    if (options.enableShadows && char.textShadow?.length > 0) {
-      const shadow = char.textShadow[0];
-      this.ctx.shadowOffsetX = shadow.offsetX;
-      this.ctx.shadowOffsetY = shadow.offsetY;
-      this.ctx.shadowBlur = shadow.blurRadius;
-      this.ctx.shadowColor = parseColor(shadow.color);
-    }
-
     // Text
     this.ctx.fillStyle = parseColor(char.color);
     this.ctx.fillText(char.character, char.x, char.baseline);
 
-    // Reset
-    this.ctx.shadowOffsetX = 0;
-    this.ctx.shadowOffsetY = 0;
-    this.ctx.shadowBlur = 0;
+    // Reset opacity
     this.ctx.globalAlpha = 1;
 
     // Decoration
@@ -344,7 +317,6 @@ const renderer = new CanvasRenderer(canvas);
 const layouts = parser.parse(html, { viewportWidth: 800 });
 
 renderer.render(layouts, {
-  enableShadows: true,
   enableDecorations: true,
   enableTransforms: true
 });

@@ -74,7 +74,7 @@ Minor visual differences may occur. However, for the primary use case of **text 
 Built on the litehtml C++ library and compiled to WebAssembly via Emscripten, delivering near-native performance.
 
 ### 🔤 Multi-Font Management
-- Load multiple TTF/OTF/WOFF fonts
+- Load multiple TTF/OTF fonts
 - Automatic font fallback chains
 - Memory-efficient font storage
 - Font metrics caching
@@ -89,7 +89,6 @@ Built on the litehtml C++ library and compiled to WebAssembly via Emscripten, de
 - Font styles: family, size, weight, style
 - Colors: text color, background color, opacity
 - Decorations: underline, strikethrough, overline
-- Shadows: multiple text shadows
 - Transforms: scale, skew, rotate
 
 ### 🌐 Cross-Environment Support

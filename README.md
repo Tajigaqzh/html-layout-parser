@@ -20,7 +20,7 @@ Extract character-level layout data with multi-font support, rich text attribute
 
 - � **High Performance** - WebAssembly-powered parsing up to **129,000+ chars/sec**
 - � **Multi-Font tSupport** - Load and manage multiple fonts with automatic fallback chains
-- 🎨 **Rich Text Attributes** - Full CSS text styling (shadows, decorations, transforms, opacity)
+- 🎨 **Rich Text Attributes** - Full CSS text styling (decorations, transforms, opacity)
 - 📦 **Multiple Output Modes** - Flat, byRow, simple, or full hierarchical output
 - 🎯 **Canvas-Ready** - Output format directly maps to Canvas 2D API
 - 🌐 **Cross-Environment** - Works in Web, Worker, and Node.js with unified API
@@ -219,14 +219,6 @@ interface CharLayout {
   letterSpacing: number;
   wordSpacing: number;
   
-  // Shadow (supports multiple shadows)
-  textShadow: Array<{
-    offsetX: number;
-    offsetY: number;
-    blurRadius: number;
-    color: string;
-  }>;
-  
   // Transform
   transform: {
     scaleX: number;
@@ -387,11 +379,11 @@ html-layout-parser/
 └── build.sh                      # Build script
 ```
 
-## 🆚 Differences from v1
+## 🆚 Differences from v1 (Unreleased)
 
-v2 is an independent project with significant improvements:
+v0.0.1 is an independent project with significant improvements over the unreleased v1:
 
-| Feature | v1 | v2 |
+| Feature | v1 (Unreleased) | v0.0.1 |
 |---------|----|----|
 | Font support | Single font | Multi-font with fallback |
 | Output modes | 2 (flat, byRow) | 4 (flat, byRow, simple, full) |

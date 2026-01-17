@@ -7,6 +7,7 @@
 
 #include "multi_font_manager.h"
 #include "font_metrics_cache.h"
+#include "debug_log.h"
 #include <cstring>
 #include <algorithm>
 #include <cctype>
@@ -398,10 +399,57 @@ bool MultiFontManager::getFontMetrics(int fontId, int fontSize, FontMetrics& met
 }
 
 int MultiFontManager::getCharWidth(int fontId, uint32_t codepoint, int fontSize) {
+    // Use the fallback-aware function with single font
+    return getCharWidthWithFallback(fontId, codepoint, fontSize, nullptr);
+}
+
+int MultiFontManager::getCharWidthWithFontFamily(const std::string& fontFamily, uint32_t codepoint, int fontSize, int* outUsedFontId) {
+    // Parse font-family into ordered list
+    std::vector<std::string> fontNames = parseFontFamily(fontFamily);
+    
+    // Try each font in the font-family list in order
+    for (const auto& fontName : fontNames) {
+        int fontId = findFontByName(fontName);
+        if (fontId != 0) {
+            // Check if this font has the glyph
+            auto it = m_fonts.find(fontId);
+            if (it != m_fonts.end() && it->second.face) {
+                FT_UInt glyphIndex = FT_Get_Char_Index(it->second.face, codepoint);
+                if (glyphIndex != 0) {
+                    // Found! Use this font
+                    DEBUG_LOG("Found character U+" << std::hex << codepoint << std::dec 
+                             << " in font-family font: " << fontName << " (ID " << fontId << ")");
+                    return getCharWidthWithFallback(fontId, codepoint, fontSize, outUsedFontId);
+                }
+            }
+        }
+    }
+    
+    // If not found in any font-family font, try default font
+    if (m_defaultFontId != 0) {
+        DEBUG_LOG("Character U+" << std::hex << codepoint << std::dec 
+                 << " not found in font-family, trying default font (ID " << m_defaultFontId << ")");
+        return getCharWidthWithFallback(m_defaultFontId, codepoint, fontSize, outUsedFontId);
+    }
+    
+    // Last resort: use first font in font-family list
+    if (!fontNames.empty()) {
+        int firstFontId = findFontByName(fontNames[0]);
+        if (firstFontId != 0) {
+            return getCharWidthWithFallback(firstFontId, codepoint, fontSize, outUsedFontId);
+        }
+    }
+    
+    // Ultimate fallback
+    return fontSize / 2;
+}
+
+int MultiFontManager::getCharWidthWithFallback(int fontId, uint32_t codepoint, int fontSize, int* outUsedFontId) {
     // Check cache first (先检查缓存)
     FontMetricsCache& cache = FontMetricsCache::getInstance();
     int cachedWidth = cache.getCharWidth(fontId, fontSize, codepoint);
     if (cachedWidth >= 0) {
+        if (outUsedFontId) *outUsedFontId = fontId;
         return cachedWidth;  // Cache hit
     }
 
@@ -416,12 +464,72 @@ int MultiFontManager::getCharWidth(int fontId, uint32_t codepoint, int fontSize)
     
     FT_Face face = it->second.face;
     
-    // Get glyph index
+    // Get glyph index for primary font
     FT_UInt glyphIndex = FT_Get_Char_Index(face, codepoint);
-    if (glyphIndex == 0) {
-        // Character not found, use space width
-        glyphIndex = FT_Get_Char_Index(face, ' ');
+    bool charNotFoundInPrimary = (glyphIndex == 0);
+    int usedFontId = fontId;
+    
+    if (charNotFoundInPrimary) {
+        // Log character not found warning (always show, not just in debug mode)
+#ifdef __EMSCRIPTEN__
+        EM_ASM({
+            console.warn('[WASM] Character U+' + $0.toString(16) + 
+                        ' (' + String.fromCodePoint($0) + ') not found in font ID ' + $1);
+        }, codepoint, fontId);
+#endif
+        
+        DEBUG_LOG("Character U+" << std::hex << codepoint << std::dec 
+                 << " not found in primary font (ID " << fontId << "), using intelligent fallback");
+        
+        // Use intelligent fallback based on character type
+        // Detect character type
+        bool isCJK = (codepoint >= 0x4E00 && codepoint <= 0x9FFF) ||      // CJK Unified Ideographs
+                     (codepoint >= 0x3400 && codepoint <= 0x4DBF) ||      // CJK Extension A
+                     (codepoint >= 0x20000 && codepoint <= 0x2A6DF);      // CJK Extension B
+        
+        bool isCJKPunctuation = (codepoint >= 0x3000 && codepoint <= 0x303F) ||  // CJK Symbols and Punctuation
+                                (codepoint >= 0xFF00 && codepoint <= 0xFFEF);    // Halfwidth and Fullwidth Forms
+        
+        bool isLatinPunctuation = (codepoint >= 0x20 && codepoint <= 0x2F) ||    // ASCII punctuation
+                                  (codepoint >= 0x3A && codepoint <= 0x40) ||
+                                  (codepoint >= 0x5B && codepoint <= 0x60) ||
+                                  (codepoint >= 0x7B && codepoint <= 0x7E);
+        
+        if (isCJK) {
+            // CJK characters: use '中' as fallback
+            const uint32_t fallbackChars[] = {0x4E2D, '0', ' '};  // 中, 0, space
+            
+            for (uint32_t fallback : fallbackChars) {
+                glyphIndex = FT_Get_Char_Index(face, fallback);
+                if (glyphIndex != 0) {
+                    DEBUG_LOG("→ Using CJK fallback character U+" << std::hex << fallback << std::dec);
+                    break;
+                }
+            }
+        } else if (isCJKPunctuation || isLatinPunctuation) {
+            // Punctuation: use half width (fontSize / 2)
+            int halfWidth = fontSize / 2;
+            DEBUG_LOG("→ Using half-width fallback: " << halfWidth << "px for punctuation");
+            cache.setCharWidth(usedFontId, fontSize, codepoint, halfWidth);
+            if (outUsedFontId) *outUsedFontId = usedFontId;
+            return halfWidth;
+        } else {
+            // Other characters: try common fallbacks
+            const uint32_t fallbackChars[] = {'0', ' '};
+            
+            for (uint32_t fallback : fallbackChars) {
+                glyphIndex = FT_Get_Char_Index(face, fallback);
+                if (glyphIndex != 0) {
+                    DEBUG_LOG("→ Using fallback character U+" << std::hex << fallback << std::dec);
+                    break;
+                }
+            }
+        }
+        
+        // If still no glyph found, return default
         if (glyphIndex == 0) {
+            DEBUG_LOG("✗ No fallback glyph found, using default width: " << (fontSize / 2) << "px");
+            if (outUsedFontId) *outUsedFontId = usedFontId;
             return fontSize / 2;
         }
     }
@@ -429,15 +537,41 @@ int MultiFontManager::getCharWidth(int fontId, uint32_t codepoint, int fontSize)
     // Load glyph
     FT_Error error = FT_Load_Glyph(face, glyphIndex, FT_LOAD_DEFAULT);
     if (error) {
+        if (outUsedFontId) *outUsedFontId = usedFontId;
         return fontSize / 2;
     }
     
-    int width = static_cast<int>(face->glyph->advance.x >> 6);
+    // Calculate width using horiAdvance
+    int horiAdvance = static_cast<int>(face->glyph->metrics.horiAdvance >> 6);
+    int advanceX = static_cast<int>(face->glyph->advance.x >> 6);
+    int width = static_cast<int>(face->glyph->metrics.width >> 6);
     
-    // Store in cache (存入缓存)
-    cache.setCharWidth(fontId, fontSize, codepoint, width);
+    // Use horiAdvance as primary method
+    int finalWidth = horiAdvance;
     
-    return width;
+    // Fallback to advance.x if horiAdvance is 0
+    if (finalWidth == 0) {
+        finalWidth = advanceX;
+    }
+    
+    // Debug output for character metrics (only in debug mode)
+    if (charNotFoundInPrimary || (codepoint >= 0x4E00 && codepoint <= 0x9FFF)) {
+        DEBUG_LOG("Char U+" << std::hex << codepoint << std::dec 
+                 << " metrics: horiAdvance=" << horiAdvance 
+                 << ", advanceX=" << advanceX 
+                 << ", width=" << width 
+                 << ", fontSize=" << fontSize 
+                 << ", finalWidth=" << finalWidth
+                 << ", usedFont=" << usedFontId
+                 << (charNotFoundInPrimary ? " (fallback)" : ""));
+    }
+    
+    // Store in cache
+    cache.setCharWidth(usedFontId, fontSize, codepoint, finalWidth);
+    
+    if (outUsedFontId) *outUsedFontId = usedFontId;
+    
+    return finalWidth;
 }
 
 uint32_t MultiFontManager::decodeUtf8(const char*& text) {

@@ -226,11 +226,6 @@ void WasmContainer::draw_text(litehtml::uint_ptr /*hdc*/, const char* text,
         layout.letterSpacing = 0.0f;
         layout.wordSpacing = 0.0f;
         
-        // Text shadow (Req 2.4)
-        // Note: Text shadow would need element context to extract
-        // Not available in draw_text callback
-        // layout.textShadow is empty by default
-        
         // Transform (Req 2.8)
         // Note: Transform would need element context to extract
         // Default values are already set in Transform struct

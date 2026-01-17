@@ -303,8 +303,7 @@ describe('JSON Output Modes', () => {
       expect(char.letterSpacing).toBeDefined();
       expect(char.wordSpacing).toBeDefined();
       
-      // Shadow and transform
-      expect(char.textShadow).toBeDefined();
+      // Transform
       expect(char.transform).toBeDefined();
       
       // Baseline and direction

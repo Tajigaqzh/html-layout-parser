@@ -277,33 +277,6 @@ describe('Canvas Rendering Support', () => {
       });
     });
 
-    describe('Text Shadow Validation', () => {
-      it('should have textShadow array', () => {
-        const result = helper.parseHTML<CharLayout[]>(testHtml, viewportWidth, 'flat');
-        
-        for (const char of result) {
-          expect(Array.isArray(char.textShadow)).toBe(true);
-        }
-      });
-
-      it('should have valid shadow properties when present', () => {
-        const html = '<div style="text-shadow: 2px 2px 4px black;">Shadow</div>';
-        const result = helper.parseHTML<CharLayout[]>(html, viewportWidth, 'flat');
-        
-        // Note: text-shadow parsing may not be fully implemented
-        // This test validates the structure when shadows are present
-        for (const char of result) {
-          if (char.textShadow.length > 0) {
-            const shadow = char.textShadow[0];
-            expect(typeof shadow.offsetX).toBe('number');
-            expect(typeof shadow.offsetY).toBe('number');
-            expect(typeof shadow.blurRadius).toBe('number');
-            expect(typeof shadow.color).toBe('string');
-          }
-        }
-      });
-    });
-
     describe('Transform Validation', () => {
       it('should have transform object', () => {
         const result = helper.parseHTML<CharLayout[]>(testHtml, viewportWidth, 'flat');
@@ -491,7 +464,6 @@ describe('Canvas Rendering Support', () => {
         'textDecoration',
         'letterSpacing',
         'wordSpacing',
-        'textShadow',
         'transform',
         'baseline',
         'direction',

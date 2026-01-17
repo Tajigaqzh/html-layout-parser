@@ -1,6 +1,6 @@
 # Web Environment Examples
 
-Complete examples for using HTML Layout Parser v2.0 in web browser environments.
+Complete examples for using HTML Layout Parser v0.0.1 in web browser environments.
 
 ## Table of Contents
 
@@ -313,8 +313,7 @@ async function basicCanvasRendering() {
     renderCharacters(canvas, layouts, {
       scale: 1,
       renderBackgrounds: true,
-      renderDecorations: true,
-      renderShadows: true
+      renderDecorations: true
     });
 
     return layouts;
@@ -365,23 +364,9 @@ async function manualCanvasRendering() {
       // Apply opacity
       ctx.globalAlpha = char.opacity;
 
-      // Draw text shadow
-      if (char.textShadow && char.textShadow.length > 0) {
-        const shadow = char.textShadow[0];
-        ctx.shadowOffsetX = shadow.offsetX;
-        ctx.shadowOffsetY = shadow.offsetY;
-        ctx.shadowBlur = shadow.blurRadius;
-        ctx.shadowColor = parseColor(shadow.color);
-      }
-
       // Draw character
       ctx.fillStyle = parseColor(char.color);
       ctx.fillText(char.character, char.x, char.baseline);
-
-      // Reset shadow
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
-      ctx.shadowBlur = 0;
 
       // Draw underline
       if (char.textDecoration?.underline) {

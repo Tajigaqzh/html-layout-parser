@@ -84,11 +84,11 @@ getVersion(): string
 获取解析器版本号。
 
 **返回值：**
-- `string` - 版本号（如 "0.2.0"）
+- `string` - 版本号（如 "0.0.1"）
 
 **示例：**
 ```typescript
-console.log('版本:', parser.getVersion()); // "0.2.0"
+console.log('版本:', parser.getVersion()); // "0.0.1"
 ```
 
 ### getEnvironment()

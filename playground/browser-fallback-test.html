@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Browser Font Fallback Test</title>
+    <style>
+        @font-face {
+            font-family: 'MaoKenShiJinHei';
+            src: url('/fonts/MaoKenShiJinHei-2.ttf');
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            color: #333;
+        }
+        
+        .test-section {
+            margin: 30px 0;
+            padding: 20px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        
+        .test-text {
+            font-family: 'MaoKenShiJinHei', Arial, sans-serif;
+            font-size: 18px;
+            line-height: 2;
+            margin: 10px 0;
+        }
+        
+        .char-box {
+            display: inline-block;
+            border: 1px solid #ccc;
+            margin: 2px;
+            padding: 5px;
+            background: white;
+        }
+        
+        .char-info {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .result-item {
+            margin: 8px 0;
+            font-family: monospace;
+        }
+        
+        .in-font {
+            color: green;
+        }
+        
+        .not-in-font {
+            color: red;
+        }
+        
+        button {
+            padding: 10px 20px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        button:hover {
+            background: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <h1>浏览器字体 Fallback 测试</h1>
+    
+    <div class="test-section">
+        <h2>测试文本</h2>
+        <p class="test-text">作者：白居易</p>
+        <p style="font-size: 12px; color: #666;">
+            字体：MaoKenShiJinHei (只包含12个字符：与、中、为、今、作、发、心、教、生、行、调、问)
+        </p>
+    </div>
+    
+    <div class="test-section">
+        <h2>单个字符测试</h2>
+        <div id="charBoxes"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>测试结果</h2>
+        <button onclick="runTest()">运行测试</button>
+        <div id="results" class="results"></div>
+    </div>
+
+    <script>
+        const testChars = [
+            { char: '作', code: 0x4F5C, inFont: true },
+            { char: '者', code: 0x8005, inFont: false },
+            { char: '：', code: 0xFF1A, inFont: false },
+            { char: '白', code: 0x767D, inFont: false },
+            { char: '居', code: 0x5C45, inFont: false },
+            { char: '易', code: 0x6613, inFont: false },
+            { char: '中', code: 0x4E2D, inFont: true },
+        ];
+
+        // 创建字符盒子
+        const charBoxesDiv = document.getElementById('charBoxes');
+        testChars.forEach(item => {
+            const box = document.createElement('div');
+            box.className = 'char-box';
+            box.innerHTML = `
+                <div style="font-family: 'MaoKenShiJinHei', Arial; font-size: 24px;">${item.char}</div>
+                <div class="char-info">
+                    U+${item.code.toString(16).toUpperCase()}<br>
+                    ${item.inFont ? '✓ 在字体中' : '✗ 不在字体中'}
+                </div>
+            `;
+            charBoxesDiv.appendChild(box);
+        });
+
+        async function runTest() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p>测试中...</p>';
+            
+            // 等待字体加载
+            await document.fonts.ready;
+            
+            const results = [];
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 测试每个字符
+            testChars.forEach(item => {
+                // 使用 MaoKenShiJinHei 字体
+                ctx.font = '18px "MaoKenShiJinHei", Arial';
+                const widthWithFallback = ctx.measureText(item.char).width;
+                
+                // 使用 Arial 字体作为参考
+                ctx.font = '18px Arial';
+                const widthArial = ctx.measureText(item.char).width;
+                
+                // 使用 MaoKenShiJinHei 中存在的字符作为参考
+                ctx.font = '18px "MaoKenShiJinHei", Arial';
+                const widthRef = ctx.measureText('中').width;
+                
+                results.push({
+                    char: item.char,
+                    code: item.code,
+                    inFont: item.inFont,
+                    widthWithFallback: widthWithFallback.toFixed(2),
+                    widthArial: widthArial.toFixed(2),
+                    widthRef: widthRef.toFixed(2),
+                    usedFallback: !item.inFont && Math.abs(widthWithFallback - widthArial) < 1
+                });
+            });
+            
+            // 显示结果
+            let html = '<h3>测量结果：</h3>';
+            results.forEach(r => {
+                const className = r.inFont ? 'in-font' : 'not-in-font';
+                html += `
+                    <div class="result-item ${className}">
+                        <strong>${r.char}</strong> (U+${r.code.toString(16).toUpperCase()})
+                        ${r.inFont ? '✓' : '✗'}
+                        <br>
+                        &nbsp;&nbsp;MaoKenShiJinHei+fallback: ${r.widthWithFallback}px
+                        <br>
+                        &nbsp;&nbsp;Arial 参考: ${r.widthArial}px
+                        <br>
+                        &nbsp;&nbsp;"中"字参考: ${r.widthRef}px
+                        <br>
+                        &nbsp;&nbsp;${r.usedFallback ? '→ 使用了 Arial fallback' : '→ 使用了 MaoKenShiJinHei'}
+                    </div>
+                `;
+            });
+            
+            html += '<h3>结论：</h3>';
+            html += '<p>当字符不在 MaoKenShiJinHei 字体中时，浏览器会：</p>';
+            html += '<ol>';
+            html += '<li>自动使用 font-family 中的下一个字体（Arial）</li>';
+            html += '<li>使用 fallback 字体中该字符的实际宽度</li>';
+            html += '<li><strong>不会</strong>使用主字体的默认字符宽度</li>';
+            html += '<li><strong>不会</strong>使用 fontSize/2 作为默认宽度</li>';
+            html += '</ol>';
+            
+            resultsDiv.innerHTML = html;
+        }
+        
+        // 页面加载后自动运行测试
+        window.addEventListener('load', () => {
+            setTimeout(runTest, 500);
+        });
+    </script>
+</body>
+</html>

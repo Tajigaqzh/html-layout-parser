@@ -74,6 +74,117 @@ parser.unloadFont(fontId);
 // [HtmlLayoutParser] Memory usage after font unload: 0.5MB
 ```
 
+### 1.1 字符回退日志
+
+当已加载字体中找不到字符时，解析器使用 **CSS font-family 回退策略**（类似浏览器）：
+
+```typescript
+// 使用 font-family: "MaoKenShiJinHei, aliBaBaFont65, Arial" 解析
+const layouts = parser.parse(html, {
+  viewportWidth: 800,
+  isDebug: true
+});
+
+// 输出示例:
+// [WASM] Character U+8005 (者) not found in font ID 2
+// [HtmlLayoutParser] Found character U+8005 in font-family font: aliBaBaFont65 (ID 1)
+// [HtmlLayoutParser] Char U+8005 metrics: horiAdvance=20, advanceX=20, width=18, fontSize=18, finalWidth=20, usedFont=1
+
+// [WASM] Character U+ff1a (：) not found in font ID 2
+// [HtmlLayoutParser] Character U+ff1a not found in primary font (ID 2), using intelligent fallback
+// [HtmlLayoutParser] → Using half-width fallback: 9px for punctuation
+```
+
+**CSS font-family 回退策略（类浏览器！）：**
+
+解析器现在实现了与浏览器**完全相同的回退机制**：
+
+1. **主字体**：尝试在 `font-family` 中的第一个字体中查找字符
+2. **font-family 回退**：如果未找到，按顺序尝试 `font-family` 列表中的每个字体
+   - 示例：`font-family: "MaoKenShiJinHei, aliBaBaFont65, Arial"`
+   - 尝试顺序：MaoKenShiJinHei → aliBaBaFont65 → Arial
+3. **默认字体**：如果在所有 font-family 字体中都未找到，尝试默认字体
+4. **智能回退**：最后手段，使用基于字符类型的估算
+   - **CJK 字符** (U+4E00-U+9FFF)：使用 '中' (U+4E2D) 字符宽度
+   - **标点符号**（CJK/拉丁）：使用半宽 (fontSize / 2)
+   - **其他字符**：尝试 '0' 或空格字符
+
+**核心改进：**
+- ✅ **浏览器兼容**：完全遵循 CSS font-family 规范
+- ✅ **精确宽度**：使用回退字体中的实际字符宽度
+- ✅ **有序回退**：遵循 font-family 顺序（不是随机搜索）
+- ✅ **无重叠**：即使主字体中缺少字符，也使用正确的宽度
+- ✅ **性能**：结果被缓存以避免重复查找
+
+**与浏览器行为对比：**
+
+| 方面 | 浏览器 | 我们的实现 |
+|------|--------|-----------|
+| 回退顺序 | font-family 列表顺序 | ✅ 相同 |
+| 逐字符 | 是，逐字符 | ✅ 相同 |
+| 实际宽度 | 使用回退字体宽度 | ✅ 相同 |
+| 系统字体 | 回退到系统字体 | ⚠️ 使用默认字体* |
+
+**\*关于系统字体回退的说明：**
+
+与浏览器不同，WASM 由于沙箱限制无法直接访问系统字体。相反，我们使用您指定的**默认字体**。要实现类似浏览器的行为：
+
+1. **加载全面的回退字体**（例如 Noto Sans、Noto Sans CJK）
+2. **使用 `setDefaultFont()` 设置为默认字体**
+3. **在 font-family 中包含它**作为最后选项
+
+**最佳实践示例：**
+
+```typescript
+const parser = new HtmlLayoutParser();
+await parser.init();
+
+// 按优先级顺序加载字体
+const arialId = parser.loadFont(arialData, 'Arial');
+const helveticaId = parser.loadFont(helveticaData, 'Helvetica');
+
+// 加载字符覆盖范围广的全面回退字体
+const notoSansId = parser.loadFont(notoSansData, 'Noto Sans');
+
+// 设置全面字体为默认（充当系统字体回退）
+parser.setDefaultFont(notoSansId);
+
+// 在 CSS 中使用完整的回退链
+const css = `
+  body {
+    font-family: 'Arial', 'Helvetica', 'Noto Sans', sans-serif;
+  }
+`;
+```
+
+**推荐的回退字体：**
+
+为获得最佳的跨语言支持，考虑加载以下全面字体之一：
+
+- **Noto Sans** - 覆盖拉丁、希腊、西里尔文
+- **Noto Sans CJK** - 覆盖中文、日文、韩文
+- **Roboto** - 良好的拉丁文覆盖
+- **Arial Unicode MS** - 广泛的字符覆盖（如果可用）
+
+**为什么采用这种方式：**
+
+| 方面 | 系统字体（浏览器）| 默认字体（我们的方式）|
+|------|-----------------|---------------------|
+| 访问方式 | 直接访问操作系统 | 仅用户加载的字体 |
+| 一致性 | 因操作系统而异 | ✅ 跨平台一致 |
+| 控制力 | 有限 | ✅ 完全控制 |
+| 性能 | 快速（已缓存）| ✅ 快速（预加载）|
+| 字符覆盖 | 取决于操作系统 | ✅ 有保证（如果你加载了）|
+
+**调试输出字段：**
+- `horiAdvance`：字体度量中的水平前进值
+- `advanceX`：X 轴前进值
+- `width`：字形宽度
+- `fontSize`：当前字体大小
+- `finalWidth`：用于布局的最终计算宽度
+- `usedFont`：实际使用的字体 ID（可能与请求的不同）
+- `(fallback)`：表示此字符使用了回退策略
+
 ### 2. 解析阶段日志
 
 ```typescript
@@ -566,7 +677,7 @@ leakDetector.stopMonitoring();
 
 ```json
 {
-  "version": "0.2.0",
+  "version": "0.0.1",
   "configurations": [
     {
       "name": "调试 HTML Layout Parser",

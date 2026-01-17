@@ -2,11 +2,11 @@
 
 HTML Layout Parser 的版本更新记录。
 
-## [0.2.0] - 2026-01-16
+## [0.0.1] - 2026-01-17
 
 ### 🎉 重大更新
 
-这是一个全新的主要版本，相比 v1 有重大改进和突破性变化。
+这是一个全新的主要版本，相比 v1（未发布）有重大改进和突破性变化。
 
 ### ✨ 新功能
 
@@ -101,7 +101,7 @@ parser.resetCacheStats()
 
 #### 选项变化
 ```typescript
-// v1
+// v1（未发布）
 parser.parse(html, viewportWidth)
 
 // v2
@@ -192,7 +192,7 @@ parser.destroy();
 
 ### 🎯 性能基准
 
-| 指标 | v1 | v2 | 改进 |
+| 指标 | v1（未发布） | v0.0.1 | 改进 |
 |------|----|----|------|
 | 解析速度 | ~500 字符/秒 | 429-103,000+ 字符/秒 | 最高 200x |
 | 内存使用 | 不可控 | < 50MB 监控 | 可控 |
@@ -236,5 +236,5 @@ npm list html-layout-parser
 npm update html-layout-parser
 
 # 安装特定版本
-npm install html-layout-parser@0.2.0
+npm install html-layout-parser@0.0.1
 ```

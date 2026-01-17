@@ -1,6 +1,6 @@
-# HTML Layout Parser v2.0 - Final Validation Report
+# HTML Layout Parser v0.0.1 - Final Validation Report
 
-Generated: January 15, 2026
+Generated: January 17, 2026
 
 ## Summary
 
@@ -73,9 +73,10 @@ All core functionality has been implemented and validated. The project is ready 
 - [x] Color: color, backgroundColor, opacity
 - [x] Text decoration: underline, overline, lineThrough
 - [x] Spacing: letterSpacing, wordSpacing
-- [x] Shadow: textShadow array
 - [x] Transform: scaleX, scaleY, skewX, skewY, rotate
 - [x] Baseline and direction
+
+**Note**: text-shadow is not supported by the underlying litehtml engine.
 
 ### Cross-Environment Support ✅
 - [x] Web browser
@@ -118,7 +119,7 @@ All core functionality has been implemented and validated. The project is ready 
 ## NPM Package ✅
 
 - [x] Package name: html-layout-parser
-- [x] Version: 2.0.0
+- [x] Version: 0.0.1
 - [x] Exports configured for all environments
 - [x] Build scripts configured
 - [x] TypeScript declarations included
@@ -138,17 +139,17 @@ All core functionality has been implemented and validated. The project is ready 
 
 1. **WASM Size**: The compiled WASM file is larger than the target due to including the full litehtml library. A minimal build configuration exists but requires further optimization.
 
-2. **Font Format**: Only TTF, OTF, and WOFF fonts are supported. WOFF2 requires additional decompression.
+2. **Font Format**: Only TTF and OTF fonts are currently supported. WOFF/WOFF2 formats are planned for future versions.
 
 3. **CSS Support**: Limited to CSS properties supported by litehtml. Some advanced CSS features may not be available.
 
 ## Recommendations for Future
 
 1. Implement WASM size optimization with tree-shaking
-2. Add WOFF2 font support
+2. Add WOFF/WOFF2 font support
 3. Consider WebGPU rendering for better performance
 4. Add streaming parsing for very large documents
 
 ## Conclusion
 
-HTML Layout Parser v2.0 is feature-complete and ready for release. All core requirements have been implemented and validated through comprehensive testing.
+HTML Layout Parser v0.0.1 is feature-complete and ready for release. All core requirements have been implemented and validated through comprehensive testing.

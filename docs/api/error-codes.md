@@ -62,7 +62,7 @@ enum ErrorCode {
 |------|------|-------------|----------|
 | 2001 | FontNotLoaded | No fonts are loaded | Load at least one font |
 | 2002 | FontLoadFailed | Font loading failed | Check font file format |
-| 2003 | FontDataInvalid | Font data is corrupted | Use valid TTF/OTF/WOFF |
+| 2003 | FontDataInvalid | Font data is corrupted | Use valid TTF/OTF |
 | 2004 | FontNameEmpty | Font name is empty | Provide font name |
 | 2005 | FontIdNotFound | Font ID doesn't exist | Check font ID |
 | 2006 | NoDefaultFont | No default font set | Call setDefaultFont() |

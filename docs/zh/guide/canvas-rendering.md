@@ -73,44 +73,24 @@ for (const char of layouts) {
 ### 支持所有文本属性
 ```typescript
 function renderCharacter(ctx: CanvasRenderingContext2D, char: CharLayout) {
-  // 1. 绘制背景
-  if (char.backgroundColor && char.backgroundColor !== '#00000000') {
-    ctx.fillStyle = parseColor(char.backgroundColor);
-    ctx.fillRect(char.x, char.y, char.width, char.height);
-  }
-
-  // 2. 设置字体
+  // 1. 设置字体
   const fontStyle = char.fontStyle === 'italic' ? 'italic' : 'normal';
   const fontWeight = char.fontWeight || 400;
   ctx.font = `${fontStyle} ${fontWeight} ${char.fontSize}px ${char.fontFamily}`;
 
-  // 3. 应用透明度
+  // 2. 应用透明度
   ctx.globalAlpha = char.opacity ?? 1;
 
-  // 4. 绘制文本阴影
-  if (char.textShadow && char.textShadow.length > 0) {
-    const shadow = char.textShadow[0];
-    ctx.shadowOffsetX = shadow.offsetX;
-    ctx.shadowOffsetY = shadow.offsetY;
-    ctx.shadowBlur = shadow.blurRadius;
-    ctx.shadowColor = parseColor(shadow.color);
-  }
-
-  // 5. 绘制字符
+  // 3. 绘制字符
   ctx.fillStyle = parseColor(char.color);
   ctx.fillText(char.character, char.x, char.baseline);
 
-  // 6. 重置阴影
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
-  ctx.shadowBlur = 0;
-
-  // 7. 绘制文本装饰
+  // 4. 绘制文本装饰
   if (char.textDecoration) {
     drawTextDecoration(ctx, char);
   }
 
-  // 8. 重置透明度
+  // 5. 重置透明度
   ctx.globalAlpha = 1;
 }
 
@@ -282,7 +262,6 @@ class CanvasRenderer {
   }
 
   render(layouts: CharLayout[], options: {
-    enableShadows?: boolean;
     enableDecorations?: boolean;
     enableTransforms?: boolean;
     clipToViewport?: boolean;
@@ -295,12 +274,6 @@ class CanvasRenderer {
   }
 
   private renderCharacter(char: CharLayout, options: any): void {
-    // 背景
-    if (char.backgroundColor && char.backgroundColor !== '#00000000') {
-      this.ctx.fillStyle = parseColor(char.backgroundColor);
-      this.ctx.fillRect(char.x, char.y, char.width, char.height);
-    }
-
     // 变换
     if (options.enableTransforms && char.transform) {
       renderTransformedText(this.ctx, char);
@@ -311,23 +284,11 @@ class CanvasRenderer {
     this.ctx.font = `${char.fontStyle} ${char.fontWeight} ${char.fontSize}px ${char.fontFamily}`;
     this.ctx.globalAlpha = char.opacity ?? 1;
 
-    // 阴影
-    if (options.enableShadows && char.textShadow?.length > 0) {
-      const shadow = char.textShadow[0];
-      this.ctx.shadowOffsetX = shadow.offsetX;
-      this.ctx.shadowOffsetY = shadow.offsetY;
-      this.ctx.shadowBlur = shadow.blurRadius;
-      this.ctx.shadowColor = parseColor(shadow.color);
-    }
-
     // 文本
     this.ctx.fillStyle = parseColor(char.color);
     this.ctx.fillText(char.character, char.x, char.baseline);
 
     // 重置
-    this.ctx.shadowOffsetX = 0;
-    this.ctx.shadowOffsetY = 0;
-    this.ctx.shadowBlur = 0;
     this.ctx.globalAlpha = 1;
 
     // 装饰
@@ -344,7 +305,6 @@ const renderer = new CanvasRenderer(canvas);
 const layouts = parser.parse(html, { viewportWidth: 800 });
 
 renderer.render(layouts, {
-  enableShadows: true,
   enableDecorations: true,
   enableTransforms: true
 });

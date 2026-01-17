@@ -6,6 +6,14 @@ HTML Layout Parser is built on [litehtml](https://github.com/litehtml/litehtml),
 HTML Layout Parser is designed for **layout calculation and text measurement**, not full web rendering. Many modern CSS features (especially animations, transforms, and advanced selectors) are not supported.
 :::
 
+::: info Character-Level Property Extraction Limitations
+While litehtml supports many CSS properties listed below for layout calculation, **HTML Layout Parser currently extracts only a subset of properties into the `CharLayout` objects** (primarily character position, dimensions, font properties, colors, and text decoration).
+
+Other properties supported by litehtml but not yet extracted by HTML Layout Parser (such as opacity, spacing, transforms, borders, margins, padding, etc.) will be **gradually added in future versions**.
+
+For a complete list of CSS support, please refer to the [litehtml documentation](https://github.com/litehtml/litehtml).
+:::
+
 ## Supported CSS Properties
 
 ### Layout Properties

@@ -76,7 +76,6 @@ describe('CharLayout Properties', () => {
         },
         letterSpacing: 0,
         wordSpacing: 0,
-        textShadow: [],
         transform: {
           scaleX: 1,
           scaleY: 1,
@@ -161,23 +160,6 @@ describe('CharLayout Properties', () => {
       };
       expect(mockLayout.wordSpacing).toBeDefined();
       expect(typeof mockLayout.wordSpacing).toBe('number');
-    });
-  });
-
-  describe('Text Shadow (Req 2.4)', () => {
-    it('should support multiple shadows', () => {
-      const mockShadows = [
-        { offsetX: 2, offsetY: 2, blurRadius: 4, color: '#00000080' },
-        { offsetX: -1, offsetY: -1, blurRadius: 2, color: '#FFFFFF80' }
-      ];
-
-      expect(mockShadows.length).toBe(2);
-      mockShadows.forEach(shadow => {
-        expect(shadow.offsetX).toBeDefined();
-        expect(shadow.offsetY).toBeDefined();
-        expect(shadow.blurRadius).toBeDefined();
-        expect(shadow.color).toBeDefined();
-      });
     });
   });
 

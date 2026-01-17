@@ -2,7 +2,7 @@
 
 All notable changes to HTML Layout Parser will be documented in this file.
 
-## [0.2.0] - 2026-01-16
+## [0.0.1] - 2026-01-17
 
 ### Added
 - Complete VitePress documentation with bilingual support (English/Chinese)
@@ -22,7 +22,7 @@ All notable changes to HTML Layout Parser will be documented in this file.
 - Startup time: ~7ms (warm), ~17ms (cold)
 - Cache hit rate: 91.2%
 
-## [0.1.0] - 2026-01-15
+## [0.0.1] - 2026-01-15
 
 ### Added
 - Initial release of HTML Layout Parser v2
@@ -38,7 +38,7 @@ All notable changes to HTML Layout Parser will be documented in this file.
 
 ### Features
 - Character-level layout extraction for Canvas rendering
-- Rich text attributes: shadows, decorations, transforms, opacity
+- Rich text attributes: decorations, transforms, opacity
 - Font metrics caching for performance
 - Strict memory management with automatic cleanup
 

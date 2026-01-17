@@ -1,6 +1,6 @@
 # Memory Management Guide
 
-This guide covers best practices for managing memory when using HTML Layout Parser v2.0.
+This guide covers best practices for managing memory when using HTML Layout Parser v0.0.1.
 
 ## Overview
 

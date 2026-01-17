@@ -63,7 +63,7 @@ Get parser version.
 getVersion(): string
 ```
 
-**Returns:** Version string (e.g., `"0.2.0"`)
+**Returns:** Version string (e.g., `"0.0.1"`)
 
 ## Font Management Methods
 
@@ -76,7 +76,7 @@ loadFont(fontData: Uint8Array, fontName: string): number
 ```
 
 **Parameters:**
-- `fontData`: Font file data (TTF, OTF, WOFF)
+- `fontData`: Font file data (TTF, OTF)
 - `fontName`: Name for CSS font-family matching
 
 **Returns:** Font ID (positive) on success, 0 on failure

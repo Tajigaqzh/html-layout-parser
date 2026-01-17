@@ -1,0 +1,148 @@
+name: Publish to NPM
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version_type:
+        description: 'Version bump type'
+        required: true
+        default: 'patch'
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+      dry_run:
+        description: 'Dry run (do not publish)'
+        required: false
+        default: false
+        type: boolean
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+      
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+      
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+      
+      - name: Setup Emscripten
+        uses: mymindstorm/setup-emsdk@v12
+        with:
+          version: '3.1.45'
+          actions-cache-folder: 'emsdk-cache'
+      
+      - name: Verify Emscripten installation
+        run: |
+          emcc --version
+          em++ --version
+      
+      - name: Build WASM
+        run: |
+          chmod +x build.sh
+          pnpm run build:wasm
+      
+      - name: Run tests
+        run: pnpm run test
+      
+      - name: Build packages
+        run: pnpm run build:packages
+      
+      - name: Bump version (manual trigger)
+        if: github.event_name == 'workflow_dispatch' && !inputs.dry_run
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          pnpm -r exec -- npm version ${{ inputs.version_type }} --no-git-tag-version
+          
+          # Get new version
+          NEW_VERSION=$(node -p "require('./packages/html-layout-parser/package.json').version")
+          echo "NEW_VERSION=v$NEW_VERSION" >> $GITHUB_ENV
+          
+          # Commit version changes
+          git add .
+          git commit -m "chore: bump version to $NEW_VERSION"
+          git tag "v$NEW_VERSION"
+          git push origin main
+          git push origin "v$NEW_VERSION"
+      
+      - name: Publish to NPM (dry run)
+        if: inputs.dry_run == true
+        run: pnpm -r publish --access public --dry-run
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Publish to NPM
+        if: inputs.dry_run != true
+        run: pnpm -r publish --access public --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      
+      - name: Create GitHub Release
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && inputs.dry_run != true
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref_name }}
+          release_name: Release ${{ github.ref_name }}
+          body: |
+            ## Changes in ${{ github.ref_name }}
+            
+            ### 📦 Published Packages
+            - `html-layout-parser@${{ github.ref_name }}`
+            - `html-layout-parser-web@${{ github.ref_name }}`
+            - `html-layout-parser-node@${{ github.ref_name }}`
+            - `html-layout-parser-worker@${{ github.ref_name }}`
+            
+            ### 🚀 Installation
+            ```bash
+            # Main package (auto-detects environment)
+            npm install html-layout-parser
+            
+            # Environment-specific packages
+            npm install html-layout-parser-web      # For browsers
+            npm install html-layout-parser-node     # For Node.js
+            npm install html-layout-parser-worker   # For Web Workers
+            ```
+            
+            ### 📚 Documentation
+            - [Getting Started](https://tajigaqzh.github.io/html-layout-parser/guide/getting-started.html)
+            - [API Reference](https://tajigaqzh.github.io/html-layout-parser/api/)
+            - [Examples](https://tajigaqzh.github.io/html-layout-parser/examples/)
+            
+            ### 🔗 Links
+            - [Documentation](https://tajigaqzh.github.io/html-layout-parser/)
+            - [Playground](https://tajigaqzh.github.io/html-layout-parser/playground/)
+            - [GitHub Repository](https://github.com/Tajigaqzh/html-layout-parser)
+          draft: false
+          prerelease: false
+      
+      - name: Notify success
+        if: success() && inputs.dry_run != true
+        run: |
+          echo "🎉 Successfully published packages to NPM!"
+          echo "📦 Published packages:"
+          echo "  - html-layout-parser"
+          echo "  - html-layout-parser-web" 
+          echo "  - html-layout-parser-node"
+          echo "  - html-layout-parser-worker"

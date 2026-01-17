@@ -1,4 +1,4 @@
-# WASM v2.0 Build Size Analysis
+# WASM v0.0.1 Build Size Analysis
 
 ## Current Build Status
 

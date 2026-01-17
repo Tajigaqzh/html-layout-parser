@@ -1,6 +1,6 @@
 # Performance Optimization Guide
 
-This guide covers techniques for optimizing HTML Layout Parser v2.0 performance.
+This guide covers techniques for optimizing HTML Layout Parser v0.0.1 performance.
 
 ## Performance Targets
 

@@ -1,6 +1,6 @@
 # Memory Management Examples
 
-Examples demonstrating correct memory management patterns for HTML Layout Parser v2.0.
+Examples demonstrating correct memory management patterns for HTML Layout Parser v0.0.1.
 
 ## Table of Contents
 

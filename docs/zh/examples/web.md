@@ -292,15 +292,6 @@ class WebParserDemo {
                 );
             }
             
-            // 应用文本阴影
-            if (char.textShadow.length > 0) {
-                const shadow = char.textShadow[0];
-                this.ctx.shadowOffsetX = shadow.offsetX;
-                this.ctx.shadowOffsetY = shadow.offsetY;
-                this.ctx.shadowBlur = shadow.blurRadius;
-                this.ctx.shadowColor = shadow.color;
-            }
-            
             // 绘制字符
             this.ctx.fillStyle = char.color;
             this.ctx.fillText(char.character, char.x, char.baseline);

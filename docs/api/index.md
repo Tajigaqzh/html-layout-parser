@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API reference for HTML Layout Parser v2.0.
+Complete API reference for HTML Layout Parser v0.0.1.
 
 ## Overview
 

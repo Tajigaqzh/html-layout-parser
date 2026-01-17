@@ -1,6 +1,6 @@
 {
   "name": "html-layout-parser",
-  "version": "0.2.0",
+  "version": "0.0.1",
   "description": "High-performance HTML layout parser compiled to WebAssembly. Supports multi-font management, CSS separation, and multiple output modes for Canvas rendering.",
   "type": "module",
   "main": "./dist/index.cjs",

@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get started with HTML Layout Parser v2.0 in minutes.
+Get started with HTML Layout Parser v0.0.1 in minutes.
 
 ## Installation
 

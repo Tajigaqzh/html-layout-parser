@@ -22,7 +22,7 @@ features:
     details: Load and manage multiple fonts with automatic fallback chains and memory-efficient storage
   - icon: 🎨
     title: Rich Text Attributes
-    details: Full CSS text styling including shadows, decorations, transforms, and opacity
+    details: Full CSS text styling including decorations, transforms, and opacity
   - icon: 📦
     title: Multiple Output Modes
     details: Choose from flat, byRow, simple, or full hierarchical output based on your needs
@@ -39,6 +39,18 @@ features:
     title: Memory Efficient
     details: Strict memory management with monitoring, smart caching, and automatic cleanup
 ---
+
+## About This Project
+
+::: info Design Purpose
+This WASM-based solution is designed to provide cross-platform capabilities and Web Worker support that complement existing approaches like SVG foreignObject. It's particularly useful for scenarios requiring:
+- Rendering in Web Workers (where DOM is unavailable)
+- Node.js server-side rendering
+- Precise control over text layout and rendering
+- High zoom levels with pixel-perfect accuracy
+
+**For main thread browser environments**, SVG foreignObject remains a simpler and more convenient option as it can directly access system fonts without manual loading. Additionally, the WASM solution introduces extra memory overhead beyond the font files themselves. This library is not intended to replace browser-standard SVG solutions, but rather to provide a complementary option for specific scenarios where WASM's unique capabilities are needed.
+:::
 
 ## Quick Example
 

@@ -60,27 +60,37 @@ interface CharLayout {
   
   // Color
   color: string;              // Text color (#RRGGBBAA)
-  backgroundColor: string;    // Background color (#RRGGBBAA)
-  opacity: number;            // Opacity (0-1)
+  backgroundColor: string;    // Background color (#RRGGBBAA) - always transparent (not extracted)
+  opacity: number;            // Opacity (0-1) - always 1.0 (not extracted)
   
   // Text decoration
   textDecoration: TextDecoration;
   
   // Spacing
-  letterSpacing: number;      // Letter spacing in pixels
-  wordSpacing: number;        // Word spacing in pixels
+  letterSpacing: number;      // Letter spacing in pixels - always 0 (not extracted)
+  wordSpacing: number;        // Word spacing in pixels - always 0 (not extracted)
   
-  // Shadow
-  textShadow: TextShadow[];   // Array of shadows
-  
-  // Transform
-  transform: Transform;       // CSS transform
+  // Transform (not currently extracted from CSS)
+  transform: Transform;       // Always default values - transform not supported
   
   // Baseline and direction
   baseline: number;           // Baseline Y position
-  direction: string;          // 'ltr' | 'rtl'
+  direction: string;          // 'ltr' | 'rtl' - always 'ltr' (not extracted)
 }
 ```
+
+::: warning Limited Property Extraction
+Due to the architecture of the underlying rendering engine, some CSS properties cannot be extracted at the character level:
+- `backgroundColor` - character background is not extracted (always transparent)
+- `opacity` - opacity is not extracted (always 1.0)
+- `letterSpacing` / `wordSpacing` - spacing is not extracted (always 0)
+- `transform` - CSS transforms are not extracted (always default values)
+- `direction` - text direction is not extracted (always 'ltr')
+
+**Supported properties**: character position, dimensions, font properties (family, size, weight, style), text color, and text decoration (underline, line-through, overline).
+
+**Not supported**: Some CSS properties like `text-shadow` are not supported by the underlying [litehtml](http://www.litehtml.com/) rendering engine. For a complete list of supported CSS properties, please refer to the [litehtml documentation](https://github.com/litehtml/litehtml).
+:::
 
 ### TextDecoration
 
@@ -94,19 +104,6 @@ interface TextDecoration {
   color: string;              // Decoration color
   style: string;              // 'solid' | 'double' | 'dotted' | 'dashed' | 'wavy'
   thickness: number;          // Line thickness
-}
-```
-
-### TextShadow
-
-Text shadow information.
-
-```typescript
-interface TextShadow {
-  offsetX: number;
-  offsetY: number;
-  blurRadius: number;
-  color: string;
 }
 ```
 

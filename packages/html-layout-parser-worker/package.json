@@ -1,6 +1,6 @@
 {
   "name": "html-layout-parser-worker",
-  "version": "0.2.0",
+  "version": "0.0.1",
   "description": "HTML Layout Parser for Web Worker environments - compiled to WebAssembly. Supports multi-font management, CSS separation, and OffscreenCanvas rendering.",
   "type": "module",
   "main": "./dist/index.cjs",

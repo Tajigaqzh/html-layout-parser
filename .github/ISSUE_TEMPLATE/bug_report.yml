@@ -69,7 +69,7 @@ body:
     attributes:
       label: Package version
       description: What version of html-layout-parser are you using?
-      placeholder: "0.2.0"
+      placeholder: "0.0.1"
     validations:
       required: true
 

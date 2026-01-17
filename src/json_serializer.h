@@ -302,13 +302,6 @@ private:
     static void serializeTextDecoration(const TextDecoration& decoration, std::ostringstream& oss);
     
     /**
-     * @brief Serialize TextShadow array to JSON (序列化阴影)
-     * @param shadows Text shadows
-     * @param oss Output stream
-     */
-    static void serializeTextShadows(const std::vector<TextShadow>& shadows, std::ostringstream& oss);
-    
-    /**
      * @brief Serialize Transform to JSON (序列化变换)
      * @param transform Transform
      * @param oss Output stream

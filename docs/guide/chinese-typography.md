@@ -4,7 +4,7 @@ When rendering Chinese text, proper punctuation handling is crucial for professi
 
 ## Understanding the Issue
 
-The parser returns character positions as calculated by the layout engine. However, it doesn't automatically handle Chinese typography rules like punctuation avoidance. This is intentional - it gives you full control over post-processing.
+The parser returns character positions as calculated by the layout engine. However, it doesn't automatically handle Chinese typography rules like punctuation avoidance. You'll need to implement these rules in post-processing to achieve proper Chinese typography.
 
 ### Forbidden Line-Start Punctuation
 
@@ -304,7 +304,7 @@ renderer.renderToCanvas(ctx, result);
 
 1. **Parser Responsibility**: The parser provides accurate character positions based on layout calculation
 2. **Your Responsibility**: Apply typography rules (like punctuation avoidance) in post-processing
-3. **Flexibility**: This separation gives you full control over typography rules
+3. **Flexibility**: Post-processing allows you to implement custom typography rules as needed
 4. **Performance**: Post-processing is fast and doesn't impact parsing performance
 
 ## See Also

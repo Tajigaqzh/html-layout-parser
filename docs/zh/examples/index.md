@@ -72,15 +72,6 @@ function renderToCanvas(canvas: HTMLCanvasElement, layouts: CharLayout[]) {
       ctx.fillRect(char.x, char.y - char.fontSize, char.width, char.height);
     }
     
-    // 应用文本阴影
-    if (char.textShadow.length > 0) {
-      const shadow = char.textShadow[0];
-      ctx.shadowOffsetX = shadow.offsetX;
-      ctx.shadowOffsetY = shadow.offsetY;
-      ctx.shadowBlur = shadow.blurRadius;
-      ctx.shadowColor = shadow.color;
-    }
-    
     // 绘制字符
     ctx.fillStyle = char.color;
     ctx.fillText(char.character, char.x, char.baseline);
@@ -94,11 +85,6 @@ function renderToCanvas(canvas: HTMLCanvasElement, layouts: CharLayout[]) {
       ctx.lineTo(char.x + char.width, char.baseline + 2);
       ctx.stroke();
     }
-    
-    // 重置阴影
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.shadowBlur = 0;
   }
 }
 

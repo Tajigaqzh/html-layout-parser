@@ -4,6 +4,10 @@ This guide will help you get up and running with HTML Layout Parser in minutes.
 
 ## Installation
 
+### Main Package (Recommended)
+
+The main package automatically detects the runtime environment and loads the appropriate code:
+
 ::: code-group
 
 ```bash [npm]
@@ -20,26 +24,77 @@ pnpm add html-layout-parser
 
 :::
 
-## Platform-Specific Imports
+### Environment-Specific Packages
 
-::: tip Reduce Bundle Size
-Import only the platform you need to significantly reduce bundle size:
+To better serve different use cases, we publish not only the complete `html-layout-parser` package but also separate packages for specific environments. If you only need support for a specific environment, you can install the corresponding individual package to reduce bundle size:
 
-```typescript
-// Auto-detect (default) - automatically detects environment
-import { HtmlLayoutParser } from 'html-layout-parser';
+::: code-group
 
-// Web Browser (explicit)
-import { HtmlLayoutParser } from 'html-layout-parser/web';
-
-// Web Worker
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
-
-// Node.js
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+```bash [Web Browser]
+npm install html-layout-parser-web
 ```
 
-Each platform-specific build includes only the necessary code for that environment.
+```bash [Node.js]
+npm install html-layout-parser-node
+```
+
+```bash [Web Worker]
+npm install html-layout-parser-worker
+```
+
+:::
+
+::: info Package Publishing Strategy
+We use a multi-package publishing strategy:
+- **Main Package** (`html-layout-parser`): Contains code for all environments with automatic detection
+- **Environment-Specific Packages**: Each package is independently published to npm and contains only environment-specific code
+
+Benefits of this approach:
+- 🎯 **Choose What You Need**: Select the right package for your project requirements
+- 📦 **Size Optimization**: Environment-specific packages have smaller bundle sizes
+- 🔄 **Backward Compatibility**: Main package provides full functionality and auto-detection
+:::
+
+::: tip Bundle Size Comparison
+- `html-layout-parser`: ~2.5MB (includes all environments)
+- `html-layout-parser-web`: ~2.2MB (separate npm package, Web browser only)
+- `html-layout-parser-node`: ~2.2MB (separate npm package, Node.js only)
+- `html-layout-parser-worker`: ~2.2MB (separate npm package, Web Worker only)
+:::
+
+## Platform-Specific Imports
+
+### Using Main Package
+
+::: tip Automatic Environment Detection
+The main package automatically detects the runtime environment and loads the appropriate code:
+
+```typescript
+// Auto-detect (recommended) - automatically detects environment
+import { HtmlLayoutParser } from 'html-layout-parser';
+
+// You can also explicitly specify the environment
+import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
+import { HtmlLayoutParser } from 'html-layout-parser/node';
+```
+:::
+
+### Using Environment-Specific Packages
+
+```typescript
+// Web browser specific package
+import { HtmlLayoutParser } from 'html-layout-parser-web';
+
+// Node.js specific package
+import { HtmlLayoutParser } from 'html-layout-parser-node';
+
+// Web Worker specific package
+import { HtmlLayoutParser } from 'html-layout-parser-worker';
+```
+
+::: warning Note
+Environment-specific packages can only be used in their corresponding environments. For example, `html-layout-parser-node` can only be used in Node.js environments and will error in browsers.
 :::
 
 ## Font File Setup

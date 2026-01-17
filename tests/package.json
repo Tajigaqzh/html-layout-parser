@@ -1,6 +1,6 @@
 {
   "name": "@html-layout-parser/tests",
-  "version": "0.2.0",
+  "version": "0.0.1",
   "private": true,
   "description": "Property-based tests for HTML Layout Parser v2.0 WASM module",
   "type": "module",

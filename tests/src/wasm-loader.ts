@@ -54,9 +54,10 @@ export function loadFontFile(fontPath: string): Uint8Array {
 
 /**
  * Get the path to the test font file
+ * Using the original full font file (not compressed) to ensure all characters are available
  */
 export function getTestFontPath(): string {
-  return join(__dirname, '../../examples/font/aliBaBaFont65.ttf');
+  return join(__dirname, '../../examples/font/.font-spider/aliBaBaFont65.ttf');
 }
 
 /**

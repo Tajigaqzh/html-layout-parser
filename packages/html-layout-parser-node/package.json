@@ -1,6 +1,6 @@
 {
   "name": "html-layout-parser-node",
-  "version": "0.2.0",
+  "version": "0.0.1",
   "description": "HTML Layout Parser for Node.js environments - compiled to WebAssembly. Supports multi-font management, file-based font loading, and batch processing.",
   "type": "module",
   "main": "./dist/index.cjs",

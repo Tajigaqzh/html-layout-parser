@@ -407,11 +407,6 @@ void JsonSerializer::serializeCharLayout(const CharLayout& layout, std::ostrings
     oss << "\"letterSpacing\":" << layout.letterSpacing << ",";
     oss << "\"wordSpacing\":" << layout.wordSpacing << ",";
     
-    // Text shadow
-    oss << "\"textShadow\":";
-    serializeTextShadows(layout.textShadow, oss);
-    oss << ",";
-    
     // Transform
     oss << "\"transform\":";
     serializeTransform(layout.transform, oss);
@@ -436,23 +431,6 @@ void JsonSerializer::serializeTextDecoration(const TextDecoration& decoration, s
     oss << "\"style\":\"" << escapeJson(decoration.style) << "\",";
     oss << "\"thickness\":" << decoration.thickness;
     oss << "}";
-}
-
-void JsonSerializer::serializeTextShadows(const std::vector<TextShadow>& shadows, std::ostringstream& oss) {
-    oss << "[";
-    for (size_t i = 0; i < shadows.size(); ++i) {
-        if (i > 0) {
-            oss << ",";
-        }
-        const TextShadow& shadow = shadows[i];
-        oss << "{";
-        oss << "\"offsetX\":" << shadow.offsetX << ",";
-        oss << "\"offsetY\":" << shadow.offsetY << ",";
-        oss << "\"blurRadius\":" << shadow.blurRadius << ",";
-        oss << "\"color\":\"" << escapeJson(shadow.color) << "\"";
-        oss << "}";
-    }
-    oss << "]";
 }
 
 void JsonSerializer::serializeTransform(const Transform& transform, std::ostringstream& oss) {

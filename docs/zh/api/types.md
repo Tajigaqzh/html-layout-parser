@@ -89,26 +89,36 @@ interface CharLayout {
   
   // 颜色属性
   color: string;              // 文字颜色 (RGBA: #RRGGBBAA)
-  backgroundColor: string;    // 背景颜色 (RGBA: #RRGGBBAA)
-  opacity: number;            // 透明度 (0-1)
+  backgroundColor: string;    // 背景颜色 (RGBA: #RRGGBBAA) - 始终透明（未提取）
+  opacity: number;            // 透明度 (0-1) - 始终 1.0（未提取）
   
   // 文本装饰
   textDecoration: TextDecoration;
   
   // 间距
-  letterSpacing: number;      // 字符间距（像素）
-  wordSpacing: number;        // 单词间距（像素）
+  letterSpacing: number;      // 字符间距（像素）- 始终 0（未提取）
+  wordSpacing: number;        // 单词间距（像素）- 始终 0（未提取）
   
-  // 阴影效果
-  textShadow: TextShadow[];
-  
-  // 变换
-  transform: TextTransform;
+  // 变换（当前不支持）
+  transform: TextTransform;   // 始终为默认值 - 不支持 transform
   
   // 文本方向
-  direction: 'ltr' | 'rtl';   // 文本方向
+  direction: 'ltr' | 'rtl';   // 文本方向 - 始终 'ltr'（未提取）
 }
 ```
+
+::: warning 属性提取限制
+由于底层渲染引擎的架构限制，某些 CSS 属性无法在字符级别提取：
+- `backgroundColor` - 不提取字符背景色（始终透明）
+- `opacity` - 不提取透明度（始终 1.0）
+- `letterSpacing` / `wordSpacing` - 不提取间距（始终 0）
+- `transform` - 不提取 CSS 变换（始终默认值）
+- `direction` - 不提取文本方向（始终 'ltr'）
+
+**支持的属性**：字符位置、尺寸、字体属性（字体族、大小、粗细、样式）、文字颜色、文本装饰（下划线、删除线、上划线）。
+
+**不支持的属性**：某些 CSS 属性（如 `text-shadow`）不被底层 [litehtml](http://www.litehtml.com/) 渲染引擎支持。完整的支持属性列表请参考 [litehtml 文档](https://github.com/litehtml/litehtml)。
+:::
 
 **使用示例：**
 ```typescript
@@ -151,32 +161,6 @@ function drawTextDecoration(ctx: CanvasRenderingContext2D, char: CharLayout) {
     ctx.moveTo(char.x, char.baseline + 2);
     ctx.lineTo(char.x + char.width, char.baseline + 2);
     ctx.stroke();
-  }
-}
-```
-
-### TextShadow
-
-文本阴影信息。
-
-```typescript
-interface TextShadow {
-  offsetX: number;            // X 偏移（像素）
-  offsetY: number;            // Y 偏移（像素）
-  blurRadius: number;         // 模糊半径（像素）
-  color: string;              // 阴影颜色 (RGBA)
-}
-```
-
-**使用示例：**
-```typescript
-function applyTextShadow(ctx: CanvasRenderingContext2D, shadows: TextShadow[]) {
-  if (shadows.length > 0) {
-    const shadow = shadows[0]; // 使用第一个阴影
-    ctx.shadowOffsetX = shadow.offsetX;
-    ctx.shadowOffsetY = shadow.offsetY;
-    ctx.shadowBlur = shadow.blurRadius;
-    ctx.shadowColor = shadow.color;
   }
 }
 ```
@@ -620,22 +604,8 @@ function renderLayouts(
     ctx.fillStyle = char.color;
     ctx.globalAlpha = char.opacity;
     
-    // 应用阴影
-    if (char.textShadow.length > 0) {
-      const shadow = char.textShadow[0];
-      ctx.shadowOffsetX = shadow.offsetX;
-      ctx.shadowOffsetY = shadow.offsetY;
-      ctx.shadowBlur = shadow.blurRadius;
-      ctx.shadowColor = shadow.color;
-    }
-    
     // 绘制字符
     ctx.fillText(char.character, char.x, char.baseline);
-    
-    // 重置阴影
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 0;
-    ctx.shadowBlur = 0;
   }
 }
 ```

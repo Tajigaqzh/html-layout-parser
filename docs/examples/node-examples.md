@@ -1,6 +1,6 @@
 # Node.js Environment Examples
 
-Complete examples for using HTML Layout Parser v2.0 in Node.js environments.
+Complete examples for using HTML Layout Parser v0.0.1 in Node.js environments.
 
 ## Table of Contents
 
@@ -690,7 +690,7 @@ main();
 ```json
 {
   "name": "html-layout-parser-cli",
-  "version": "0.2.0",
+  "version": "0.0.1",
   "bin": {
     "html-layout-parser": "./dist/cli.js"
   },
@@ -699,7 +699,7 @@ main();
     "start": "node dist/cli.js"
   },
   "dependencies": {
-    "html-layout-parser": "^0.2.0"
+    "html-layout-parser": "^0.0.1"
   },
   "devDependencies": {
     "@types/node": "^18.0.0",

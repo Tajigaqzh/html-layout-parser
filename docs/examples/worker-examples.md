@@ -1,6 +1,6 @@
 # Worker Environment Examples
 
-Complete examples for using HTML Layout Parser v2.0 in Web Worker environments.
+Complete examples for using HTML Layout Parser v0.0.1 in Web Worker environments.
 
 ## Table of Contents
 
@@ -354,23 +354,11 @@ function renderCharacter(ctx: OffscreenCanvasRenderingContext2D, char: CharLayou
   // Apply opacity
   ctx.globalAlpha = char.opacity ?? 1;
 
-  // Draw text shadow
-  if (char.textShadow && char.textShadow.length > 0) {
-    const shadow = char.textShadow[0];
-    ctx.shadowOffsetX = shadow.offsetX;
-    ctx.shadowOffsetY = shadow.offsetY;
-    ctx.shadowBlur = shadow.blurRadius;
-    ctx.shadowColor = parseColor(shadow.color);
-  }
-
   // Draw character
   ctx.fillStyle = parseColor(char.color);
   ctx.fillText(char.character, char.x, char.baseline);
 
-  // Reset
-  ctx.shadowOffsetX = 0;
-  ctx.shadowOffsetY = 0;
-  ctx.shadowBlur = 0;
+  // Reset opacity
   ctx.globalAlpha = 1;
 
   // Draw underline

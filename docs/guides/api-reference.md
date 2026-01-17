@@ -1,6 +1,6 @@
 # API Reference
 
-Complete API reference for HTML Layout Parser v2.0.
+Complete API reference for HTML Layout Parser v0.0.1.
 
 ## HtmlLayoutParser Class
 
@@ -50,7 +50,7 @@ const env = parser.getEnvironment(); // 'web' | 'worker' | 'node' | 'unknown'
 
 Load a font from binary data.
 
-- **fontData**: Font file data (TTF, OTF, WOFF)
+- **fontData**: Font file data (TTF, OTF)
 - **fontName**: Name for CSS font-family matching
 - **Returns**: Font ID (positive) on success, 0 on failure
 
@@ -163,7 +163,7 @@ const diagnostics = parser.getLastParseResult();
 Get parser version.
 
 ```typescript
-const version = parser.getVersion(); // "0.2.0"
+const version = parser.getVersion(); // "0.0.1"
 ```
 
 #### `getMetrics(): MemoryMetrics | null`
@@ -265,9 +265,6 @@ interface CharLayout {
   letterSpacing: number;
   wordSpacing: number;
   
-  // Shadow
-  textShadow: TextShadow[];
-  
   // Transform
   transform: Transform;
   
@@ -289,19 +286,6 @@ interface TextDecoration {
   color: string;
   style: string;              // 'solid' | 'double' | 'dotted' | 'dashed' | 'wavy'
   thickness: number;
-}
-```
-
-### TextShadow
-
-Text shadow information.
-
-```typescript
-interface TextShadow {
-  offsetX: number;
-  offsetY: number;
-  blurRadius: number;
-  color: string;
 }
 ```
 

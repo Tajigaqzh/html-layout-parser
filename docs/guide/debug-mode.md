@@ -74,6 +74,117 @@ parser.unloadFont(fontId);
 // [HtmlLayoutParser] Memory usage after font unload: 0.5MB
 ```
 
+### 1.1 Character Fallback Logs
+
+When a character is not found in the loaded font, the parser uses **CSS font-family fallback strategy** (like browsers):
+
+```typescript
+// Parse with font-family: "MaoKenShiJinHei, aliBaBaFont65, Arial"
+const layouts = parser.parse(html, {
+  viewportWidth: 800,
+  isDebug: true
+});
+
+// Output examples:
+// [WASM] Character U+8005 (者) not found in font ID 2
+// [HtmlLayoutParser] Found character U+8005 in font-family font: aliBaBaFont65 (ID 1)
+// [HtmlLayoutParser] Char U+8005 metrics: horiAdvance=20, advanceX=20, width=18, fontSize=18, finalWidth=20, usedFont=1
+
+// [WASM] Character U+ff1a (：) not found in font ID 2
+// [HtmlLayoutParser] Character U+ff1a not found in primary font (ID 2), using intelligent fallback
+// [HtmlLayoutParser] → Using half-width fallback: 9px for punctuation
+```
+
+**CSS font-family Fallback Strategy (Browser-Like!):**
+
+The parser now implements the **exact same fallback mechanism as browsers**:
+
+1. **Primary Font**: Try to find the character in the first font in `font-family`
+2. **font-family Fallback**: If not found, try each font in `font-family` list **in order**
+   - Example: `font-family: "MaoKenShiJinHei, aliBaBaFont65, Arial"`
+   - Tries: MaoKenShiJinHei → aliBaBaFont65 → Arial
+3. **Default Font**: If not found in any font-family font, try the default font
+4. **Intelligent Fallback**: Last resort, use character-type-based estimation
+   - **CJK Characters** (U+4E00-U+9FFF): Use '中' (U+4E2D) character width
+   - **Punctuation** (CJK/Latin): Use half-width (fontSize / 2)
+   - **Other Characters**: Try '0' or space character
+
+**Key Improvements:**
+- ✅ **Browser-Compatible**: Follows CSS font-family specification exactly
+- ✅ **Accurate Width**: Uses actual character width from fallback fonts
+- ✅ **Ordered Fallback**: Respects font-family order (not random search)
+- ✅ **No Overlapping**: Characters use correct widths even when missing from primary font
+- ✅ **Performance**: Results are cached to avoid repeated lookups
+
+**Comparison with Browser Behavior:**
+
+| Aspect | Browser | Our Implementation |
+|--------|---------|-------------------|
+| Fallback Order | font-family list order | ✅ Same |
+| Per-Character | Yes, per character | ✅ Same |
+| Actual Width | Uses fallback font width | ✅ Same |
+| System Fonts | Falls back to system | ⚠️ Uses default font* |
+
+**\*Note on System Font Fallback:**
+
+Unlike browsers, WASM cannot directly access system fonts due to sandbox restrictions. Instead, we use a **default font** that you specify. To achieve browser-like behavior:
+
+1. **Load a comprehensive fallback font** (e.g., Noto Sans, Noto Sans CJK)
+2. **Set it as the default font** using `setDefaultFont()`
+3. **Include it in font-family** as the last option
+
+**Best Practice Example:**
+
+```typescript
+const parser = new HtmlLayoutParser();
+await parser.init();
+
+// Load fonts in order of preference
+const arialId = parser.loadFont(arialData, 'Arial');
+const helveticaId = parser.loadFont(helveticaData, 'Helvetica');
+
+// Load a comprehensive fallback font with wide character coverage
+const notoSansId = parser.loadFont(notoSansData, 'Noto Sans');
+
+// Set the comprehensive font as default (acts like system font fallback)
+parser.setDefaultFont(notoSansId);
+
+// Use in CSS with proper fallback chain
+const css = `
+  body {
+    font-family: 'Arial', 'Helvetica', 'Noto Sans', sans-serif;
+  }
+`;
+```
+
+**Recommended Fallback Fonts:**
+
+For best cross-language support, consider loading one of these comprehensive fonts:
+
+- **Noto Sans** - Covers Latin, Greek, Cyrillic
+- **Noto Sans CJK** - Covers Chinese, Japanese, Korean
+- **Roboto** - Good Latin coverage
+- **Arial Unicode MS** - Wide character coverage (if available)
+
+**Why This Approach:**
+
+| Aspect | System Fonts (Browser) | Default Font (Our Approach) |
+|--------|----------------------|---------------------------|
+| Access | Direct OS access | User-loaded fonts only |
+| Consistency | Varies by OS | ✅ Consistent across platforms |
+| Control | Limited | ✅ Full control over fonts |
+| Performance | Fast (cached) | ✅ Fast (pre-loaded) |
+| Character Coverage | Depends on OS | ✅ Guaranteed (if you load it) |
+
+**Debug Output Fields:**
+- `horiAdvance`: Horizontal advance from font metrics
+- `advanceX`: X-axis advance value
+- `width`: Glyph width
+- `fontSize`: Current font size
+- `finalWidth`: Final calculated width used for layout
+- `usedFont`: The font ID that was actually used (may differ from requested)
+- `(fallback)`: Indicates this character used fallback strategy
+
 ### 2. Parse Stage Logs
 
 ```typescript
@@ -674,7 +785,7 @@ Create `.vscode/launch.json`:
 
 ```json
 {
-  "version": "0.2.0",
+  "version": "0.0.1",
   "configurations": [
     {
       "name": "Debug HTML Layout Parser",

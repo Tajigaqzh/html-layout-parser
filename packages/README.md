@@ -86,13 +86,13 @@ pnpm run typecheck
 ### Version Bump
 
 ```bash
-# Patch version (2.0.0 -> 2.0.1)
+# Patch version (0.0.1 -> 0.0.2)
 ./scripts/version-bump.sh patch
 
-# Minor version (2.0.0 -> 2.1.0)
+# Minor version (0.0.1 -> 0.1.0)
 ./scripts/version-bump.sh minor
 
-# Major version (2.0.0 -> 3.0.0)
+# Major version (0.0.1 -> 1.0.0)
 ./scripts/version-bump.sh major
 ```
 
