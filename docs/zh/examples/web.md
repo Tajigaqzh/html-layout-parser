@@ -2,6 +2,32 @@
 
 在 Web 浏览器中使用 HTML Layout Parser 进行实时 HTML 布局解析和 Canvas 渲染。
 
+## 准备工作
+
+在使用这些示例之前，请先将 web bundle 复制到项目中：
+
+```bash
+# 复制 web bundle 到 public 目录
+cp -r node_modules/html-layout-parser/web public/html-layout-parser
+```
+
+并在 HTML 中全局加载 WASM 模块：
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your App</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 全局加载 WASM 模块 -->
+  <script src="/html-layout-parser/html_layout_parser.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+```
+
 ## 基本 Web 使用
 
 ### HTML 结构
@@ -119,7 +145,8 @@ p { font-style: italic; }
 
 ```typescript
 // app.ts
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+// 从复制后的文件中引入
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 class WebParserDemo {
     private parser: HtmlLayoutParser;

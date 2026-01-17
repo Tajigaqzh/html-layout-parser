@@ -17,7 +17,7 @@ Examples demonstrating efficient batch and parallel processing with shared fonts
 The key to efficient batch processing is loading fonts once and reusing them across multiple parse operations.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout, FontInfo } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout, FontInfo } from '/html-layout-parser/index.js';
 
 /**
  * Font Reuse Pattern
@@ -109,7 +109,7 @@ async function comparePerformance() {
 Processing documents one at a time with shared resources.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout, MemoryMetrics } from '/html-layout-parser/index.js';
 
 interface BatchResult {
   index: number;
@@ -263,7 +263,7 @@ sequentialBatchExample();
 Processing multiple documents simultaneously using Promise.all.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
 
 /**
  * Parallel Processing with Shared Parser
@@ -415,7 +415,7 @@ parallelExample();
 Patterns optimized for maximum throughput.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout, FontInfo } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout, FontInfo } from '/html-layout-parser/index.js';
 
 /**
  * High-Throughput Parser
@@ -575,7 +575,7 @@ highThroughputExample();
 Processing large batches while keeping memory usage under control.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout, MemoryMetrics } from '/html-layout-parser/index.js';
 
 /**
  * Memory-Efficient Batch Processor

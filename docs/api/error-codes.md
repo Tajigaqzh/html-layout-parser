@@ -98,7 +98,7 @@ enum ErrorCode {
 ### Basic Error Handling
 
 ```typescript
-import { HtmlLayoutParser, ErrorCode } from 'html-layout-parser';
+import { HtmlLayoutParser, ErrorCode } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
 await parser.init();

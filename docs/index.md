@@ -54,12 +54,18 @@ This WASM-based solution is designed to provide cross-platform capabilities and 
 
 ## Quick Example
 
-::: tip Platform-Specific Imports for Smaller Bundle Size
-Import only the platform you need to reduce bundle size:
-- **Auto-detect**: `import { HtmlLayoutParser } from 'html-layout-parser'`
-- **Web Browser**: `import { HtmlLayoutParser } from 'html-layout-parser/web'`
-- **Web Worker**: `import { HtmlLayoutParser } from 'html-layout-parser/worker'`
-- **Node.js**: `import { HtmlLayoutParser } from 'html-layout-parser/node'`
+::: tip Manual Copy Approach (Recommended)
+For reliable WASM loading, copy the pre-compiled bundles to your project:
+
+```bash
+# Copy web bundle to your public directory
+cp -r node_modules/html-layout-parser/web public/html-layout-parser
+```
+
+Then load WASM globally in your HTML:
+```html
+<script src="/html-layout-parser/html_layout_parser.js"></script>
+```
 :::
 
 ::: warning Font File Path Recommendation
@@ -70,10 +76,11 @@ Place font files in the `public` directory (not in `src`) to prevent build tools
 :::
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+// Import from copied files
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
-await parser.init();
+await parser.init(); // Uses globally loaded WASM
 
 // Load font from public directory
 const fontData = await fetch('/fonts/arial.ttf').then(r => r.arrayBuffer());

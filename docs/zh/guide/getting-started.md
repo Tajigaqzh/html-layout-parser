@@ -1,12 +1,14 @@
 # 快速开始
 
-本指南帮助你在几分钟内上手 HTML Layout Parser。
+本指南将帮助你在几分钟内上手 HTML Layout Parser。
 
 ## 安装
 
-### 主包（推荐）
+### 下载安装并手动复制（推荐）
 
-主包会自动检测运行环境并加载相应的代码：
+HTML Layout Parser 使用 WebAssembly (WASM) 模块，现代构建工具对它的处理较复杂。为保证在各种环境下稳定加载，我们建议安装后手动复制文件到项目中。
+
+1. **下载包：**
 
 ::: code-group
 
@@ -24,78 +26,92 @@ pnpm add html-layout-parser
 
 :::
 
-### 环境特定包
+2. **复制文件到项目：**
 
-为了更好地服务不同的使用场景，我们除了发布 `html-layout-parser` 完整包外，还为特定环境单独打了包。如果你只需要特定环境的支持，可以安装对应的单独包来减小打包体积：
+安装完成后，将 `node_modules/html-layout-parser/` 下的对应 bundle 复制到项目中：
+
+```bash
+# Web 应用
+cp -r node_modules/html-layout-parser/web/ public/html-layout-parser/
+
+# Node.js 应用
+cp -r node_modules/html-layout-parser/node/ src/html-layout-parser/
+
+# Web Worker 应用
+cp -r node_modules/html-layout-parser/worker/ public/html-layout-parser/
+```
+
+3. **项目结构应如下：**
 
 ::: code-group
 
-```bash [Web 浏览器]
-npm install html-layout-parser-web
+```text [Web 项目]
+project/
+├── public/
+│   ├── html-layout-parser/
+│   │   ├── index.js
+│   │   ├── html_layout_parser.wasm
+│   │   └── canvas.js (可选)
+│   └── fonts/
+│       └── arial.ttf
+└── src/
+    └── main.ts
 ```
 
-```bash [Node.js]
-npm install html-layout-parser-node
-```
-
-```bash [Web Worker]
-npm install html-layout-parser-worker
+```text [Node.js 项目]
+project/
+├── src/
+│   ├── html-layout-parser/
+│   │   ├── index.js
+│   │   └── html_layout_parser.wasm
+│   └── main.ts
+└── fonts/
+    └── arial.ttf
 ```
 
 :::
 
-::: info 包发布策略说明
-我们采用了多包发布策略：
-- **主包** (`html-layout-parser`)：包含所有环境的代码，自动检测运行环境
-- **环境特定包**：每个包都是独立发布到 npm 的单独包，只包含特定环境的代码
+### 为什么推荐手动复制？
 
-这样设计的好处：
-- 🎯 **按需选择**：根据项目需求选择合适的包
-- 📦 **体积优化**：环境特定包体积更小
-- 🔄 **向后兼容**：主包提供完整功能和自动检测
-:::
+现代打包器（Vite、Webpack、Rollup）对 WASM 的处理较复杂，可能导致加载问题：
 
-::: tip 包大小对比
-- `html-layout-parser`: ~2.5MB（包含所有环境）
-- `html-layout-parser-web`: ~2.2MB（单独 npm 包，仅 Web 浏览器）
-- `html-layout-parser-node`: ~2.2MB（单独 npm 包，仅 Node.js）
-- `html-layout-parser-worker`: ~2.2MB（单独 npm 包，仅 Web Worker）
-:::
+- **导入路径解析**：打包器可能重命名或移动 WASM 文件
+- **模块加载方式**：不同环境需要不同的 WASM 加载策略
+- **构建优化**：打包器可能对 WASM 做不兼容的优化
 
-## 按平台单独引入
+手动复制可以确保文件路径稳定、名称可预测。
 
-### 使用主包
+## 按平台使用
 
-::: tip 自动环境检测
-主包会自动检测运行环境并加载相应的代码：
+### Web 浏览器
 
 ```typescript
-// 自动检测（推荐）- 自动检测运行环境
-import { HtmlLayoutParser } from 'html-layout-parser';
+// 从复制后的文件中引入
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
-// 也可以显式指定环境
-import { HtmlLayoutParser } from 'html-layout-parser/web';
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+const parser = new HtmlLayoutParser();
+await parser.init();
 ```
-:::
 
-### 使用环境特定包
+### Node.js
 
 ```typescript
-// Web 浏览器专用包
-import { HtmlLayoutParser } from 'html-layout-parser-web';
+// 从复制后的文件中引入（按需调整路径）
+import { HtmlLayoutParser } from './html-layout-parser/index.js';
 
-// Node.js 专用包
-import { HtmlLayoutParser } from 'html-layout-parser-node';
-
-// Web Worker 专用包
-import { HtmlLayoutParser } from 'html-layout-parser-worker';
+const parser = new HtmlLayoutParser();
+await parser.init();
 ```
 
-::: warning 注意
-环境特定包只能在对应的环境中使用。例如，`html-layout-parser-node` 只能在 Node.js 环境中使用，在浏览器中会报错。
-:::
+### Web Worker
+
+```typescript
+// 从复制后的文件中引入
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+
+const parser = new HtmlLayoutParser();
+await parser.init();
+```
 
 ## 字体文件设置
 
@@ -119,16 +135,16 @@ project/
 
 ## 基本用法
 
-### 步骤 1: 导入和初始化
+### 步骤 1：导入与初始化
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
 await parser.init();
 ```
 
-### 步骤 2: 加载字体
+### 步骤 2：加载字体
 
 解析前必须加载字体。解析器需要字体数据来计算字符宽度和位置。
 
@@ -144,7 +160,7 @@ const fontId = parser.loadFont(fontData, 'Arial');
 parser.setDefaultFont(fontId);
 ```
 
-### 步骤 3: 解析 HTML
+### 步骤 3：解析 HTML
 
 ```typescript
 const html = '<div style="color: red; font-size: 24px;">Hello World</div>';
@@ -159,7 +175,7 @@ for (const char of layouts) {
 }
 ```
 
-### 步骤 4: 渲染到 Canvas
+### 步骤 4：渲染到 Canvas
 
 ```typescript
 const canvas = document.getElementById('canvas') as HTMLCanvasElement;
@@ -172,7 +188,7 @@ for (const char of layouts) {
 }
 ```
 
-### 步骤 5: 清理资源
+### 步骤 5：清理资源
 
 ::: danger 关键：内存管理
 使用完毕后务必销毁解析器以释放 WebAssembly 内存。
@@ -185,7 +201,7 @@ parser.destroy();
 ## 完整示例
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 async function main() {
   const parser = new HtmlLayoutParser();
@@ -243,7 +259,7 @@ const layouts = parser.parse(html, {
 });
 ```
 
-或使用便捷方法：
+或者使用便捷方法：
 
 ```typescript
 const layouts = parser.parseWithCSS(html, css, { viewportWidth: 800 });
@@ -251,7 +267,7 @@ const layouts = parser.parseWithCSS(html, css, { viewportWidth: 800 });
 
 ## 下一步
 
-- [字体管理](/zh/guide/font-management) - 了解多字体支持
+- [字体管理](/zh/guide/font-management) - 多字体支持
 - [输出模式](/zh/guide/output-modes) - 选择合适的输出格式
-- [内存管理](/zh/guide/memory-management) - 内存管理最佳实践
-- [示例](/zh/examples/) - 查看更多使用示例
+- [内存管理](/zh/guide/memory-management) - 内存最佳实践
+- [示例](/zh/examples/) - 更多使用示例

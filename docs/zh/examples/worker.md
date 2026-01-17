@@ -2,6 +2,15 @@
 
 在 Web Worker 环境中使用 HTML Layout Parser 的完整示例。
 
+## 准备工作
+
+在使用这些示例之前，请先将 worker bundle 复制到项目中：
+
+```bash
+# 复制 worker bundle 到 workers 目录
+cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
+```
+
 ## 基础 Worker 设置
 
 ### 主线程
@@ -91,7 +100,8 @@ async function main() {
 
 ```typescript
 // parser-worker.ts
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
+// 从复制后的文件中引入
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
 
 let parser: HtmlLayoutParser | null = null;
 
@@ -104,7 +114,7 @@ self.onmessage = async (event: MessageEvent) => {
     switch (type) {
       case 'init':
         parser = new HtmlLayoutParser();
-        await parser.init();
+        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
         result = true;
         break;
 
@@ -236,7 +246,8 @@ async function main() {
 
 ```typescript
 // offscreen-worker.ts
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/worker';
+// 从复制后的文件中引入
+import { HtmlLayoutParser, CharLayout } from '/workers/html-layout-parser/index.js';
 
 let parser: HtmlLayoutParser | null = null;
 let canvas: OffscreenCanvas | null = null;
@@ -280,7 +291,7 @@ self.onmessage = async (event: MessageEvent) => {
         canvas.height = payload.height;
         ctx = canvas.getContext('2d');
         parser = new HtmlLayoutParser();
-        await parser.init();
+        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
         break;
 
       case 'loadFont':

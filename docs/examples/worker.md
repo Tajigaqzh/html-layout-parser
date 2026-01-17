@@ -2,6 +2,15 @@
 
 Complete examples for using HTML Layout Parser in Web Worker environments.
 
+## Setup
+
+Before using these examples, copy the worker bundle to your project:
+
+```bash
+# Copy worker bundle to your workers directory
+cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
+```
+
 ## Basic Worker Setup
 
 ### Main Thread
@@ -91,7 +100,8 @@ async function main() {
 
 ```typescript
 // parser-worker.ts
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
+// Import from copied files
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
 
 let parser: HtmlLayoutParser | null = null;
 
@@ -104,7 +114,8 @@ self.onmessage = async (event: MessageEvent) => {
     switch (type) {
       case 'init':
         parser = new HtmlLayoutParser();
-        await parser.init();
+        // Initialize with explicit WASM path
+        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
         result = true;
         break;
 
@@ -236,7 +247,8 @@ async function main() {
 
 ```typescript
 // offscreen-worker.ts
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/worker';
+// Import from copied files
+import { HtmlLayoutParser, CharLayout } from '/workers/html-layout-parser/index.js';
 
 let parser: HtmlLayoutParser | null = null;
 let canvas: OffscreenCanvas | null = null;
@@ -280,7 +292,7 @@ self.onmessage = async (event: MessageEvent) => {
         canvas.height = payload.height;
         ctx = canvas.getContext('2d');
         parser = new HtmlLayoutParser();
-        await parser.init();
+        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
         break;
 
       case 'loadFont':
@@ -328,7 +340,7 @@ self.onmessage = async (event: MessageEvent) => {
 Use multiple workers for parallel processing.
 
 ```typescript
-import { CharLayout } from 'html-layout-parser';
+import { CharLayout } from '/html-layout-parser/index.js';
 
 interface PoolTask {
   id: string;

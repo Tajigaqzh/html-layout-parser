@@ -304,7 +304,7 @@ try {
 ## Complete Example
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 async function example() {
   const parser = new HtmlLayoutParser();

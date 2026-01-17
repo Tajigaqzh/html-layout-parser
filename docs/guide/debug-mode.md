@@ -808,14 +808,14 @@ Create `.vscode/launch.json`:
 Create `debug-script.js`:
 
 ```javascript
-const { HtmlLayoutParser } = require('html-layout-parser/node');
+const { HtmlLayoutParser } = require('./src/lib/html-layout-parser/index.js');
 const fs = require('fs');
 
 async function debugParse() {
   const parser = new HtmlLayoutParser();
   
   try {
-    await parser.init();
+    await parser.init('./src/lib/html-layout-parser/html_layout_parser.js');
     
     // Load test font
     const fontData = fs.readFileSync('./fonts/arial.ttf');

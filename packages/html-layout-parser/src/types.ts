@@ -1151,4 +1151,6 @@ export interface HtmlLayoutParserModule {
  * Factory function type for creating the module
  * 创建模块的工厂函数类型
  */
-export type CreateHtmlLayoutParserModule = () => Promise<HtmlLayoutParserModule>;
+export type CreateHtmlLayoutParserModule = (config?: {
+  locateFile?: (path: string) => string;
+}) => Promise<HtmlLayoutParserModule>;

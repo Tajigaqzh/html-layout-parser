@@ -2,16 +2,43 @@
 
 Complete examples for using HTML Layout Parser in web browser environments.
 
+## Setup
+
+Before using these examples, make sure you have copied the web bundle to your project:
+
+```bash
+# Copy web bundle to your public directory
+cp -r node_modules/html-layout-parser/web public/html-layout-parser
+```
+
+And load the WASM module in your HTML:
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your App</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- Load WASM module globally -->
+  <script src="/html-layout-parser/html_layout_parser.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+```
+
 ## Basic HTML Parsing
 
 The simplest example of parsing HTML and getting character layouts.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
+// Import from copied files
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
 
 async function basicParsing() {
   const parser = new HtmlLayoutParser();
-  await parser.init();
+  await parser.init(); // Uses globally loaded WASM
 
   try {
     // Load a font (required before parsing)
@@ -44,7 +71,7 @@ async function basicParsing() {
 Loading and using multiple fonts with font-family fallback.
 
 ```typescript
-import { HtmlLayoutParser, FontInfo } from 'html-layout-parser/web';
+import { HtmlLayoutParser, FontInfo } from '/html-layout-parser/index.js';
 
 async function multiFontExample() {
   const parser = new HtmlLayoutParser();
@@ -105,7 +132,115 @@ async function multiFontExample() {
 Separating HTML content from CSS styles.
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+
+async function cssSeparationExample() {
+  const parser = new HtmlLayoutParser();
+  await parser.init();
+
+  try {
+    // Load font
+    const fontResponse = await fetch('/fonts/arial.ttf');
+    const fontData = new Uint8Array(await fontResponse.arrayBuffer());
+    parser.loadFont(fontData, 'Arial');
+    parser.setDefaultFont(1);
+
+    // HTML content (no inline styles)
+    const html = `
+      <div class="container">
+        <h1 class="title">Welcome</h1>
+        <p class="content">This is the main content.</p>
+      </div>
+    `;
+
+    // CSS styles (separate from HTML)
+    const css = `
+      .title {
+        font-size: 32px;
+        font-weight: bold;
+        color: #333333FF;
+      }
+      .content {
+        font-size: 16px;
+        color: #666666FF;
+      }
+    `;
+
+    // Method 1: Using css option
+    const layouts1 = parser.parse(html, {
+      viewportWidth: 800,
+      css: css
+    });
+
+    // Method 2: Using parseWithCSS
+    const layouts2 = parser.parseWithCSS(html, css, {
+      viewportWidth: 800
+    });
+
+    return layouts1;
+  } finally {
+    parser.destroy();
+  }
+}
+```
+  await parser.init();
+
+  try {
+    // Load multiple fonts
+    const fonts = [
+      { url: '/fonts/arial.ttf', name: 'Arial' },
+      { url: '/fonts/times.ttf', name: 'Times New Roman' },
+      { url: '/fonts/courier.ttf', name: 'Courier New' }
+    ];
+
+    const fontIds: Map<string, number> = new Map();
+
+    for (const font of fonts) {
+      const response = await fetch(font.url);
+      const data = new Uint8Array(await response.arrayBuffer());
+      const fontId = parser.loadFont(data, font.name);
+      
+      if (fontId > 0) {
+        fontIds.set(font.name, fontId);
+        console.log(`Loaded ${font.name} with ID ${fontId}`);
+      }
+    }
+
+    // Set default font
+    const defaultFontId = fontIds.get('Arial');
+    if (defaultFontId) {
+      parser.setDefaultFont(defaultFontId);
+    }
+
+    // Parse HTML with font-family fallback
+    const html = `
+      <div style="font-family: 'Times New Roman', Georgia, Arial; font-size: 20px;">
+        This text uses Times New Roman
+      </div>
+      <div style="font-family: 'Courier New', monospace; font-size: 16px;">
+        This text uses Courier New
+      </div>
+    `;
+
+    const layouts = parser.parse(html, { viewportWidth: 800 });
+    
+    // Check which fonts were used
+    const usedFonts = new Set(layouts.map(c => c.fontFamily));
+    console.log('Fonts used:', Array.from(usedFonts));
+
+    return layouts;
+  } finally {
+    parser.destroy();
+  }
+}
+```
+
+## CSS Separation
+
+Separating HTML content from CSS styles.
+
+```typescript
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 async function cssSeparationExample() {
   const parser = new HtmlLayoutParser();
@@ -162,7 +297,7 @@ async function cssSeparationExample() {
 Rendering parsed layouts to HTML Canvas.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
 
 function parseColor(color: string): string {
   if (!color || color === '#00000000') return 'transparent';
@@ -246,7 +381,7 @@ async function canvasRenderingExample() {
 Dynamic theme switching using CSS separation.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
 
 const themes = {
   light: `
@@ -357,7 +492,7 @@ import {
   CharLayout, 
   FontInfo,
   ParseResultWithDiagnostics 
-} from 'html-layout-parser/web';
+} from '/html-layout-parser/index.js';
 
 class HtmlLayoutApp {
   private parser: HtmlLayoutParser;

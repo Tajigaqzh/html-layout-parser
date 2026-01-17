@@ -2,8 +2,6 @@
 
 High-performance HTML layout parser compiled to WebAssembly. Supports multi-font management, CSS separation, and multiple output modes for Canvas rendering.
 
-This is the unified package that supports all environments (Web, Worker, Node.js) with auto-detection.
-
 ## Installation
 
 ```bash
@@ -16,40 +14,150 @@ yarn add html-layout-parser
 
 ## Quick Start
 
-```typescript
-// Auto-detect environment
-import { HtmlLayoutParser } from 'html-layout-parser';
+### Web Browser (Recommended Method)
 
-// Or use environment-specific imports for better tree-shaking
-import { HtmlLayoutParser } from 'html-layout-parser/web';
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+1. **Copy files to your project:**
+
+After installation, copy the web bundle to your public directory:
+
+```bash
+# Copy web bundle to your public directory
+cp -r node_modules/html-layout-parser/web public/wasm
 ```
 
-### Basic Usage
+Your project structure should look like:
+```
+public/
+  wasm/
+    html_layout_parser.js
+    html_layout_parser.wasm
+    index.js
+    index.d.ts
+```
+
+2. **Load in your HTML:**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your App</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- Load WASM module globally -->
+  <script src="/wasm/html_layout_parser.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+```
+
+3. **Use in your code:**
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+// Import the parser class
+import { HtmlLayoutParser } from '/wasm/index.js';
+
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init(); // Will use globally loaded WASM module
+
+  // Load a font
+  const fontResponse = await fetch('/fonts/arial.ttf');
+  const fontData = new Uint8Array(await fontResponse.arrayBuffer());
+  const fontId = parser.loadFont(fontData, 'Arial');
+  parser.setDefaultFont(fontId);
+
+  // Parse HTML
+  const layouts = parser.parse('<div>Hello World</div>', {
+    viewportWidth: 800
+  });
+
+  console.log(layouts);
+  parser.destroy();
+}
+```
+
+### Node.js Environment
+
+1. **Copy Node.js bundle:**
+
+```bash
+cp -r node_modules/html-layout-parser/node ./lib/wasm
+```
+
+2. **Use in your code:**
+
+```typescript
+import { HtmlLayoutParser } from './lib/wasm/index.js';
 
 const parser = new HtmlLayoutParser();
-await parser.init('./html_layout_parser.js');
+await parser.init('./lib/wasm/html_layout_parser.js');
+// ... use parser
+```
 
-// Load a font
-const fontResponse = await fetch('./fonts/arial.ttf');
-const fontData = new Uint8Array(await fontResponse.arrayBuffer());
-const fontId = parser.loadFont(fontData, 'Arial');
-parser.setDefaultFont(fontId);
+### Web Worker
 
-// Parse HTML
-const layouts = parser.parse('<div style="color: red;">Hello World</div>', {
-  viewportWidth: 800
-});
+1. **Copy Worker bundle:**
 
-console.log(layouts);
-// [{ character: 'H', x: 0, y: 0, width: 10, height: 16, ... }, ...]
+```bash
+cp -r node_modules/html-layout-parser/worker public/workers
+```
 
-// Clean up
-parser.destroy();
+2. **Use in your worker:**
+
+```typescript
+// In your worker file
+import { HtmlLayoutParser } from '/workers/index.js';
+
+const parser = new HtmlLayoutParser();
+await parser.init('/workers/html_layout_parser.js');
+// ... use parser
+```
+
+## Why Manual Copy?
+
+We recommend manual copying because:
+
+- **Reliable**: Works with all bundlers and deployment environments
+- **Predictable**: WASM files are served as static assets
+- **Fast**: No complex module resolution or dynamic imports
+- **Compatible**: Works with CDNs, static hosting, and any web server
+
+## Build Integration
+
+You can automate the copying process in your build scripts:
+
+### Package.json script:
+```json
+{
+  "scripts": {
+    "postinstall": "cp -r node_modules/html-layout-parser/web public/wasm",
+    "dev": "npm run postinstall && vite",
+    "build": "npm run postinstall && vite build"
+  }
+}
+```
+
+### Vite plugin:
+```typescript
+// vite.config.ts
+import { defineConfig } from 'vite'
+import { copyFileSync, mkdirSync } from 'fs'
+
+export default defineConfig({
+  plugins: [
+    {
+      name: 'copy-wasm',
+      buildStart() {
+        mkdirSync('public/wasm', { recursive: true })
+        copyFileSync('node_modules/html-layout-parser/web/html_layout_parser.js', 'public/wasm/html_layout_parser.js')
+        copyFileSync('node_modules/html-layout-parser/web/html_layout_parser.wasm', 'public/wasm/html_layout_parser.wasm')
+        copyFileSync('node_modules/html-layout-parser/web/index.js', 'public/wasm/index.js')
+      }
+    }
+  ]
+})
 ```
 
 ## Features
@@ -61,18 +169,6 @@ parser.destroy();
 - **Cross-Environment**: Works in Web, Worker, and Node.js
 - **Memory Safe**: Proper memory management with explicit cleanup
 - **TypeScript Support**: Full type definitions included
-
-## Environment-Specific Packages
-
-For minimal bundle size, you can also use environment-specific packages:
-
-- `html-layout-parser-web` - Web browser only
-- `html-layout-parser-worker` - Web Worker only
-- `html-layout-parser-node` - Node.js only
-
-## API Reference
-
-See the full documentation at [docs/](./docs/).
 
 ## License
 

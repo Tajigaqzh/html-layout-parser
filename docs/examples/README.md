@@ -35,7 +35,7 @@ This directory contains comprehensive usage examples for HTML Layout Parser v0.0
 ## Quick Reference
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 // Initialize
 const parser = new HtmlLayoutParser();

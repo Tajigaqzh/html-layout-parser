@@ -1,142 +1,119 @@
 # 安装
 
-## 包管理器
+## 包安装
 
-::: code-group
+从 npm 安装 HTML Layout Parser：
 
-```bash [npm]
+```bash
 npm install html-layout-parser
 ```
 
-```bash [yarn]
-yarn add html-layout-parser
+## 不同环境的设置
+
+HTML Layout Parser 提供了针对不同环境的预编译产物。安装后，需要将对应的 bundle 复制到你的项目中。
+
+### Web 浏览器
+
+1. **复制 Web bundle 到项目中：**
+
+```bash
+# 将 web bundle 复制到 public 目录
+cp -r node_modules/html-layout-parser/web public/html-layout-parser
 ```
 
-```bash [pnpm]
-pnpm add html-layout-parser
+2. **项目结构应如下：**
+
+```
+public/
+  html-layout-parser/
+    html_layout_parser.js    # WASM 加载器
+    html_layout_parser.wasm  # WASM 二进制
+    index.js                 # TypeScript 编译产物
+    index.d.ts               # 类型定义
 ```
 
-:::
+3. **在 HTML 中全局加载 WASM：**
 
-## 环境特定包
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your App</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- 全局加载 WASM 模块 -->
+  <script src="/html-layout-parser/html_layout_parser.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+```
 
-为了优化包大小，可以使用环境特定的入口点：
+4. **在代码中引入：**
 
 ```typescript
-// Web 浏览器
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+// 从复制后的文件中引入
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
-// Web Worker
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
-
-// Node.js
-import { HtmlLayoutParser } from 'html-layout-parser/node';
-
-// 自动检测环境
-import { HtmlLayoutParser } from 'html-layout-parser';
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init(); // 使用全局加载的 WASM
+  
+  // 加载字体并解析...
+}
 ```
 
-## WASM 文件
+### Node.js
 
-包含以下文件：
-- `html_layout_parser.wasm` - WebAssembly 二进制文件 (2.25MB)
-- `html_layout_parser.js` - JavaScript 加载器
+1. **复制 Node.js bundle：**
 
-### 自动加载
+```bash
+# 复制到项目的 lib 目录
+cp -r node_modules/html-layout-parser/node ./src/lib/html-layout-parser
+```
 
-默认情况下，WASM 文件会自动从包目录加载。
-
-### 自定义路径
-
-如果需要从自定义路径加载：
+2. **在 Node.js 代码中引入：**
 
 ```typescript
-const parser = new HtmlLayoutParser();
-await parser.init('/custom/path/html_layout_parser.js');
+import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init('./lib/html-layout-parser/html_layout_parser.js');
+  
+  // 加载字体并解析...
+}
 ```
 
-### Vite 配置
+### Web Worker
+
+1. **复制 worker bundle：**
+
+```bash
+# 复制到 workers 目录
+cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
+```
+
+2. **在 worker 中引入：**
 
 ```typescript
-// vite.config.ts
-export default defineConfig({
-  optimizeDeps: {
-    exclude: ['html-layout-parser']
-  }
-});
+// 在 worker 文件中
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+  
+  // 加载字体并解析...
+}
 ```
 
-### Webpack 配置
+## 为什么推荐手动复制？
 
-```javascript
-// webpack.config.js
-module.exports = {
-  experiments: {
-    asyncWebAssembly: true
-  }
-};
-```
+我们推荐手动复制，因为：
 
-## 字体文件
-
-解析器需要字体文件来计算字符布局。支持的格式：
-- TTF (TrueType)
-- OTF (OpenType)
-
-::: warning 注意
-不支持 WOFF/WOFF2、EOT 和 SVG 字体格式。目前如需使用这些格式，请先转换为 TTF 或 OTF。**后续版本计划支持 WOFF/WOFF2 格式**。
-:::
-
-### 字体加载示例
-
-```typescript
-// Web 环境
-const response = await fetch('/fonts/arial.ttf');
-const fontData = new Uint8Array(await response.arrayBuffer());
-const fontId = parser.loadFont(fontData, 'Arial');
-
-// Node.js 环境
-const fontId = await parser.loadFontFromFile('./fonts/arial.ttf', 'Arial');
-```
-
-## TypeScript 支持
-
-包含完整的 TypeScript 类型定义：
-
-```typescript
-import { 
-  HtmlLayoutParser,
-  CharLayout,
-  ParseOptions,
-  FontInfo,
-  MemoryMetrics
-} from 'html-layout-parser';
-```
-
-## 浏览器兼容性
-
-| 浏览器 | 最低版本 |
-|--------|----------|
-| Chrome | 57+ |
-| Firefox | 52+ |
-| Safari | 11+ |
-| Edge | 16+ |
-
-## Node.js 兼容性
-
-- Node.js 16+
-- 需要支持 WebAssembly
-
-## 验证安装
-
-```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
-
-const parser = new HtmlLayoutParser();
-await parser.init();
-
-console.log('版本:', parser.getVersion());
-console.log('环境:', parser.getEnvironment());
-
-parser.destroy();
-```
+- **🔒 可靠**：适配所有打包器和部署环境
+- **📦 可预测**：WASM 文件以静态资源方式提供
+- **⚡ 快速**：无需复杂的模块解析或动态导入
+- **🌐 兼容**：适用于 CDN、静态托管和任何 Web 服务器
+- **🎯 简单**：文件位置和导入路径清晰

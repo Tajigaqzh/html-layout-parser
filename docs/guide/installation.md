@@ -1,190 +1,119 @@
 # Installation
 
-## Package Options
+## Package Installation
 
-HTML Layout Parser offers multiple package options to fit your needs:
-
-### Main Package (Recommended)
-
-The main package includes all environments with automatic detection:
+Install the HTML Layout Parser package from npm:
 
 ```bash
 npm install html-layout-parser
 ```
 
-```typescript
-// Auto-detects environment
-import { HtmlLayoutParser } from 'html-layout-parser';
+## Setup for Different Environments
 
-// Or import specific environment
-import { HtmlLayoutParser } from 'html-layout-parser/web';
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
-import { HtmlLayoutParser } from 'html-layout-parser/node';
-```
+HTML Layout Parser provides pre-compiled bundles for different environments. After installation, you need to copy the appropriate bundle to your project.
 
-### Platform-Specific Packages
+### Web Browser Setup
 
-For smaller bundle sizes, install only what you need:
-
-::: code-group
-
-```bash [Web Browser]
-npm install html-layout-parser-web
-```
-
-```bash [Web Worker]
-npm install html-layout-parser-worker
-```
-
-```bash [Node.js]
-npm install html-layout-parser-node
-```
-
-:::
-
-## Package Sizes
-
-| Package | Size |
-|---------|------|
-| html-layout-parser | ~2.3MB (includes WASM) |
-| html-layout-parser-web | ~2.3MB |
-| html-layout-parser-worker | ~2.3MB |
-| html-layout-parser-node | ~2.3MB |
-
-::: info
-The WASM module (~2.25MB) is included in each package. The JavaScript wrapper is ~25KB.
-:::
-
-## Module Formats
-
-All packages support both ESM and CommonJS:
-
-```typescript
-// ESM
-import { HtmlLayoutParser } from 'html-layout-parser';
-
-// CommonJS
-const { HtmlLayoutParser } = require('html-layout-parser');
-```
-
-## TypeScript Support
-
-Full TypeScript support is included with all packages:
-
-```typescript
-import { 
-  HtmlLayoutParser, 
-  CharLayout, 
-  ParseOptions,
-  LayoutDocument 
-} from 'html-layout-parser';
-
-const parser = new HtmlLayoutParser();
-await parser.init();
-
-const layouts: CharLayout[] = parser.parse(html, {
-  viewportWidth: 800
-} satisfies ParseOptions);
-```
-
-## Browser Support
-
-- Chrome 57+
-- Firefox 52+
-- Safari 11+
-- Edge 16+
-
-## Node.js Support
-
-- Node.js 16+
-
-## CDN Usage
-
-You can also use the package via CDN (not recommended for production):
-
-```html
-<script type="module">
-  import { HtmlLayoutParser } from 'https://unpkg.com/html-layout-parser/dist/web.js';
-  
-  const parser = new HtmlLayoutParser();
-  await parser.init('https://unpkg.com/html-layout-parser/dist/html_layout_parser.js');
-</script>
-```
-
-## Building from Source
-
-### Prerequisites
-
-- [Emscripten SDK](https://emscripten.org/docs/getting_started/downloads.html)
-- Node.js 16+
-- pnpm 8+
-
-### Build Steps
+1. **Copy the web bundle to your project:**
 
 ```bash
-# Clone the repository
-git clone https://github.com/Tajigaqzh/html-layout-parser.git
-cd html-layout-parser
-
-# Install dependencies
-pnpm install
-
-# Build WASM module
-./build.sh
-
-# Build TypeScript packages
-pnpm run build:packages
-
-# Run tests
-pnpm test
+# Copy web bundle to your public directory
+cp -r node_modules/html-layout-parser/web public/html-layout-parser
 ```
 
-## Troubleshooting
-
-### WASM Loading Issues
-
-If the WASM module fails to load, you may need to configure your server to serve `.wasm` files with the correct MIME type:
+2. **Your project structure should look like:**
 
 ```
-Content-Type: application/wasm
+public/
+  html-layout-parser/
+    html_layout_parser.js    # WASM loader
+    html_layout_parser.wasm  # WASM binary
+    index.js                 # TypeScript compiled code
+    index.d.ts               # Type definitions
 ```
 
-### Custom WASM Path
+3. **Load WASM globally in your HTML:**
 
-If you need to load the WASM from a custom path:
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your App</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- Load WASM module globally -->
+  <script src="/html-layout-parser/html_layout_parser.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+```
+
+4. **Import in your code:**
 
 ```typescript
-const parser = new HtmlLayoutParser();
-await parser.init('/custom/path/html_layout_parser.js');
+// Import from the copied files
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init(); // Will use globally loaded WASM module
+  
+  // Load font and parse...
+}
 ```
 
-### Webpack Configuration
+### Node.js Setup
 
-For Webpack, you may need to configure asset handling:
+1. **Copy the Node.js bundle:**
 
-```javascript
-// webpack.config.js
-module.exports = {
-  module: {
-    rules: [
-      {
-        test: /\.wasm$/,
-        type: 'asset/resource'
-      }
-    ]
-  }
-};
+```bash
+# Copy to your project's lib directory
+cp -r node_modules/html-layout-parser/node ./src/lib/html-layout-parser
 ```
 
-### Vite Configuration
-
-Vite handles WASM files automatically, but you can configure if needed:
+2. **Import in your Node.js code:**
 
 ```typescript
-// vite.config.ts
-export default {
-  optimizeDeps: {
-    exclude: ['html-layout-parser']
-  }
-};
+import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init('./lib/html-layout-parser/html_layout_parser.js');
+  
+  // Load font and parse...
+}
 ```
+
+### Web Worker Setup
+
+1. **Copy the worker bundle:**
+
+```bash
+# Copy to your workers directory
+cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
+```
+
+2. **Import in your worker:**
+
+```typescript
+// In your worker file
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+  
+  // Load font and parse...
+}
+```
+
+## Why Manual Copy?
+
+We recommend manual copying because:
+
+- **🔒 Reliable**: Works with all bundlers and deployment environments
+- **📦 Predictable**: WASM files are served as static assets
+- **⚡ Fast**: No complex module resolution or dynamic imports
+- **🌐 Compatible**: Works with CDNs, static hosting, and any web server
+- **🎯 Simple**: Clear file locations and import paths

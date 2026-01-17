@@ -1,6 +1,6 @@
 {
   "name": "html-layout-parser",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "High-performance HTML layout parser compiled to WebAssembly. Supports multi-font management, CSS separation, and multiple output modes for Canvas rendering.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -54,18 +54,23 @@
         "default": "./dist/node.cjs"
       }
     },
-    "./wasm": "./dist/html_layout_parser.wasm",
-    "./wasm-js": "./dist/html_layout_parser.js",
     "./package.json": "./package.json"
   },
   "files": [
     "dist",
+    "web",
+    "node", 
+    "worker",
     "README.md"
   ],
   "scripts": {
-    "build": "tsup && pnpm run copy:wasm",
+    "build": "tsup && pnpm run copy:wasm && pnpm run copy:bundles",
     "copy:wasm": "cp ../../wasm-output/html_layout_parser.wasm dist/ && cp ../../wasm-output/html_layout_parser.js dist/",
-    "clean": "rm -rf dist",
+    "copy:bundles": "pnpm run copy:web && pnpm run copy:node && pnpm run copy:worker",
+    "copy:web": "mkdir -p web && cp dist/html_layout_parser.js web/ && cp dist/html_layout_parser.wasm web/ && cp dist/web.js web/index.js && cp dist/web.d.ts web/index.d.ts",
+    "copy:node": "mkdir -p node && cp dist/html_layout_parser.js node/ && cp dist/html_layout_parser.wasm node/ && cp dist/node.js node/index.js && cp dist/node.d.ts node/index.d.ts",
+    "copy:worker": "mkdir -p worker && cp dist/html_layout_parser.js worker/ && cp dist/html_layout_parser.wasm worker/ && cp dist/worker.js worker/index.js && cp dist/worker.d.ts worker/index.d.ts",
+    "clean": "rm -rf dist web node worker",
     "prepublishOnly": "pnpm run clean && pnpm run build",
     "typecheck": "tsc --noEmit"
   },

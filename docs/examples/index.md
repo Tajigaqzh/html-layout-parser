@@ -51,7 +51,7 @@ Correct memory management patterns:
 ### Minimal Example
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
 await parser.init();
@@ -117,7 +117,7 @@ if (result.success) {
 - Always call `destroy()` when done
 - Use `try/finally` for cleanup
 - Monitor memory in long-running apps
-- Use environment-specific imports for smaller bundles
+- Copy the appropriate bundle to `public/` and import from it
 
 ### Don'ts ❌
 

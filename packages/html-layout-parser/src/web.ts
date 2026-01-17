@@ -46,21 +46,46 @@ export class HtmlLayoutParser extends BaseParser {
       return;
     }
 
-    const jsPath = wasmPath || './html_layout_parser.js';
+    // Try different loading strategies
+    const loadingStrategies = [
+      // 1. Custom path provided by user
+      wasmPath,
+      // 2. Try npm package exports (for bundlers that support it)
+      'html-layout-parser/wasm-js',
+    ].filter(Boolean) as string[];
 
-    try {
-      // Try ES module import first
-      const wasmModule = await import(/* @vite-ignore */ jsPath);
-      const createModule: CreateHtmlLayoutParserModule = 
-        wasmModule.default || wasmModule.createModule || wasmModule;
+    for (const jsPath of loadingStrategies) {
+      try {
+        // Try ES module import first
+        const wasmModule = await import(/* @vite-ignore */ jsPath);
+        const createModule: CreateHtmlLayoutParserModule = 
+          wasmModule.default || wasmModule.createModule || wasmModule;
 
-      if (typeof createModule === 'function') {
-        this.setModuleLoader(async () => createModule());
-        await super.init();
-        return;
+        if (typeof createModule === 'function') {
+          // Set up WASM locator for npm package
+          this.setModuleLoader(async () => {
+            return createModule({
+              locateFile: (path: string) => {
+                if (path.endsWith('.wasm')) {
+                  // Try to resolve WASM file from npm package
+                  try {
+                    return new URL('html-layout-parser/wasm', import.meta.url).href;
+                  } catch {
+                    // Fallback to relative path
+                    return './html_layout_parser.wasm';
+                  }
+                }
+                return path;
+              }
+            });
+          });
+          await super.init();
+          return;
+        }
+      } catch (error) {
+        // Continue to next strategy
+        console.debug(`Failed to load WASM from ${jsPath}:`, error);
       }
-    } catch {
-      // Fall back to global variable
     }
 
     // Check if already loaded as global
@@ -71,7 +96,7 @@ export class HtmlLayoutParser extends BaseParser {
       return;
     }
 
-    throw new Error('Failed to load WASM module in web environment. Make sure html_layout_parser.js is loaded.');
+    throw new Error('Failed to load WASM module in web environment. Please provide a custom path or ensure WASM files are accessible.');
   }
 }
 

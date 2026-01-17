@@ -148,11 +148,11 @@ self.onmessage = (e) => {
 **WASM Parser Solution**:
 ```typescript
 // ✅ Works perfectly in Web Worker
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
 
 self.onmessage = async (e) => {
   const parser = new HtmlLayoutParser();
-  await parser.init();
+  await parser.init('/workers/html-layout-parser/html_layout_parser.js');
   
   // Load font
   const fontData = e.data.fontData;
@@ -357,7 +357,7 @@ class CanvasRenderer {
 ### After: WASM Parser
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 class CanvasRenderer {
   private parser: HtmlLayoutParser;

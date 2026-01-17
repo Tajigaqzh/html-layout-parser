@@ -120,7 +120,7 @@ main();
 ```typescript
 // parser-worker.ts - Worker thread code
 
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
 
 let parser: HtmlLayoutParser | null = null;
 
@@ -139,7 +139,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
     switch (type) {
       case 'init':
         parser = new HtmlLayoutParser();
-        await parser.init();
+        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
         result = true;
         break;
 
@@ -315,7 +315,7 @@ main();
 ```typescript
 // offscreen-worker.ts
 
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/worker';
+import { HtmlLayoutParser, CharLayout } from '/workers/html-layout-parser/index.js';
 
 let parser: HtmlLayoutParser | null = null;
 let canvas: OffscreenCanvas | null = null;
@@ -386,7 +386,7 @@ self.onmessage = async (event: MessageEvent<Message>) => {
         ctx = canvas.getContext('2d');
         
         parser = new HtmlLayoutParser();
-        await parser.init();
+        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
         break;
 
       case 'loadFont':
@@ -651,7 +651,7 @@ main();
 ```typescript
 // background-worker.ts
 
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
 
 let parser: HtmlLayoutParser | null = null;
 
@@ -662,7 +662,7 @@ self.onmessage = async (event: MessageEvent) => {
     switch (type) {
       case 'init':
         parser = new HtmlLayoutParser();
-        await parser.init();
+        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
         self.postMessage({ type: 'ready' });
         break;
 
@@ -720,7 +720,7 @@ Using multiple workers for parallel processing.
 ```typescript
 // worker-pool.ts
 
-import { CharLayout } from 'html-layout-parser';
+import { CharLayout } from '/html-layout-parser/index.js';
 
 interface PoolTask {
   id: string;

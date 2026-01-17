@@ -55,7 +55,7 @@ The same browser on different platforms produces different results:
 The parser produces **identical results everywhere**:
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
 await parser.init();
@@ -219,7 +219,7 @@ class TextMeasurer {
 ### After: HTML Layout Parser
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 class TextMeasurer {
   private parser: HtmlLayoutParser;

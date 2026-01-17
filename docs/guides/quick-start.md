@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get started with HTML Layout Parser v0.0.1 in minutes.
+Get started with HTML Layout Parser in minutes using the manual copy approach.
 
 ## Installation
 
@@ -8,15 +8,43 @@ Get started with HTML Layout Parser v0.0.1 in minutes.
 npm install html-layout-parser
 ```
 
+## Setup
+
+### For Web Applications
+
+1. **Copy the web bundle:**
+
+```bash
+cp -r node_modules/html-layout-parser/web public/html-layout-parser
+```
+
+2. **Load WASM in your HTML:**
+
+```html
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your App</title>
+</head>
+<body>
+  <div id="app"></div>
+  <!-- Load WASM module globally -->
+  <script src="/html-layout-parser/html_layout_parser.js"></script>
+  <script type="module" src="/src/main.js"></script>
+</body>
+</html>
+```
+
 ## Basic Usage
 
 ### Step 1: Import and Initialize
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+// Import from copied files
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
-await parser.init();
+await parser.init(); // Uses globally loaded WASM
 ```
 
 ### Step 2: Load a Font
@@ -53,6 +81,95 @@ for (const char of layouts) {
 ### Step 4: Clean Up
 
 ```typescript
+// Always clean up when done
+parser.destroy();
+```
+
+## Complete Example
+
+```typescript
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+
+async function main() {
+  const parser = new HtmlLayoutParser();
+  
+  try {
+    // Initialize parser
+    await parser.init();
+    
+    // Load font
+    const fontResponse = await fetch('/fonts/arial.ttf');
+    const fontData = new Uint8Array(await fontResponse.arrayBuffer());
+    const fontId = parser.loadFont(fontData, 'Arial');
+    parser.setDefaultFont(fontId);
+    
+    // Parse HTML
+    const html = `
+      <div style="font-size: 24px; color: #333;">
+        <h1>Hello World</h1>
+        <p>This is a paragraph with <span style="color: red;">red text</span>.</p>
+      </div>
+    `;
+    
+    const layouts = parser.parse(html, { viewportWidth: 800 });
+    
+    console.log(`Parsed ${layouts.length} characters`);
+    
+    // Use layouts for canvas rendering or other purposes
+    layouts.forEach(char => {
+      console.log(`'${char.character}' at (${char.x}, ${char.y})`);
+    });
+    
+  } finally {
+    // Always clean up
+    parser.destroy();
+  }
+}
+
+main().catch(console.error);
+```
+
+## Environment-Specific Setup
+
+### Node.js
+
+```bash
+# Copy Node.js bundle
+cp -r node_modules/html-layout-parser/node ./src/lib/html-layout-parser
+```
+
+```typescript
+import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+
+const parser = new HtmlLayoutParser();
+await parser.init('./lib/html-layout-parser/html_layout_parser.js');
+```
+
+### Web Worker
+
+```bash
+# Copy worker bundle
+cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
+```
+
+```typescript
+// In worker file
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+
+const parser = new HtmlLayoutParser();
+await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+```
+
+## Next Steps
+
+- 📖 Read the [Installation Guide](../guide/installation.md) for detailed setup
+- 🎨 Check out [Web Examples](../examples/web.md) for canvas rendering
+- 🔧 Learn about [Memory Management](../examples/memory.md)
+- 📚 Browse all [Examples](../examples/index.md)
+
+### Step 4: Clean Up
+
+```typescript
 // Always destroy when done
 parser.destroy();
 ```
@@ -60,7 +177,7 @@ parser.destroy();
 ## Complete Example
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
 
 async function main() {
   // Initialize parser
@@ -221,19 +338,22 @@ const layouts = parser.parse(html, { viewportWidth: 800 });
 ### Web Browser
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 ```
 
 ### Web Worker
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
 ```
 
 ### Node.js
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+
+const parser = new HtmlLayoutParser();
+await parser.init('./lib/html-layout-parser/html_layout_parser.js');
 
 // Node.js can load fonts from files
 const fontId = await parser.loadFontFromFile('./fonts/arial.ttf', 'Arial');

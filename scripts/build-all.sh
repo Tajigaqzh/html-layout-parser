@@ -1,11 +1,11 @@
 #!/bin/bash
 
-# Build all packages script
+# Build main package script
 # Usage: ./scripts/build-all.sh
 
 set -e
 
-echo "🔨 Building HTML Layout Parser packages..."
+echo "🔨 Building HTML Layout Parser package..."
 echo ""
 
 # Get the script directory
@@ -30,21 +30,19 @@ pnpm install
 echo "✅ Dependencies installed"
 echo ""
 
-# Step 3: Build all packages
-echo "📦 Step 3: Building all packages..."
-pnpm -r run build
-echo "✅ All packages built"
+# Step 3: Build main package
+echo "📦 Step 3: Building main package..."
+cd packages/html-layout-parser
+pnpm run build
+echo "✅ Main package built"
 echo ""
 
 # Step 4: Run type checks
 echo "📦 Step 4: Running type checks..."
-pnpm -r run typecheck || echo "⚠️  Some type checks failed"
+pnpm run typecheck || echo "⚠️  Some type checks failed"
 echo ""
 
 echo "🎉 Build complete!"
 echo ""
-echo "Packages built:"
-echo "  - html-layout-parser (unified package)"
-echo "  - html-layout-parser-web"
-echo "  - html-layout-parser-worker"
-echo "  - html-layout-parser-node"
+echo "Package built:"
+echo "  - html-layout-parser (with web/, node/, worker/ bundles)"

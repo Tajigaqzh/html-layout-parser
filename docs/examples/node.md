@@ -2,16 +2,27 @@
 
 Complete examples for using HTML Layout Parser in Node.js environments.
 
+## Setup
+
+Before using these examples, copy the Node.js bundle to your project:
+
+```bash
+# Copy Node.js bundle to your project
+cp -r node_modules/html-layout-parser/node ./src/lib/html-layout-parser
+```
+
 ## Basic Node.js Usage
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/node';
+// Import from copied files
+import { HtmlLayoutParser, CharLayout } from './lib/html-layout-parser/index.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
 async function basicNodeExample() {
   const parser = new HtmlLayoutParser();
-  await parser.init();
+  // Initialize with explicit WASM path
+  await parser.init('./lib/html-layout-parser/html_layout_parser.js');
 
   try {
     // Load font from file
@@ -44,12 +55,12 @@ basicNodeExample().catch(console.error);
 Using the Node.js-specific `loadFontFromFile` method.
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
 import * as path from 'path';
 
 async function fileFontLoadingExample() {
   const parser = new HtmlLayoutParser();
-  await parser.init();
+  await parser.init('./lib/html-layout-parser/html_layout_parser.js');
 
   try {
     const fontsDir = path.join(__dirname, 'fonts');
@@ -106,7 +117,7 @@ async function fileFontLoadingExample() {
 Processing multiple HTML files efficiently.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/node';
+import { HtmlLayoutParser, CharLayout } from './lib/html-layout-parser/index.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -120,7 +131,7 @@ interface ProcessingResult {
 
 async function batchProcessingExample() {
   const parser = new HtmlLayoutParser();
-  await parser.init();
+  await parser.init('./lib/html-layout-parser/html_layout_parser.js');
 
   try {
     // Load font once
@@ -192,7 +203,7 @@ async function batchProcessingExample() {
 
 ```typescript
 import express, { Request, Response } from 'express';
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/node';
+import { HtmlLayoutParser, CharLayout } from './lib/html-layout-parser/index.js';
 import * as path from 'path';
 
 // Parser singleton
@@ -213,7 +224,7 @@ class ParserService {
 
   private async initialize(): Promise<void> {
     this.parser = new HtmlLayoutParser();
-    await this.parser.init();
+    await this.parser.init('./lib/html-layout-parser/html_layout_parser.js');
 
     const fontPath = path.join(__dirname, 'fonts', 'arial.ttf');
     const fontId = await this.parser.loadFontFromFile(fontPath, 'Arial');
@@ -287,7 +298,7 @@ process.on('SIGTERM', () => {
 
 ```typescript
 #!/usr/bin/env node
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -389,7 +400,7 @@ async function main(): Promise<void> {
   const parser = new HtmlLayoutParser();
 
   try {
-    await parser.init();
+    await parser.init('./lib/html-layout-parser/html_layout_parser.js');
 
     // Load font
     if (options.font) {

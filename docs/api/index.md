@@ -13,7 +13,7 @@ HTML Layout Parser provides a simple yet powerful API for parsing HTML/CSS and e
 The main parser class. See [HtmlLayoutParser](/api/parser) for full documentation.
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
 await parser.init();
@@ -73,7 +73,7 @@ parser.destroy();
 ## Factory Function
 
 ```typescript
-import { createParser } from 'html-layout-parser';
+import { createParser } from '/html-layout-parser/index.js';
 
 const parser = createParser();
 await parser.init();
@@ -82,7 +82,7 @@ await parser.init();
 ## Environment Detection
 
 ```typescript
-import { detectEnvironment } from 'html-layout-parser';
+import { detectEnvironment } from '/html-layout-parser/index.js';
 
 const env = detectEnvironment(); // 'web' | 'worker' | 'node' | 'unknown'
 ```
@@ -92,19 +92,19 @@ const env = detectEnvironment(); // 'web' | 'worker' | 'node' | 'unknown'
 ::: code-group
 
 ```typescript [Web Browser]
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 ```
 
 ```typescript [Web Worker]
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 ```
 
 ```typescript [Node.js]
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 ```
 
 ```typescript [Auto-detect]
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 ```
 
 :::

@@ -44,7 +44,7 @@ In Node.js you need a Canvas implementation (such as node-canvas) and font confi
 The parser produces **identical results everywhere** by using a single WASM layout engine with embedded font metrics:
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
 await parser.init();

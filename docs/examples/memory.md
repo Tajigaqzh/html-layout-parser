@@ -7,7 +7,7 @@ Examples demonstrating correct memory management patterns.
 ### Basic Pattern: Load Once, Use Many Times
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
 
 // ✅ CORRECT: Load font once, use for multiple parses
 async function correctPattern() {
@@ -65,7 +65,7 @@ async function incorrectPattern() {
 ### Basic Memory Monitoring
 
 ```typescript
-import { HtmlLayoutParser, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, MemoryMetrics } from '/html-layout-parser/index.js';
 
 function logMemoryMetrics(parser: HtmlLayoutParser): void {
   const metrics = parser.getMemoryMetrics();
@@ -115,7 +115,7 @@ async function memoryMonitoringExample() {
 ### Continuous Memory Monitoring
 
 ```typescript
-import { HtmlLayoutParser, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, MemoryMetrics } from '/html-layout-parser/index.js';
 
 class MemoryMonitor {
   private parser: HtmlLayoutParser;
@@ -188,7 +188,7 @@ class MemoryMonitor {
 ### Using try/finally for Guaranteed Cleanup
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 // ✅ CORRECT: Always use try/finally for cleanup
 async function guaranteedCleanup() {
@@ -243,7 +243,7 @@ async function cleanupWrapperExample() {
 ### Cleanup in Class-Based Applications
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
 
 class DocumentRenderer {
   private parser: HtmlLayoutParser | null = null;
@@ -304,7 +304,7 @@ async function classCleanupExample() {
 ### Singleton Pattern
 
 ```typescript
-import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout, MemoryMetrics } from '/html-layout-parser/index.js';
 
 class ParserSingleton {
   private static instance: ParserSingleton | null = null;
@@ -382,7 +382,7 @@ class ParserSingleton {
 ## Common Mistakes to Avoid
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 // ❌ MISTAKE 1: Forgetting to destroy
 async function mistake1() {

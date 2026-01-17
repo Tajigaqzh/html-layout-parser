@@ -15,7 +15,7 @@
 ### 最简单的使用
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 async function basicExample() {
   const parser = new HtmlLayoutParser();

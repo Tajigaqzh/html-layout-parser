@@ -781,7 +781,7 @@ Move parsing to a Web Worker for better UI responsiveness:
 
 ```typescript
 // worker.ts
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
+import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
 
 let parser: HtmlLayoutParser;
 
@@ -791,7 +791,7 @@ self.onmessage = async (e) => {
   switch (type) {
     case 'init':
       parser = new HtmlLayoutParser();
-      await parser.init();
+      await parser.init('/workers/html-layout-parser/html_layout_parser.js');
       self.postMessage({ type: 'ready' });
       break;
       

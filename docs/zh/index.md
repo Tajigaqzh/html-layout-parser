@@ -54,12 +54,18 @@ features:
 
 ## 快速示例
 
-::: tip 按平台单独引入以减小打包体积
-只引入所需平台的代码可以减小打包体积：
-- **自动检测**: `import { HtmlLayoutParser } from 'html-layout-parser'`
-- **Web 浏览器**: `import { HtmlLayoutParser } from 'html-layout-parser/web'`
-- **Web Worker**: `import { HtmlLayoutParser } from 'html-layout-parser/worker'`
-- **Node.js**: `import { HtmlLayoutParser } from 'html-layout-parser/node'`
+::: tip 手动复制方案（推荐）
+为了稳定加载 WASM，建议将预编译 bundle 复制到项目中：
+
+```bash
+# 复制 web bundle 到 public 目录
+cp -r node_modules/html-layout-parser/web public/html-layout-parser
+```
+
+然后在 HTML 中全局加载 WASM：
+```html
+<script src="/html-layout-parser/html_layout_parser.js"></script>
+```
 :::
 
 ::: warning 字体文件路径建议
@@ -70,10 +76,11 @@ features:
 :::
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+// 从复制后的文件中引入
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
-await parser.init();
+await parser.init(); // 使用全局加载的 WASM
 
 // 从 public 目录加载字体
 const fontData = await fetch('/fonts/arial.ttf').then(r => r.arrayBuffer());

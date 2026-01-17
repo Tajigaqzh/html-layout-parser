@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Version bump script for all packages
+# Version bump script for main package
 # Usage: ./scripts/version-bump.sh [patch|minor|major]
 
 set -e
@@ -13,7 +13,7 @@ if [[ ! "$VERSION_TYPE" =~ ^(patch|minor|major)$ ]]; then
     exit 1
 fi
 
-echo "📦 Bumping version ($VERSION_TYPE) for all packages..."
+echo "📦 Bumping version ($VERSION_TYPE) for main package..."
 echo ""
 
 # Get the script directory
@@ -22,21 +22,12 @@ ROOT_DIR="$(dirname "$SCRIPT_DIR")"
 
 cd "$ROOT_DIR"
 
-PACKAGES=(
-    "html-layout-parser"
-    "html-layout-parser-web"
-    "html-layout-parser-worker"
-    "html-layout-parser-node"
-)
-
-for pkg in "${PACKAGES[@]}"; do
-    echo "  Bumping $pkg..."
-    cd "packages/$pkg"
-    npm version $VERSION_TYPE --no-git-tag-version
-    NEW_VERSION=$(node -p "require('./package.json').version")
-    echo "    → $NEW_VERSION"
-    cd ../..
-done
+echo "  Bumping html-layout-parser..."
+cd "packages/html-layout-parser"
+npm version $VERSION_TYPE --no-git-tag-version
+NEW_VERSION=$(node -p "require('./package.json').version")
+echo "    → $NEW_VERSION"
+cd ../..
 
 echo ""
 echo "🎉 Version bump complete!"

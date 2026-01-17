@@ -18,7 +18,7 @@ Complete examples for using HTML Layout Parser v0.0.1 in web browser environment
 The simplest example of parsing HTML and getting character layouts.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
 
 async function basicParsing() {
   // Create and initialize parser
@@ -59,7 +59,7 @@ async function basicParsing() {
 Loading and using multiple fonts with font-family fallback.
 
 ```typescript
-import { HtmlLayoutParser, FontInfo } from 'html-layout-parser/web';
+import { HtmlLayoutParser, FontInfo } from '/html-layout-parser/index.js';
 
 async function multiFontExample() {
   const parser = new HtmlLayoutParser();
@@ -133,7 +133,7 @@ async function multiFontExample() {
 Separating HTML content from CSS styles for flexible theming.
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 async function cssSeparationExample() {
   const parser = new HtmlLayoutParser();
@@ -275,13 +275,13 @@ import {
   HtmlLayoutParser, 
   CharLayout,
   LayoutDocument 
-} from 'html-layout-parser/web';
+} from '/html-layout-parser/index.js';
 import { 
   renderToCanvas, 
   renderCharacters,
   parseColor,
   buildFontString 
-} from 'html-layout-parser/canvas';
+} from '/html-layout-parser/canvas.js';
 
 // Basic Canvas rendering
 async function basicCanvasRendering() {
@@ -490,8 +490,8 @@ function roundRect(
 Dynamic theme switching using CSS separation.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
-import { renderCharacters } from 'html-layout-parser/canvas';
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
+import { renderCharacters } from '/html-layout-parser/canvas.js';
 
 // Theme definitions
 const themes = {
@@ -637,8 +637,8 @@ import {
   FontInfo,
   MemoryMetrics,
   ParseResultWithDiagnostics 
-} from 'html-layout-parser/web';
-import { renderToCanvas } from 'html-layout-parser/canvas';
+} from '/html-layout-parser/index.js';
+import { renderToCanvas } from '/html-layout-parser/canvas.js';
 
 class HtmlLayoutApp {
   private parser: HtmlLayoutParser;

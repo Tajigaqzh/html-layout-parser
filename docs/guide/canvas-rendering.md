@@ -6,7 +6,7 @@ HTML Layout Parser's output format is designed specifically for the Canvas 2D AP
 
 ### Simple Character Rendering
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
 
 async function basicCanvasRendering() {
   const parser = new HtmlLayoutParser();

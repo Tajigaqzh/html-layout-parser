@@ -4,9 +4,11 @@ This guide will help you get up and running with HTML Layout Parser in minutes.
 
 ## Installation
 
-### Main Package (Recommended)
+### Download and Manual Copy (Recommended)
 
-The main package automatically detects the runtime environment and loads the appropriate code:
+HTML Layout Parser uses WebAssembly (WASM) modules that require special handling in modern build tools. To ensure compatibility across all environments, we recommend downloading the package and manually copying the files to your project.
+
+1. **Download the package:**
 
 ::: code-group
 
@@ -24,78 +26,92 @@ pnpm add html-layout-parser
 
 :::
 
-### Environment-Specific Packages
+2. **Copy files to your project:**
 
-To better serve different use cases, we publish not only the complete `html-layout-parser` package but also separate packages for specific environments. If you only need support for a specific environment, you can install the corresponding individual package to reduce bundle size:
+After installation, copy the appropriate bundle from `node_modules/html-layout-parser/` to your project's public directory:
+
+```bash
+# For web applications
+cp -r node_modules/html-layout-parser/web/ public/html-layout-parser/
+
+# For Node.js applications  
+cp -r node_modules/html-layout-parser/node/ src/html-layout-parser/
+
+# For Web Worker applications
+cp -r node_modules/html-layout-parser/worker/ public/html-layout-parser/
+```
+
+3. **Project structure should look like:**
 
 ::: code-group
 
-```bash [Web Browser]
-npm install html-layout-parser-web
+```text [Web Project]
+project/
+├── public/
+│   ├── html-layout-parser/
+│   │   ├── index.js
+│   │   ├── html_layout_parser.wasm
+│   │   └── canvas.js (optional)
+│   └── fonts/
+│       └── arial.ttf
+└── src/
+    └── main.ts
 ```
 
-```bash [Node.js]
-npm install html-layout-parser-node
-```
-
-```bash [Web Worker]
-npm install html-layout-parser-worker
+```text [Node.js Project]
+project/
+├── src/
+│   ├── html-layout-parser/
+│   │   ├── index.js
+│   │   └── html_layout_parser.wasm
+│   └── main.ts
+└── fonts/
+    └── arial.ttf
 ```
 
 :::
 
-::: info Package Publishing Strategy
-We use a multi-package publishing strategy:
-- **Main Package** (`html-layout-parser`): Contains code for all environments with automatic detection
-- **Environment-Specific Packages**: Each package is independently published to npm and contains only environment-specific code
+### Why Manual Copy?
 
-Benefits of this approach:
-- 🎯 **Choose What You Need**: Select the right package for your project requirements
-- 📦 **Size Optimization**: Environment-specific packages have smaller bundle sizes
-- 🔄 **Backward Compatibility**: Main package provides full functionality and auto-detection
-:::
+Modern bundlers (Vite, Webpack, Rollup) have complex handling of WebAssembly modules that can cause loading issues:
 
-::: tip Bundle Size Comparison
-- `html-layout-parser`: ~2.5MB (includes all environments)
-- `html-layout-parser-web`: ~2.2MB (separate npm package, Web browser only)
-- `html-layout-parser-node`: ~2.2MB (separate npm package, Node.js only)
-- `html-layout-parser-worker`: ~2.2MB (separate npm package, Web Worker only)
-:::
+- **Import path resolution**: Bundlers may rename or relocate WASM files
+- **Module loading**: Different environments require different WASM loading strategies  
+- **Build optimization**: Bundlers may try to optimize WASM in incompatible ways
 
-## Platform-Specific Imports
+Manual copying ensures the files remain in predictable locations with stable names.
 
-### Using Main Package
+## Platform-Specific Usage
 
-::: tip Automatic Environment Detection
-The main package automatically detects the runtime environment and loads the appropriate code:
+### Web Browser
 
 ```typescript
-// Auto-detect (recommended) - automatically detects environment
-import { HtmlLayoutParser } from 'html-layout-parser';
+// Import from your copied files
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
-// You can also explicitly specify the environment
-import { HtmlLayoutParser } from 'html-layout-parser/web';
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+const parser = new HtmlLayoutParser();
+await parser.init();
 ```
-:::
 
-### Using Environment-Specific Packages
+### Node.js
 
 ```typescript
-// Web browser specific package
-import { HtmlLayoutParser } from 'html-layout-parser-web';
+// Import from your copied files (adjust path as needed)
+import { HtmlLayoutParser } from './html-layout-parser/index.js';
 
-// Node.js specific package
-import { HtmlLayoutParser } from 'html-layout-parser-node';
-
-// Web Worker specific package
-import { HtmlLayoutParser } from 'html-layout-parser-worker';
+const parser = new HtmlLayoutParser();
+await parser.init();
 ```
 
-::: warning Note
-Environment-specific packages can only be used in their corresponding environments. For example, `html-layout-parser-node` can only be used in Node.js environments and will error in browsers.
-:::
+### Web Worker
+
+```typescript
+// Import from your copied files
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+
+const parser = new HtmlLayoutParser();
+await parser.init();
+```
 
 ## Font File Setup
 
@@ -122,7 +138,7 @@ project/
 ### Step 1: Import and Initialize
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 const parser = new HtmlLayoutParser();
 await parser.init();
@@ -185,7 +201,7 @@ parser.destroy();
 ## Complete Example
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from '/html-layout-parser/index.js';
 
 async function main() {
   const parser = new HtmlLayoutParser();

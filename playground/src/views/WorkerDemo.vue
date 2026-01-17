@@ -179,11 +179,11 @@ onMounted(() => {
   
   worker.value.onmessage = handleWorkerMessage
   
-  // Initialize worker with WASM
+  // Initialize worker with WASM from npm package
   worker.value.postMessage({
     type: 'init',
-    wasmJsPath: '/wasm/html_layout_parser.js',
-    wasmBinaryPath: '/wasm/html_layout_parser.wasm'
+    // Worker will handle loading from npm package internally
+    useNpmPackage: true
   })
 })
 
