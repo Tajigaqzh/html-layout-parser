@@ -5,6 +5,7 @@
 ## 基础 Node.js 用法
 
 ```typescript
+// 从环境特定入口点导入
 import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/node';
 import * as fs from 'fs/promises';
 import * as path from 'path';

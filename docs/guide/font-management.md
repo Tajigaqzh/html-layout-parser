@@ -7,7 +7,7 @@ HTML Layout Parser supports loading and managing multiple fonts with automatic f
 ### Web Environment
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
 await parser.init();
@@ -27,7 +27,7 @@ if (fontId > 0) {
 ### Node.js Environment
 
 ```typescript
-import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/node';
 
 const parser = new HtmlLayoutParser();
 await parser.init('./lib/html-layout-parser/html_layout_parser.js');

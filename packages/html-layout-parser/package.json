@@ -1,6 +1,6 @@
 {
   "name": "html-layout-parser",
-  "version": "0.1.0",
+  "version": "0.2.2",
   "description": "High-performance HTML layout parser compiled to WebAssembly. Supports multi-font management, CSS separation, and multiple output modes for Canvas rendering.",
   "type": "module",
   "main": "./dist/index.cjs",
@@ -54,6 +54,11 @@
         "default": "./dist/node.cjs"
       }
     },
+    "./wasm": {
+      "types": "./dist/html_layout_parser.d.ts",
+      "import": "./dist/html_layout_parser.mjs",
+      "require": "./dist/html_layout_parser.cjs"
+    },
     "./package.json": "./package.json"
   },
   "files": [
@@ -65,11 +70,11 @@
   ],
   "scripts": {
     "build": "tsup && pnpm run copy:wasm && pnpm run copy:bundles",
-    "copy:wasm": "cp ../../wasm-output/html_layout_parser.wasm dist/ && cp ../../wasm-output/html_layout_parser.js dist/",
+    "copy:wasm": "cp ../../wasm-output/html_layout_parser.wasm dist/ && cp ../../wasm-output/html_layout_parser.mjs dist/html_layout_parser.mjs && cp ../../wasm-output/html_layout_parser.cjs dist/html_layout_parser.cjs && if [ -f ../../wasm-output/html_layout_parser.d.ts ]; then cp ../../wasm-output/html_layout_parser.d.ts dist/; fi && if [ -f ../../wasm-output/html_layout_parser_types.d.ts ]; then cp ../../wasm-output/html_layout_parser_types.d.ts dist/; fi",
     "copy:bundles": "pnpm run copy:web && pnpm run copy:node && pnpm run copy:worker",
-    "copy:web": "mkdir -p web && cp dist/html_layout_parser.js web/ && cp dist/html_layout_parser.wasm web/ && cp dist/web.js web/index.js && cp dist/web.d.ts web/index.d.ts",
-    "copy:node": "mkdir -p node && cp dist/html_layout_parser.js node/ && cp dist/html_layout_parser.wasm node/ && cp dist/node.js node/index.js && cp dist/node.d.ts node/index.d.ts",
-    "copy:worker": "mkdir -p worker && cp dist/html_layout_parser.js worker/ && cp dist/html_layout_parser.wasm worker/ && cp dist/worker.js worker/index.js && cp dist/worker.d.ts worker/index.d.ts",
+    "copy:web": "mkdir -p web && cp dist/html_layout_parser.mjs web/ && cp dist/html_layout_parser.cjs web/ && cp dist/html_layout_parser.wasm web/ && cp dist/web.js web/index.js && cp dist/web.d.ts web/index.d.ts && if [ -f dist/html_layout_parser.d.ts ]; then cp dist/html_layout_parser.d.ts web/; fi && if [ -f dist/html_layout_parser_types.d.ts ]; then cp dist/html_layout_parser_types.d.ts web/; fi",
+    "copy:node": "mkdir -p node && cp dist/html_layout_parser.mjs node/ && cp dist/html_layout_parser.cjs node/ && cp dist/html_layout_parser.wasm node/ && cp dist/node.js node/index.js && cp dist/node.d.ts node/index.d.ts && if [ -f dist/html_layout_parser.d.ts ]; then cp dist/html_layout_parser.d.ts node/; fi && if [ -f dist/html_layout_parser_types.d.ts ]; then cp dist/html_layout_parser_types.d.ts node/; fi",
+    "copy:worker": "mkdir -p worker && cp dist/html_layout_parser.mjs worker/ && cp dist/html_layout_parser.cjs worker/ && cp dist/html_layout_parser.wasm worker/ && cp dist/worker.js worker/index.js && cp dist/worker.d.ts worker/index.d.ts && if [ -f dist/html_layout_parser.d.ts ]; then cp dist/html_layout_parser.d.ts worker/; fi && if [ -f dist/html_layout_parser_types.d.ts ]; then cp dist/html_layout_parser_types.d.ts worker/; fi",
     "clean": "rm -rf dist web node worker",
     "prepublishOnly": "pnpm run clean && pnpm run build",
     "typecheck": "tsc --noEmit"

@@ -7,7 +7,8 @@
 ### 基本模式：加载一次，多次使用
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+// 从环境特定入口点导入
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
 
 // ✅ 正确：加载一次字体，用于多次解析
 async function correctPattern() {
@@ -65,7 +66,7 @@ async function incorrectPattern() {
 ### 基础内存监控
 
 ```typescript
-import { HtmlLayoutParser, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, MemoryMetrics } from 'html-layout-parser/web';
 
 function logMemoryMetrics(parser: HtmlLayoutParser): void {
   const metrics = parser.getMemoryMetrics();
@@ -115,7 +116,7 @@ async function memoryMonitoringExample() {
 ### 持续内存监控
 
 ```typescript
-import { HtmlLayoutParser, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, MemoryMetrics } from 'html-layout-parser/web';
 
 class MemoryMonitor {
   private parser: HtmlLayoutParser;
@@ -188,7 +189,7 @@ class MemoryMonitor {
 ### 使用 try/finally 保证清理
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
 // ✅ 正确：始终使用 try/finally 进行清理
 async function guaranteedCleanup() {
@@ -243,7 +244,7 @@ async function cleanupWrapperExample() {
 ### 基于类的应用中的清理
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
 
 class DocumentRenderer {
   private parser: HtmlLayoutParser | null = null;
@@ -304,7 +305,7 @@ async function classCleanupExample() {
 ### 单例模式
 
 ```typescript
-import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser/web';
 
 class ParserSingleton {
   private static instance: ParserSingleton | null = null;
@@ -382,7 +383,7 @@ class ParserSingleton {
 ## 常见错误避免
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser';
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
 // ❌ 错误 1：忘记销毁
 async function mistake1() {

@@ -4,11 +4,43 @@
 
 ## 准备工作
 
-在使用这些示例之前，请先将 worker bundle 复制到项目中：
+### 方法 1：直接导入（推荐）
+
+对于 **Vite 用户**，首先在 `vite.config.ts` 中添加：
+
+```typescript
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['html-layout-parser']
+  }
+})
+```
+
+然后使用直接导入：
+
+```typescript
+// 直接从 npm 包导入
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
+
+// 在 worker 中
+const parser = new HtmlLayoutParser();
+await parser.init(); // 自动从 node_modules 加载 WASM
+```
+
+### 方法 2：手动复制（备选）
+
+如果遇到打包器问题，复制 worker bundle：
 
 ```bash
 # 复制 worker bundle 到 workers 目录
 cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
+```
+
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
+
+const parser = new HtmlLayoutParser();
+await parser.init('/workers/html-layout-parser/html_layout_parser.mjs'); // 自定义路径
 ```
 
 ## 基础 Worker 设置
@@ -100,8 +132,8 @@ async function main() {
 
 ```typescript
 // parser-worker.ts
-// 从复制后的文件中引入
-import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+// 从环境特定入口点导入
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
 
 let parser: HtmlLayoutParser | null = null;
 
@@ -246,8 +278,8 @@ async function main() {
 
 ```typescript
 // offscreen-worker.ts
-// 从复制后的文件中引入
-import { HtmlLayoutParser, CharLayout } from '/workers/html-layout-parser/index.js';
+// 从环境特定入口点导入
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/worker';
 
 let parser: HtmlLayoutParser | null = null;
 let canvas: OffscreenCanvas | null = null;

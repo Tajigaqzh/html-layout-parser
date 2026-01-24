@@ -772,30 +772,68 @@ var HtmlLayoutParser2 = class extends HtmlLayoutParser {
     if (this.isInitialized()) {
       return;
     }
-    const jsPath = wasmPath || "./html_layout_parser.js";
-    try {
-      const wasmModule = await import(
-        /* @vite-ignore */
-        jsPath
-      );
-      const createModule = wasmModule.default || wasmModule.createModule || wasmModule;
-      if (typeof createModule === "function") {
-        this.setModuleLoader(async () => createModule());
-        await super.init();
-        return;
-      }
-    } catch {
-    }
-    if (typeof self !== "undefined" && typeof self.importScripts === "function") {
+    const loadingStrategies = [
+      // 1. Custom path provided by user
+      wasmPath,
+      // 2. Try to load from relative paths (for bundled scenarios)
+      "./html_layout_parser.mjs",
+      "./html_layout_parser.cjs",
+      "./html_layout_parser.js",
+      // 3. Try absolute paths for development
+      "/wasm/html_layout_parser.mjs",
+      "/wasm/html_layout_parser.cjs"
+    ].filter(Boolean);
+    for (const jsPath of loadingStrategies) {
       try {
-        self.importScripts(jsPath);
-        const globalCreateModule2 = self.createHtmlLayoutParserModule;
-        if (typeof globalCreateModule2 === "function") {
-          this.setModuleLoader(async () => globalCreateModule2());
+        const wasmModule = await import(
+          /* @vite-ignore */
+          jsPath
+        );
+        const createModule = wasmModule.default || wasmModule.createHtmlLayoutParserModule || wasmModule;
+        if (typeof createModule === "function") {
+          this.setModuleLoader(async () => {
+            return createModule({
+              locateFile: (path) => {
+                console.log("[Worker] locateFile called with path:", path);
+                if (path.endsWith(".wasm")) {
+                  if (jsPath.startsWith("/wasm/")) {
+                    console.log("[Worker] Redirecting WASM to /wasm/ path");
+                    return "/wasm/html_layout_parser.wasm";
+                  } else {
+                    const wasmPaths = [
+                      "./html_layout_parser.wasm",
+                      "../html_layout_parser.wasm",
+                      wasmPath?.replace(/\.(mjs|cjs|js)$/, ".wasm") || "./html_layout_parser.wasm"
+                    ];
+                    console.log("[Worker] Using production WASM path:", wasmPaths[0]);
+                    return wasmPaths[0];
+                  }
+                }
+                console.log("[Worker] locateFile returning original path:", path);
+                return path;
+              }
+            });
+          });
           await super.init();
           return;
         }
-      } catch {
+      } catch (error) {
+        console.debug(`[Worker] Failed to load WASM from ${jsPath}:`, error);
+      }
+    }
+    if (typeof self !== "undefined" && typeof self.importScripts === "function") {
+      for (const jsPath of loadingStrategies) {
+        try {
+          self.importScripts(jsPath);
+          const globalCreateModule2 = self.createHtmlLayoutParserModule;
+          if (typeof globalCreateModule2 === "function") {
+            this.setModuleLoader(async () => globalCreateModule2());
+            await super.init();
+            return;
+          }
+        } catch (error) {
+          console.debug(`[Worker] importScripts failed for ${jsPath}:`, error);
+        }
       }
     }
     const globalCreateModule = globalThis.createHtmlLayoutParserModule;

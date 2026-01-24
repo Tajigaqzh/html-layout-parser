@@ -16,6 +16,7 @@
     "docs:dev": "cd docs && pnpm dev",
     "docs:build": "cd docs && pnpm build",
     "docs:preview": "cd docs && pnpm preview",
+    "build:cdn": "./scripts/build-cdn.sh",
     "playground": "cd playground && pnpm dev",
     "publish": "./scripts/publish-all.sh",
     "publish:dry": "./scripts/publish-all.sh --dry-run",

@@ -4,11 +4,11 @@
 
 ## 安装
 
-### 下载安装并手动复制（推荐）
+### 直接导入（推荐）
 
-HTML Layout Parser 使用 WebAssembly (WASM) 模块，现代构建工具对它的处理较复杂。为保证在各种环境下稳定加载，我们建议安装后手动复制文件到项目中。
+现在支持直接从 npm 包导入，无需手动复制文件：
 
-1. **下载包：**
+1. **安装包：**
 
 ::: code-group
 
@@ -26,91 +26,182 @@ pnpm add html-layout-parser
 
 :::
 
-2. **复制文件到项目：**
+2. **Vite 用户配置**（必需）：
 
-安装完成后，将 `node_modules/html-layout-parser/` 下的对应 bundle 复制到项目中：
+如果使用 **Vite**，需要在 `vite.config.ts` 中添加配置：
+
+```typescript
+import { defineConfig } from 'vite'
+
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['html-layout-parser']
+  }
+})
+```
+
+**为什么需要这个配置？** Vite 的依赖预构建会破坏 WASM 模块，此配置可以防止这种情况。
+
+## 基本用法
+
+### 第1步：导入并初始化
+
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser/web';
+
+const parser = new HtmlLayoutParser();
+await parser.init(); // 自动从 node_modules 加载 WASM
+```
+
+### 第2步：加载字体
+
+解析 HTML 前必须先加载字体：
+
+```typescript
+// 获取字体文件
+const response = await fetch('/fonts/arial.ttf');
+const fontData = new Uint8Array(await response.arrayBuffer());
+
+// 加载字体并获取 ID
+const fontId = parser.loadFont(fontData, 'Arial');
+
+// 设置为默认字体
+parser.setDefaultFont(fontId);
+```
+
+### 第3步：解析 HTML
+
+```typescript
+const html = '<div style="color: red; font-size: 24px;">你好世界</div>';
+
+const layouts = parser.parse(html, {
+  viewportWidth: 800
+});
+
+// layouts 是 CharLayout 对象数组
+for (const char of layouts) {
+  console.log(`${char.character} 位于 (${char.x}, ${char.y})`);
+}
+```
+
+### 第4步：清理资源
+
+```typescript
+// 使用完毕后务必清理
+parser.destroy();
+```
+
+## 完整示例
+
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser/web';
+
+async function main() {
+  const parser = new HtmlLayoutParser();
+  
+  try {
+    // 初始化解析器
+    await parser.init();
+    
+    // 加载字体
+    const fontResponse = await fetch('/fonts/arial.ttf');
+    const fontData = new Uint8Array(await fontResponse.arrayBuffer());
+    const fontId = parser.loadFont(fontData, 'Arial');
+    parser.setDefaultFont(fontId);
+    
+    // 解析 HTML
+    const html = `
+      <div style="font-size: 24px; color: #333;">
+        <h1>你好世界</h1>
+        <p>这是一段包含<span style="color: red;">红色文字</span>的段落。</p>
+      </div>
+    `;
+    
+    const layouts = parser.parse(html, { viewportWidth: 800 });
+    
+    console.log(`解析了 ${layouts.length} 个字符`);
+    
+    // 使用 layouts 进行 Canvas 渲染或其他用途
+    layouts.forEach(char => {
+      console.log(`'${char.character}' 位于 (${char.x}, ${char.y})`);
+    });
+    
+  } finally {
+    // 务必清理资源
+    parser.destroy();
+  }
+}
+
+main().catch(console.error);
+```
+
+## 环境特定用法
+
+### 自动检测（推荐）
+```typescript
+import { HtmlLayoutParser, detectEnvironment } from 'html-layout-parser';
+
+console.log(`运行在 ${detectEnvironment()} 环境`);
+const parser = new HtmlLayoutParser();
+await parser.init();
+```
+
+### 明确指定环境
+```typescript
+// Web 浏览器
+import { HtmlLayoutParser } from 'html-layout-parser/web';
+
+// Node.js
+import { HtmlLayoutParser } from 'html-layout-parser/node';
+
+// Web Worker
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
+```
+
+### Node.js 文件加载
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser/node';
+
+const parser = new HtmlLayoutParser();
+await parser.init();
+
+// 从文件加载字体（仅 Node.js）
+const fontId = await parser.loadFontFromFile('./fonts/arial.ttf', 'Arial');
+parser.setDefaultFont(fontId);
+```
+
+## 故障排除：手动复制设置
+
+⚠️ **仅在直接导入失败时使用此方法。**
+
+推荐方法是直接导入（如上所示）。手动复制是备用解决方案。
+
+### Web 应用
 
 ```bash
-# Web 应用
-cp -r node_modules/html-layout-parser/web/ public/html-layout-parser/
-
-# Node.js 应用
-cp -r node_modules/html-layout-parser/node/ src/html-layout-parser/
-
-# Web Worker 应用
-cp -r node_modules/html-layout-parser/worker/ public/html-layout-parser/
+# 仅在直接导入不工作时
+cp -r node_modules/html-layout-parser/web public/html-layout-parser
 ```
-
-3. **项目结构应如下：**
-
-::: code-group
-
-```text [Web 项目]
-project/
-├── public/
-│   ├── html-layout-parser/
-│   │   ├── index.js
-│   │   ├── html_layout_parser.wasm
-│   │   └── canvas.js (可选)
-│   └── fonts/
-│       └── arial.ttf
-└── src/
-    └── main.ts
-```
-
-```text [Node.js 项目]
-project/
-├── src/
-│   ├── html-layout-parser/
-│   │   ├── index.js
-│   │   └── html_layout_parser.wasm
-│   └── main.ts
-└── fonts/
-    └── arial.ttf
-```
-
-:::
-
-### 为什么推荐手动复制？
-
-现代打包器（Vite、Webpack、Rollup）对 WASM 的处理较复杂，可能导致加载问题：
-
-- **导入路径解析**：打包器可能重命名或移动 WASM 文件
-- **模块加载方式**：不同环境需要不同的 WASM 加载策略
-- **构建优化**：打包器可能对 WASM 做不兼容的优化
-
-手动复制可以确保文件路径稳定、名称可预测。
-
-## 按平台使用
-
-### Web 浏览器
 
 ```typescript
-// 从复制后的文件中引入
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
 const parser = new HtmlLayoutParser();
-await parser.init();
+await parser.init('/html-layout-parser/html_layout_parser.mjs');
 ```
 
-### Node.js
+### Node.js 应用
 
-```typescript
-// 从复制后的文件中引入（按需调整路径）
-import { HtmlLayoutParser } from './html-layout-parser/index.js';
-
-const parser = new HtmlLayoutParser();
-await parser.init();
+```bash
+# 仅在直接导入不工作时
+cp -r node_modules/html-layout-parser/node ./lib/html-layout-parser
 ```
 
-### Web Worker
-
 ```typescript
-// 从复制后的文件中引入
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/node';
 
 const parser = new HtmlLayoutParser();
-await parser.init();
+await parser.init('./lib/html-layout-parser/html_layout_parser.mjs');
 ```
 
 ## 字体文件设置
@@ -138,7 +229,7 @@ project/
 ### 步骤 1：导入与初始化
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
 await parser.init();
@@ -201,7 +292,7 @@ parser.destroy();
 ## 完整示例
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 async function main() {
   const parser = new HtmlLayoutParser();

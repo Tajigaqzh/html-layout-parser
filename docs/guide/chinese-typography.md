@@ -150,7 +150,7 @@ function redistributeLineSpacing(line: LineInfo, movedWidth: number): void {
 ## Usage Example
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 // Initialize parser
 const parser = new HtmlLayoutParser();
@@ -205,7 +205,7 @@ However, CSS-based solutions may not work perfectly in all cases, so post-proces
 Here's a full working example:
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 class ChineseTextRenderer {
   private parser: HtmlLayoutParser;

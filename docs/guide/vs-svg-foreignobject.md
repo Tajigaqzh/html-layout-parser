@@ -148,7 +148,7 @@ self.onmessage = (e) => {
 **WASM Parser Solution**:
 ```typescript
 // ✅ Works perfectly in Web Worker
-import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
 
 self.onmessage = async (e) => {
   const parser = new HtmlLayoutParser();
@@ -357,7 +357,7 @@ class CanvasRenderer {
 ### After: WASM Parser
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 class CanvasRenderer {
   private parser: HtmlLayoutParser;

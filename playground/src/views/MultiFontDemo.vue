@@ -59,18 +59,15 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import ComparisonView from '../components/ComparisonView.vue'
-import { useParser } from '../composables/useParser'
+import { useMultiFontParser } from '../composables/useMultiFontParser'
 
-const { initParser, parseHTML, isLoading, error } = useParser()
+const { initParser, loadFont, parseHTML, isLoading, error } = useMultiFontParser()
 
 const fontsLoading = ref(false)
 const viewportWidth = ref(800)
 const layouts = ref<any[]>()
 const metrics = ref<any>()
 const renderKey = ref(0)
-
-// Track loaded font IDs
-const loadedFontIds = ref<Map<string, number>>(new Map())
 
 const fonts = ref([
   { name: 'aliBaBaFont65', file: '/fonts/aliBaBaFont65.ttf', loaded: false },
@@ -151,16 +148,9 @@ async function loadAllFonts() {
   
   try {
     // Initialize parser first
-    const wasmModule = await initParser()
+    await initParser()
     
-    // Clear font metrics cache before loading new fonts
-    console.log('Clearing font metrics cache...')
-    if (wasmModule._clearCache) {
-      wasmModule._clearCache()
-      console.log('✅ Font metrics cache cleared')
-    }
-    
-    // Load all fonts without unloading previous ones
+    // Load all fonts
     for (const font of fonts.value) {
       const response = await fetch(font.file)
       if (!response.ok) {
@@ -170,42 +160,11 @@ async function loadAllFonts() {
       const arrayBuffer = await response.arrayBuffer()
       const fontData = new Uint8Array(arrayBuffer)
       
-      // Directly call WASM API to load font (don't use useParser's loadFont)
-      const dataPtr = wasmModule._malloc(fontData.length)
-      if (dataPtr === 0) {
-        throw new Error(`Failed to allocate memory for ${font.name}`)
-      }
+      // Use the new loadFont method from useMultiFontParser
+      await loadFont(fontData, font.name)
+      font.loaded = true
       
-      const nameBytes = wasmModule.lengthBytesUTF8(font.name) + 1
-      const namePtr = wasmModule._malloc(nameBytes)
-      if (namePtr === 0) {
-        wasmModule._free(dataPtr)
-        throw new Error(`Failed to allocate memory for font name ${font.name}`)
-      }
-      
-      try {
-        wasmModule.HEAPU8.set(fontData, dataPtr)
-        wasmModule.stringToUTF8(font.name, namePtr, nameBytes)
-        
-        const fontId = wasmModule._loadFont(dataPtr, fontData.length, namePtr)
-        
-        if (fontId <= 0) {
-          throw new Error(`Failed to load font ${font.name}`)
-        }
-        
-        loadedFontIds.value.set(font.name, fontId)
-        font.loaded = true
-        
-        console.log(`Loaded ${font.name} with ID ${fontId}`)
-        
-        // Set first font as default
-        if (loadedFontIds.value.size === 1) {
-          wasmModule._setDefaultFont(fontId)
-        }
-      } finally {
-        wasmModule._free(dataPtr)
-        wasmModule._free(namePtr)
-      }
+      console.log(`Loaded ${font.name}`)
     }
     
     // Wait for browser to load fonts for Canvas rendering
@@ -237,7 +196,7 @@ async function loadAllFonts() {
       }
     }
     
-    console.log('All fonts loaded:', Array.from(loadedFontIds.value.entries()))
+    console.log('All fonts loaded successfully')
   } catch (err: any) {
     error.value = err.message
   } finally {

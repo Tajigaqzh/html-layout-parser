@@ -1067,6 +1067,16 @@ interface HtmlLayoutParserModule {
 type CreateHtmlLayoutParserModule = (config?: {
     locateFile?: (path: string) => string;
 }) => Promise<HtmlLayoutParserModule>;
+/**
+ * Emscripten module interface (alias for compatibility)
+ * Emscripten 模块接口（兼容性别名）
+ */
+type EmscriptenModule = HtmlLayoutParserModule;
+/**
+ * Module factory function type
+ * 模块工厂函数类型
+ */
+type ModuleFactory = CreateHtmlLayoutParserModule;
 
 /**
  * HTML Layout Parser v2.0 - Core Parser Class
@@ -1525,4 +1535,4 @@ declare class HtmlLayoutParser extends HtmlLayoutParser$1 {
  */
 declare function createParser(): HtmlLayoutParser;
 
-export { type Block, type BoxSpacing, type CharLayout, type CreateHtmlLayoutParserModule, type Environment, ErrorCode, type ErrorSeverity, type FontInfo, type FontLoadResult, HtmlLayoutParser, HtmlLayoutParser$1 as HtmlLayoutParserBase, type HtmlLayoutParserModule, type LayoutDocument, type Line, type MemoryMetrics, type OutputMode, type Page, type ParseError, type ParseOptions, type ParseResult, type ParseResultWithDiagnostics, type PerformanceMetrics, type Row, type Run, type SimpleOutput, type TextDecoration, type Transform, type Viewport, createParser, HtmlLayoutParser as default };
+export { type Block, type BoxSpacing, type CharLayout, type CreateHtmlLayoutParserModule, type EmscriptenModule, type Environment, ErrorCode, type ErrorSeverity, type FontInfo, type FontLoadResult, HtmlLayoutParser, HtmlLayoutParser$1 as HtmlLayoutParserBase, type HtmlLayoutParserModule, type LayoutDocument, type Line, type MemoryMetrics, type ModuleFactory, type OutputMode, type Page, type ParseError, type ParseOptions, type ParseResult, type ParseResultWithDiagnostics, type PerformanceMetrics, type Row, type Run, type SimpleOutput, type TextDecoration, type Transform, type Viewport, createParser, HtmlLayoutParser as default };

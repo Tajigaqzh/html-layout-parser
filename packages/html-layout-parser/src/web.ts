@@ -46,12 +46,74 @@ export class HtmlLayoutParser extends BaseParser {
       return;
     }
 
-    // Try different loading strategies
+    // Check if we're in Vite development environment
+    const isViteDev = typeof window !== 'undefined' && 
+                     (window as any).__vite_is_modern_browser !== undefined;
+
+    if (isViteDev) {
+      // In Vite development, use the plugin-served files
+      try {
+        console.log('Loading WASM from npm package via Vite plugin...');
+        
+        // Load the WASM module factory from Vite plugin
+        const response = await fetch('/wasm/html_layout_parser.mjs');
+        if (!response.ok) {
+          throw new Error(`Failed to fetch WASM module: ${response.status}`);
+        }
+        
+        const moduleCode = await response.text();
+        
+        // Create a blob URL for the module code
+        const blob = new Blob([moduleCode], { type: 'application/javascript' });
+        const moduleUrl = URL.createObjectURL(blob);
+        
+        try {
+          const wasmModule = await import(/* @vite-ignore */ moduleUrl);
+          const createModule: CreateHtmlLayoutParserModule = 
+            wasmModule.default || wasmModule.createHtmlLayoutParserModule || wasmModule;
+
+          if (typeof createModule === 'function') {
+            this.setModuleLoader(async () => {
+              return createModule({
+                locateFile: (path: string) => {
+                  console.log('locateFile called with path:', path);
+                  if (path.endsWith('.wasm')) {
+                    console.log('Redirecting WASM to /wasm/ path');
+                    return '/wasm/html_layout_parser.wasm';
+                  }
+                  console.log('locateFile returning original path:', path);
+                  return path;
+                }
+              });
+            });
+            await super.init();
+            console.log('HTML Layout Parser initialized successfully from npm package v0.1.0 with direct import');
+            return;
+          }
+        } finally {
+          URL.revokeObjectURL(moduleUrl);
+        }
+      } catch (error) {
+        console.error('Vite development loading failed:', error);
+        // Fall through to production loading strategies
+      }
+    }
+
+    // Production loading strategies
     const loadingStrategies = [
       // 1. Custom path provided by user
       wasmPath,
-      // 2. Try npm package exports (for bundlers that support it)
-      'html-layout-parser/wasm-js',
+      // 2. Try to load from same directory (npm package dist folder)
+      './html_layout_parser.mjs',
+      './html_layout_parser.cjs',
+      // 3. Try import.meta.url based resolution for ESM
+      ...(typeof import.meta !== 'undefined' && import.meta.url ? [
+        new URL('./html_layout_parser.mjs', import.meta.url).href,
+        new URL('./html_layout_parser.cjs', import.meta.url).href
+      ] : []),
+      // 4. Try relative paths for bundled scenarios
+      '../html_layout_parser.mjs',
+      '../html_layout_parser.cjs',
     ].filter(Boolean) as string[];
 
     for (const jsPath of loadingStrategies) {
@@ -59,22 +121,25 @@ export class HtmlLayoutParser extends BaseParser {
         // Try ES module import first
         const wasmModule = await import(/* @vite-ignore */ jsPath);
         const createModule: CreateHtmlLayoutParserModule = 
-          wasmModule.default || wasmModule.createModule || wasmModule;
+          wasmModule.default || wasmModule.createHtmlLayoutParserModule || wasmModule;
 
         if (typeof createModule === 'function') {
           // Set up WASM locator for npm package
           this.setModuleLoader(async () => {
             return createModule({
               locateFile: (path: string) => {
+                console.log('locateFile called with path:', path);
                 if (path.endsWith('.wasm')) {
-                  // Try to resolve WASM file from npm package
-                  try {
-                    return new URL('html-layout-parser/wasm', import.meta.url).href;
-                  } catch {
-                    // Fallback to relative path
-                    return './html_layout_parser.wasm';
+                  // Map the internal WASM names to the unified WASM file
+                  if (path === 'html_layout_parser_esm.wasm' || 
+                      path === 'html_layout_parser_cjs.wasm' ||
+                      path === 'html_layout_parser.wasm') {
+                    const wasmPath = 'html_layout_parser.wasm';
+                    console.log('Using unified WASM path:', wasmPath);
+                    return wasmPath;
                   }
                 }
+                console.log('locateFile returning original path:', path);
                 return path;
               }
             });

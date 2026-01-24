@@ -781,7 +781,7 @@ Move parsing to a Web Worker for better UI responsiveness:
 
 ```typescript
 // worker.ts
-import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
 
 let parser: HtmlLayoutParser;
 

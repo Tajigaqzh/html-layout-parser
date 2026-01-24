@@ -54,17 +54,21 @@ features:
 
 ## 快速示例
 
-::: tip 手动复制方案（推荐）
-为了稳定加载 WASM，建议将预编译 bundle 复制到项目中：
+::: tip 直接导入方案（推荐）
+现在支持直接从 npm 包导入，无需手动复制文件：
 
 ```bash
-# 复制 web bundle 到 public 目录
-cp -r node_modules/html-layout-parser/web public/html-layout-parser
+npm install html-layout-parser
 ```
 
-然后在 HTML 中全局加载 WASM：
-```html
-<script src="/html-layout-parser/html_layout_parser.js"></script>
+**Vite 用户需要配置**：
+```typescript
+// vite.config.ts
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['html-layout-parser']
+  }
+})
 ```
 :::
 
@@ -76,8 +80,8 @@ cp -r node_modules/html-layout-parser/web public/html-layout-parser
 :::
 
 ```typescript
-// 从复制后的文件中引入
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+// 直接从 npm 包导入（web环境）
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
 const parser = new HtmlLayoutParser();
 await parser.init(); // 使用全局加载的 WASM

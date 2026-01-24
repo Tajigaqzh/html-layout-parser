@@ -17,7 +17,7 @@ Examples demonstrating correct memory management patterns for HTML Layout Parser
 ### Basic Pattern: Load Once, Use Many Times
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
 
 /**
  * ✅ CORRECT: Load font once, use for multiple parses
@@ -90,7 +90,7 @@ async function incorrectPattern() {
 ### Font Lifecycle Management
 
 ```typescript
-import { HtmlLayoutParser, FontInfo } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser, FontInfo } from 'html-layout-parser';
 
 /**
  * Font Manager with proper lifecycle management
@@ -238,7 +238,7 @@ async function fontManagerExample() {
 ### Basic Memory Monitoring
 
 ```typescript
-import { HtmlLayoutParser, MemoryMetrics } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser, MemoryMetrics } from 'html-layout-parser';
 
 async function memoryMonitoringExample() {
   const parser = new HtmlLayoutParser();
@@ -295,7 +295,7 @@ function logMemoryMetrics(parser: HtmlLayoutParser): void {
 ### Continuous Memory Monitoring
 
 ```typescript
-import { HtmlLayoutParser, MemoryMetrics } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser, MemoryMetrics } from 'html-layout-parser';
 
 class MemoryMonitor {
   private parser: HtmlLayoutParser;
@@ -424,7 +424,7 @@ async function continuousMonitoringExample() {
 ### Using try/finally for Guaranteed Cleanup
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 /**
  * ✅ CORRECT: Always use try/finally for cleanup
@@ -476,7 +476,7 @@ async function noCleanupOnError() {
 ### Cleanup with Async/Await
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 /**
  * Wrapper function that ensures cleanup
@@ -515,7 +515,7 @@ async function cleanupWrapperExample() {
 ### Cleanup in Class-Based Applications
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
 
 class DocumentRenderer {
   private parser: HtmlLayoutParser | null = null;
@@ -597,7 +597,7 @@ async function usingDeclarationExample() {
 ### Singleton Pattern for Long-Running Apps
 
 ```typescript
-import { HtmlLayoutParser, CharLayout, MemoryMetrics } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser';
 
 /**
  * Singleton parser for long-running applications
@@ -722,7 +722,7 @@ async function longRunningAppExample() {
 ## Common Mistakes to Avoid
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 // ❌ MISTAKE 1: Forgetting to destroy
 async function mistake1() {

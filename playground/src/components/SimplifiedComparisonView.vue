@@ -1,4 +1,7 @@
-<template>
+Run pnpm run build:packages
+ ERR_PNPM_NO_SCRIPT  Missing script: build:packages
+Command "build:packages" not found. Did you mean "pnpm run build:wasm"?
+Error: Process completed with exit code 1.<template>
   <div class="comparison-view">
     <div class="comparison-panel">
       <div class="panel-header">

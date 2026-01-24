@@ -120,7 +120,7 @@ main();
 ```typescript
 // parser-worker.ts - Worker thread code
 
-import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
 
 let parser: HtmlLayoutParser | null = null;
 
@@ -315,7 +315,7 @@ main();
 ```typescript
 // offscreen-worker.ts
 
-import { HtmlLayoutParser, CharLayout } from '/workers/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/worker';
 
 let parser: HtmlLayoutParser | null = null;
 let canvas: OffscreenCanvas | null = null;
@@ -651,7 +651,7 @@ main();
 ```typescript
 // background-worker.ts
 
-import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
 
 let parser: HtmlLayoutParser | null = null;
 
@@ -720,7 +720,7 @@ Using multiple workers for parallel processing.
 ```typescript
 // worker-pool.ts
 
-import { CharLayout } from '/html-layout-parser/index.js';
+import { CharLayout } from 'html-layout-parser';
 
 interface PoolTask {
   id: string;

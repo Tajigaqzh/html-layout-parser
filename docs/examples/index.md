@@ -51,7 +51,7 @@ Correct memory management patterns:
 ### Minimal Example
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
 await parser.init();
@@ -117,7 +117,8 @@ if (result.success) {
 - Always call `destroy()` when done
 - Use `try/finally` for cleanup
 - Monitor memory in long-running apps
-- Copy the appropriate bundle to `public/` and import from it
+- Use direct import from npm package (recommended)
+- Configure Vite with `optimizeDeps.exclude` if needed
 
 ### Don'ts ❌
 

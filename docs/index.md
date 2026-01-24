@@ -54,17 +54,21 @@ This WASM-based solution is designed to provide cross-platform capabilities and 
 
 ## Quick Example
 
-::: tip Manual Copy Approach (Recommended)
-For reliable WASM loading, copy the pre-compiled bundles to your project:
+::: tip Direct Import (Recommended)
+Now supports direct import from npm package without manual file copying:
 
 ```bash
-# Copy web bundle to your public directory
-cp -r node_modules/html-layout-parser/web public/html-layout-parser
+npm install html-layout-parser
 ```
 
-Then load WASM globally in your HTML:
-```html
-<script src="/html-layout-parser/html_layout_parser.js"></script>
+**Vite users need configuration**:
+```typescript
+// vite.config.ts
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['html-layout-parser']
+  }
+})
 ```
 :::
 
@@ -76,8 +80,8 @@ Place font files in the `public` directory (not in `src`) to prevent build tools
 :::
 
 ```typescript
-// Import from copied files
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+// Direct import from npm package (web environment)
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
 const parser = new HtmlLayoutParser();
 await parser.init(); // Uses globally loaded WASM

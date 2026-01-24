@@ -4,28 +4,50 @@ Complete examples for using HTML Layout Parser in web browser environments.
 
 ## Setup
 
-Before using these examples, make sure you have copied the web bundle to your project:
+### Method 1: Direct Import (Recommended)
+
+For **Vite users**, first add this to your `vite.config.ts`:
+
+```typescript
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['html-layout-parser']
+  }
+})
+```
+
+Then use direct imports:
+
+```typescript
+// Import directly from npm package
+import { HtmlLayoutParser } from 'html-layout-parser/web';
+
+async function basicParsing() {
+  const parser = new HtmlLayoutParser();
+  await parser.init(); // Automatically loads WASM from node_modules
+  // ... rest of your code
+}
+```
+
+### Method 2: Manual Copy (Fallback)
+
+⚠️ **Only use this if you encounter bundler issues with direct import.**
+
+The direct import method (Method 1) is now the recommended approach. Manual copy is provided as a fallback for edge cases.
 
 ```bash
-# Copy web bundle to your public directory
+# Only if direct import doesn't work
 cp -r node_modules/html-layout-parser/web public/html-layout-parser
 ```
 
-And load the WASM module in your HTML:
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Your App</title>
-</head>
-<body>
-  <div id="app"></div>
-  <!-- Load WASM module globally -->
-  <script src="/html-layout-parser/html_layout_parser.js"></script>
-  <script type="module" src="/src/main.js"></script>
-</body>
-</html>
+async function basicParsing() {
+  const parser = new HtmlLayoutParser();
+  await parser.init('/html-layout-parser/html_layout_parser.mjs'); // Custom path
+  // ... rest of your code
+}
 ```
 
 ## Basic HTML Parsing
@@ -33,12 +55,12 @@ And load the WASM module in your HTML:
 The simplest example of parsing HTML and getting character layouts.
 
 ```typescript
-// Import from copied files
-import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
+// Import from environment-specific entry point
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
 
 async function basicParsing() {
   const parser = new HtmlLayoutParser();
-  await parser.init(); // Uses globally loaded WASM
+  await parser.init(); // Automatically loads WASM from npm package
 
   try {
     // Load a font (required before parsing)
@@ -71,7 +93,8 @@ async function basicParsing() {
 Loading and using multiple fonts with font-family fallback.
 
 ```typescript
-import { HtmlLayoutParser, FontInfo } from '/html-layout-parser/index.js';
+// Import from environment-specific entry point
+import { HtmlLayoutParser, FontInfo } from 'html-layout-parser/web';
 
 async function multiFontExample() {
   const parser = new HtmlLayoutParser();
@@ -132,7 +155,7 @@ async function multiFontExample() {
 Separating HTML content from CSS styles.
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
 async function cssSeparationExample() {
   const parser = new HtmlLayoutParser();
@@ -240,7 +263,7 @@ async function cssSeparationExample() {
 Separating HTML content from CSS styles.
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
 async function cssSeparationExample() {
   const parser = new HtmlLayoutParser();
@@ -297,7 +320,7 @@ async function cssSeparationExample() {
 Rendering parsed layouts to HTML Canvas.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
 
 function parseColor(color: string): string {
   if (!color || color === '#00000000') return 'transparent';
@@ -381,7 +404,7 @@ async function canvasRenderingExample() {
 Dynamic theme switching using CSS separation.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
 
 const themes = {
   light: `
@@ -492,7 +515,7 @@ import {
   CharLayout, 
   FontInfo,
   ParseResultWithDiagnostics 
-} from '/html-layout-parser/index.js';
+} from 'html-layout-parser';
 
 class HtmlLayoutApp {
   private parser: HtmlLayoutParser;

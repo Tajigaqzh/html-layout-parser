@@ -1,25 +1,12 @@
 // Worker for offscreen canvas rendering
-interface WasmModule {
-  _malloc: (size: number) => number
-  _free: (ptr: number) => void
-  _loadFont: (dataPtr: number, dataLen: number, namePtr: number) => number
-  _unloadFont: (fontId: number) => void
-  _setDefaultFont: (fontId: number) => void
-  _parseHTML: (htmlPtr: number, cssPtr: number, width: number, modePtr: number, debug: number) => number
-  _freeString: (ptr: number) => void
-  lengthBytesUTF8: (str: string) => number
-  stringToUTF8: (str: string, ptr: number, maxBytes: number) => void
-  UTF8ToString: (ptr: number) => string
-  HEAPU8: Uint8Array
-}
+import { HtmlLayoutParser } from 'html-layout-parser/worker'
 
-let wasmModule: WasmModule | null = null
+let parser: HtmlLayoutParser | null = null
 let currentFontId = 0
 
 interface RenderMessage {
   type: 'init' | 'loadFont' | 'render'
-  wasmJsPath?: string
-  wasmBinaryPath?: string
+  useNpmPackage?: boolean
   fontData?: Uint8Array
   fontName?: string
   html?: string
@@ -28,40 +15,22 @@ interface RenderMessage {
   canvas?: OffscreenCanvas
 }
 
-// Load WASM module
-async function initWasm(wasmJsPath: string, wasmBinaryPath: string) {
+// Initialize parser
+async function initParser() {
   try {
-    // Fetch and evaluate the WASM loader script
-    const response = await fetch(wasmJsPath)
-    const scriptText = await response.text()
-    
-    // Create a function from the script text and execute it
-    const scriptFunc = new Function(scriptText + '; return createHtmlLayoutParserModule;')
-    const createModule = scriptFunc()
-    
-    if (!createModule) {
-      throw new Error('WASM module factory not found')
-    }
-    
-    wasmModule = await createModule({
-      locateFile: (path: string) => {
-        if (path.endsWith('.wasm')) {
-          return wasmBinaryPath
-        }
-        return path
-      }
-    })
-    
-    return wasmModule
+    parser = new HtmlLayoutParser()
+    await parser.init()
+    console.log('[Worker] Parser initialized successfully')
+    return parser
   } catch (error) {
-    console.error('WASM init error:', error)
+    console.error('[Worker] Parser init error:', error)
     throw error
   }
 }
 
-// Load font into WASM
+// Load font into parser
 function loadFont(fontData: Uint8Array, fontName: string): number {
-  if (!wasmModule) {
+  if (!parser) {
     throw new Error('WASM not initialized')
   }
   
@@ -69,108 +38,47 @@ function loadFont(fontData: Uint8Array, fontName: string): number {
   
   // Unload previous font
   if (currentFontId > 0) {
-    wasmModule._unloadFont(currentFontId)
+    parser.unloadFont(currentFontId)
     currentFontId = 0
   }
   
-  // Allocate memory for font data
-  const dataPtr = wasmModule._malloc(fontData.length)
-  if (dataPtr === 0) {
-    throw new Error('Failed to allocate memory for font data')
+  // Load new font
+  const fontId = parser.loadFont(fontData, fontName)
+  
+  console.log('[Worker] Font loaded with ID:', fontId)
+  
+  if (fontId <= 0) {
+    throw new Error('Failed to load font')
   }
   
-  // Allocate memory for font name
-  const nameBytes = wasmModule.lengthBytesUTF8(fontName) + 1
-  const namePtr = wasmModule._malloc(nameBytes)
-  if (namePtr === 0) {
-    wasmModule._free(dataPtr)
-    throw new Error('Failed to allocate memory for font name')
-  }
+  // Set as default font
+  parser.setDefaultFont(fontId)
   
-  try {
-    // Copy data to WASM memory
-    wasmModule.HEAPU8.set(fontData, dataPtr)
-    wasmModule.stringToUTF8(fontName, namePtr, nameBytes)
-    
-    // Load font
-    const fontId = wasmModule._loadFont(dataPtr, fontData.length, namePtr)
-    
-    console.log('[Worker] Font loaded with ID:', fontId)
-    
-    if (fontId <= 0) {
-      throw new Error('Failed to load font')
-    }
-    
-    // Set as default font
-    wasmModule._setDefaultFont(fontId)
-    
-    currentFontId = fontId
-    return fontId
-  } finally {
-    wasmModule._free(dataPtr)
-    wasmModule._free(namePtr)
-  }
+  currentFontId = fontId
+  return fontId
 }
 
 // Parse HTML
 function parseHTML(html: string, css: string, width: number): any[] {
-  if (!wasmModule) {
+  if (!parser) {
     throw new Error('WASM not initialized')
   }
   
-  const mode = 'flat'
-  
   console.log('[Worker] Parsing HTML:', { htmlLength: html.length, cssLength: css.length, width })
   
-  // Allocate HTML string
-  const htmlBytes = wasmModule.lengthBytesUTF8(html) + 1
-  const htmlPtr = wasmModule._malloc(htmlBytes)
-  if (htmlPtr === 0) {
-    throw new Error('Failed to allocate memory for HTML')
+  const options: any = {
+    viewportWidth: width,
+    mode: 'flat'
   }
   
-  // Allocate mode string
-  const modeBytes = wasmModule.lengthBytesUTF8(mode) + 1
-  const modePtr = wasmModule._malloc(modeBytes)
-  if (modePtr === 0) {
-    wasmModule._free(htmlPtr)
-    throw new Error('Failed to allocate memory for mode')
-  }
-  
-  // Allocate CSS string if provided
-  let cssPtr = 0
   if (css && css.trim()) {
-    const cssBytes = wasmModule.lengthBytesUTF8(css) + 1
-    cssPtr = wasmModule._malloc(cssBytes)
-    if (cssPtr !== 0) {
-      wasmModule.stringToUTF8(css, cssPtr, cssBytes)
-    }
+    options.css = css
   }
   
-  try {
-    wasmModule.stringToUTF8(html, htmlPtr, htmlBytes)
-    wasmModule.stringToUTF8(mode, modePtr, modeBytes)
-    
-    const resultPtr = wasmModule._parseHTML(htmlPtr, cssPtr, width, modePtr, 0)
-    
-    if (resultPtr === 0) {
-      throw new Error('Parse returned null')
-    }
-    
-    const resultJson = wasmModule.UTF8ToString(resultPtr)
-    wasmModule._freeString(resultPtr)
-    
-    const layouts = JSON.parse(resultJson)
-    console.log('[Worker] Parse result:', { layoutCount: layouts.length, firstLayout: layouts[0] })
-    
-    return layouts
-  } finally {
-    wasmModule._free(htmlPtr)
-    wasmModule._free(modePtr)
-    if (cssPtr !== 0) {
-      wasmModule._free(cssPtr)
-    }
-  }
+  const layouts = parser.parse(html, options)
+  console.log('[Worker] Parse result:', { layoutCount: layouts.length, firstLayout: layouts[0] })
+  
+  return layouts
 }
 
 // Render to canvas
@@ -251,13 +159,13 @@ function renderToCanvas(
 
 // Message handler
 self.onmessage = async (e: MessageEvent<RenderMessage>) => {
-  const { type, wasmJsPath, wasmBinaryPath, fontData, fontName, html, css, width, canvas } = e.data
+  const { type, useNpmPackage, fontData, fontName, html, css, width, canvas } = e.data
   
   try {
     switch (type) {
       case 'init':
-        if (wasmJsPath && wasmBinaryPath) {
-          await initWasm(wasmJsPath, wasmBinaryPath)
+        if (useNpmPackage) {
+          await initParser()
           self.postMessage({ type: 'init', success: true })
         }
         break

@@ -1154,3 +1154,15 @@ export interface HtmlLayoutParserModule {
 export type CreateHtmlLayoutParserModule = (config?: {
   locateFile?: (path: string) => string;
 }) => Promise<HtmlLayoutParserModule>;
+
+/** 
+ * Emscripten module interface (alias for compatibility)
+ * Emscripten 模块接口（兼容性别名）
+ */
+export type EmscriptenModule = HtmlLayoutParserModule;
+
+/** 
+ * Module factory function type
+ * 模块工厂函数类型
+ */
+export type ModuleFactory = CreateHtmlLayoutParserModule;

@@ -4,28 +4,50 @@
 
 ## 准备工作
 
-在使用这些示例之前，请先将 web bundle 复制到项目中：
+### 方法 1：直接导入（推荐）
+
+对于 **Vite 用户**，首先在 `vite.config.ts` 中添加：
+
+```typescript
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['html-layout-parser']
+  }
+})
+```
+
+然后使用直接导入：
+
+```typescript
+// 直接从 npm 包导入
+import { HtmlLayoutParser } from 'html-layout-parser/web';
+
+async function basicParsing() {
+  const parser = new HtmlLayoutParser();
+  await parser.init(); // 自动从 node_modules 加载 WASM
+  // ... 其余代码
+}
+```
+
+### 方法 2：手动复制（备选）
+
+⚠️ **仅在直接导入遇到打包器问题时使用。**
+
+直接导入方法（方法1）现在是推荐方法。手动复制作为边缘情况的备选方案。
 
 ```bash
-# 复制 web bundle 到 public 目录
+# 仅在直接导入不工作时
 cp -r node_modules/html-layout-parser/web public/html-layout-parser
 ```
 
-并在 HTML 中全局加载 WASM 模块：
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Your App</title>
-</head>
-<body>
-  <div id="app"></div>
-  <!-- 全局加载 WASM 模块 -->
-  <script src="/html-layout-parser/html_layout_parser.js"></script>
-  <script type="module" src="/src/main.js"></script>
-</body>
-</html>
+async function basicParsing() {
+  const parser = new HtmlLayoutParser();
+  await parser.init('/html-layout-parser/html_layout_parser.mjs'); // 自定义路径
+  // ... 其余代码
+}
 ```
 
 ## 基本 Web 使用
@@ -145,8 +167,8 @@ p { font-style: italic; }
 
 ```typescript
 // app.ts
-// 从复制后的文件中引入
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+// 从环境特定入口点导入
+import { HtmlLayoutParser } from 'html-layout-parser/web';
 
 class WebParserDemo {
     private parser: HtmlLayoutParser;

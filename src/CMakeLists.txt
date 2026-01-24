@@ -172,6 +172,13 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${GUMBO_DIR}/include/gumbo
 )
 
+# Add FreeType include directories for Emscripten port
+if(USE_FREETYPE)
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        ${EMSCRIPTEN_ROOT_PATH}/cache/sysroot/include/freetype2
+    )
+endif()
+
 # Emscripten compile options
 set_target_properties(${PROJECT_NAME} PROPERTIES
     SUFFIX ".js"
@@ -186,8 +193,8 @@ else()
     set(EXCEPTION_LINK_FLAG "SHELL:-s DISABLE_EXCEPTION_CATCHING=1")
 endif()
 
-# Emscripten link options
-target_link_options(${PROJECT_NAME} PRIVATE
+# Common Emscripten link options
+set(COMMON_LINK_OPTIONS
     # Use FreeType port
     "SHELL:-s USE_FREETYPE=1"
     # Exported functions (v2 API)
@@ -198,10 +205,6 @@ target_link_options(${PROJECT_NAME} PRIVATE
     "SHELL:-s ALLOW_MEMORY_GROWTH=1"
     # Initial memory size (16MB)
     "SHELL:-s INITIAL_MEMORY=16777216"
-    # Modular output
-    "SHELL:-s MODULARIZE=1"
-    # Export name
-    "SHELL:-s EXPORT_NAME='createHtmlLayoutParserModule'"
     # Environment settings - support web and node
     "SHELL:-s ENVIRONMENT='web,node'"
     # Disable filesystem (not needed)
@@ -215,19 +218,102 @@ target_link_options(${PROJECT_NAME} PRIVATE
     -${OPTIMIZATION_LEVEL}
 )
 
-# Add LTO flag separately if enabled
-if(ENABLE_LTO)
-    target_link_options(${PROJECT_NAME} PRIVATE -flto)
-    target_compile_options(${PROJECT_NAME} PRIVATE -flto)
+# Add link options for original target
+target_link_options(${PROJECT_NAME} PRIVATE
+    ${COMMON_LINK_OPTIONS}
+)
+
+# Create ESM version
+add_executable(${PROJECT_NAME}_esm
+    ${SOURCE_GUMBO}
+    ${SOURCE_LITEHTML}
+    ${SOURCE_WASM_V2}
+)
+
+target_include_directories(${PROJECT_NAME}_esm PRIVATE
+    ${LITEHTML_ROOT}/include
+    ${LITEHTML_ROOT}/include/litehtml
+    ${LITEHTML_DIR}
+    ${GUMBO_DIR}/include
+    ${GUMBO_DIR}/include/gumbo
+)
+
+# Add FreeType include directories for ESM target
+if(USE_FREETYPE)
+    target_include_directories(${PROJECT_NAME}_esm PRIVATE
+        ${EMSCRIPTEN_ROOT_PATH}/cache/sysroot/include/freetype2
+    )
 endif()
 
-# Compile options - enable FreeType port at compile time
-target_compile_options(${PROJECT_NAME} PRIVATE
-    -${OPTIMIZATION_LEVEL}
-    -Wall
-    "SHELL:-s USE_FREETYPE=1"
-    ${EXCEPTION_COMPILE_FLAG}
+set_target_properties(${PROJECT_NAME}_esm PROPERTIES
+    SUFFIX ".mjs"
+    OUTPUT_NAME "html_layout_parser_esm"
 )
+
+target_link_options(${PROJECT_NAME}_esm PRIVATE
+    ${COMMON_LINK_OPTIONS}
+    # Modular output
+    "SHELL:-s MODULARIZE=1"
+    # Export name
+    "SHELL:-s EXPORT_NAME='createHtmlLayoutParserModule'"
+    # ES6 module format
+    "SHELL:-s EXPORT_ES6=1"
+    # ES6 module format (USE_ES6_IMPORT_META is deprecated)
+)
+
+# Create CommonJS version
+add_executable(${PROJECT_NAME}_cjs
+    ${SOURCE_GUMBO}
+    ${SOURCE_LITEHTML}
+    ${SOURCE_WASM_V2}
+)
+
+target_include_directories(${PROJECT_NAME}_cjs PRIVATE
+    ${LITEHTML_ROOT}/include
+    ${LITEHTML_ROOT}/include/litehtml
+    ${LITEHTML_DIR}
+    ${GUMBO_DIR}/include
+    ${GUMBO_DIR}/include/gumbo
+)
+
+# Add FreeType include directories for CJS target
+if(USE_FREETYPE)
+    target_include_directories(${PROJECT_NAME}_cjs PRIVATE
+        ${EMSCRIPTEN_ROOT_PATH}/cache/sysroot/include/freetype2
+    )
+endif()
+
+set_target_properties(${PROJECT_NAME}_cjs PROPERTIES
+    SUFFIX ".js"
+    OUTPUT_NAME "html_layout_parser_cjs"
+)
+
+target_link_options(${PROJECT_NAME}_cjs PRIVATE
+    ${COMMON_LINK_OPTIONS}
+    # Modular output
+    "SHELL:-s MODULARIZE=1"
+    # Export name
+    "SHELL:-s EXPORT_NAME='createHtmlLayoutParserModule'"
+    # CommonJS format (default)
+)
+
+# Add LTO flag separately if enabled for both targets
+if(ENABLE_LTO)
+    target_link_options(${PROJECT_NAME}_esm PRIVATE -flto)
+    target_compile_options(${PROJECT_NAME}_esm PRIVATE -flto)
+    target_link_options(${PROJECT_NAME}_cjs PRIVATE -flto)
+    target_compile_options(${PROJECT_NAME}_cjs PRIVATE -flto)
+endif()
+
+# Compile options for both targets
+foreach(target ${PROJECT_NAME}_esm ${PROJECT_NAME}_cjs ${PROJECT_NAME})
+    target_compile_options(${target} PRIVATE
+        -${OPTIMIZATION_LEVEL}
+        -Wall
+        "SHELL:-s USE_FREETYPE=1"
+        ${EXCEPTION_COMPILE_FLAG}
+    )
+endforeach()
 
 # Print build configuration summary
 message(STATUS "=== Build Configuration ===")

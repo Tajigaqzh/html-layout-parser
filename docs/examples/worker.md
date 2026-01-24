@@ -101,7 +101,7 @@ async function main() {
 ```typescript
 // parser-worker.ts
 // Import from copied files
-import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
 
 let parser: HtmlLayoutParser | null = null;
 
@@ -248,7 +248,7 @@ async function main() {
 ```typescript
 // offscreen-worker.ts
 // Import from copied files
-import { HtmlLayoutParser, CharLayout } from '/workers/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/worker';
 
 let parser: HtmlLayoutParser | null = null;
 let canvas: OffscreenCanvas | null = null;
@@ -340,7 +340,7 @@ self.onmessage = async (event: MessageEvent) => {
 Use multiple workers for parallel processing.
 
 ```typescript
-import { CharLayout } from '/html-layout-parser/index.js';
+import { CharLayout } from 'html-layout-parser/worker';
 
 interface PoolTask {
   id: string;

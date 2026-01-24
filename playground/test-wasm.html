@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>WASM Loading Test</title>
+</head>
+<body>
+    <h1>WASM Loading Test</h1>
+    <div id="status">Testing...</div>
+    <div id="result"></div>
+
+    <script type="module">
+        async function testWasmLoading() {
+            const statusDiv = document.getElementById('status');
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                statusDiv.textContent = 'Loading HtmlLayoutParser...';
+                
+                // Import the web version
+                const { HtmlLayoutParser } = await import('/node_modules/html-layout-parser/dist/web.js');
+                
+                statusDiv.textContent = 'Creating parser instance...';
+                const parser = new HtmlLayoutParser();
+                
+                statusDiv.textContent = 'Initializing WASM...';
+                await parser.init();
+                
+                statusDiv.textContent = 'Testing parse...';
+                const result = parser.parse('<div>Hello World</div>', { viewportWidth: 800 });
+                
+                statusDiv.textContent = 'Success!';
+                resultDiv.innerHTML = `
+                    <h2>Test Results:</h2>
+                    <p>Parser initialized successfully</p>
+                    <p>Parse result: ${result.length} layout items</p>
+                    <pre>${JSON.stringify(result.slice(0, 3), null, 2)}</pre>
+                `;
+                
+                parser.destroy();
+            } catch (error) {
+                statusDiv.textContent = 'Error!';
+                resultDiv.innerHTML = `
+                    <h2>Error:</h2>
+                    <p style="color: red;">${error.message}</p>
+                    <pre style="color: red;">${error.stack}</pre>
+                `;
+            }
+        }
+        
+        testWasmLoading();
+    </script>
+</body>
+</html>

@@ -7,7 +7,8 @@
 高效批量处理的关键是加载一次字体并重复使用。
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+// 从环境特定入口点导入
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
 
 // ✅ 正确：加载一次字体，解析多个文档
 async function efficientBatchProcessing(documents: string[]): Promise<CharLayout[][]> {
@@ -61,7 +62,7 @@ async function inefficientProcessing(documents: string[]): Promise<CharLayout[][
 ## 顺序批量处理
 
 ```typescript
-import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser/web';
 
 interface BatchResult {
   index: number;
@@ -189,7 +190,7 @@ async function sequentialBatchExample() {
 ## 并行文档解析
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
 
 // 分块并行处理
 async function chunkedParallelProcessing(
@@ -261,7 +262,7 @@ async function parallelWithCSS(documents: DocumentWithCSS[]): Promise<CharLayout
 ## 高吞吐量模式
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/web';
 
 class HighThroughputParser {
   private parser: HtmlLayoutParser;
@@ -385,7 +386,7 @@ async function highThroughputExample() {
 ## 内存高效的批量处理
 
 ```typescript
-import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser';
+import { HtmlLayoutParser, CharLayout, MemoryMetrics } from 'html-layout-parser/web';
 
 class MemoryEfficientProcessor {
   private parser: HtmlLayoutParser;

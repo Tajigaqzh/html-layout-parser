@@ -772,22 +772,46 @@ var HtmlLayoutParser2 = class extends HtmlLayoutParser {
     if (this.isInitialized()) {
       return;
     }
-    const jsPath = wasmPath || "./html_layout_parser.js";
-    try {
-      const wasmModule = await import(
-        /* @vite-ignore */
-        jsPath
-      );
-      const createModule = wasmModule.default || wasmModule.createModule || wasmModule;
-      if (typeof createModule === "function") {
-        this.setModuleLoader(async () => createModule());
-        await super.init();
-        return;
+    const loadingStrategies = [
+      // 1. Custom path provided by user
+      wasmPath,
+      // 2. Try ESM version first
+      "./html_layout_parser.mjs",
+      // 3. Try CJS version
+      "./html_layout_parser.cjs",
+      // 4. Try legacy .js version
+      "./html_layout_parser.js"
+    ].filter(Boolean);
+    for (const jsPath of loadingStrategies) {
+      try {
+        const wasmModule = await import(
+          /* @vite-ignore */
+          jsPath
+        );
+        const createModule = wasmModule.default || wasmModule.createHtmlLayoutParserModule || wasmModule;
+        if (typeof createModule === "function") {
+          this.setModuleLoader(async () => {
+            return createModule({
+              locateFile: (path) => {
+                console.debug(`[Node.js] locateFile called with path: ${path}`);
+                if (path.endsWith(".wasm")) {
+                  const url = new URL("html_layout_parser.wasm", import.meta.url);
+                  const wasmPath2 = url.pathname;
+                  console.debug(`[Node.js] Resolved WASM path: ${wasmPath2}`);
+                  return wasmPath2;
+                }
+                return path;
+              }
+            });
+          });
+          await super.init();
+          return;
+        }
+      } catch (error) {
+        console.debug(`Failed to load WASM from ${jsPath}:`, error);
       }
-    } catch (error) {
-      throw new Error(`Failed to load WASM module in Node.js: ${error}`);
     }
-    throw new Error("Failed to load WASM module factory function in Node.js");
+    throw new Error("Failed to load WASM module in Node.js: No compatible WASM module found");
   }
   /**
    * Load a font from a file path (Node.js only)

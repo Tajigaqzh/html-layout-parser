@@ -8,112 +8,182 @@ Install the HTML Layout Parser package from npm:
 npm install html-layout-parser
 ```
 
-## Setup for Different Environments
+### ⚠️ Important: Vite Users Must Configure
 
-HTML Layout Parser provides pre-compiled bundles for different environments. After installation, you need to copy the appropriate bundle to your project.
+If you're using **Vite**, add this to your `vite.config.ts` **before using the package**:
 
-### Web Browser Setup
+```typescript
+import { defineConfig } from 'vite'
 
-1. **Copy the web bundle to your project:**
+export default defineConfig({
+  optimizeDeps: {
+    exclude: ['html-layout-parser']
+  }
+})
+```
+
+**Why?** Vite's dependency pre-bundling breaks WASM modules. This configuration prevents that.
+
+## Usage Methods
+
+HTML Layout Parser now supports both **direct import** and **manual copy** approaches:
+
+### Method 1: Direct Import (Recommended)
+
+You can now directly import and use the package without manual file copying:
+
+```typescript
+// ESM import (recommended)
+import { HtmlLayoutParser } from 'html-layout-parser';
+
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init(); // Automatically loads WASM from node_modules
+  
+  // Load font
+  const fontResponse = await fetch('/fonts/arial.ttf');
+  const fontData = new Uint8Array(await fontResponse.arrayBuffer());
+  const fontId = parser.loadFont(fontData, 'Arial');
+  parser.setDefaultFont(fontId);
+  
+  // Parse HTML
+  const layouts = parser.parse('<div>Hello World</div>', { viewportWidth: 800 });
+  
+  parser.destroy();
+}
+```
+
+```javascript
+// CommonJS require (also supported)
+const { HtmlLayoutParser } = require('html-layout-parser');
+
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init();
+  // ... rest of the code
+}
+```
+
+#### Environment-Specific Imports
+
+For better tree-shaking and explicit targeting:
+
+```typescript
+// Web browser
+import { HtmlLayoutParser } from 'html-layout-parser/web';
+
+// Node.js
+import { HtmlLayoutParser } from 'html-layout-parser/node';
+
+// Web Worker
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
+```
+
+#### Direct WASM Module Access
+
+For advanced use cases:
+
+```typescript
+// Direct WASM module import
+import createModule from 'html-layout-parser/wasm';
+
+const wasmModule = await createModule();
+// Use low-level WASM API directly
+```
+
+### Method 2: Manual Copy (Fallback)
+
+⚠️ **Only use this method if you encounter bundler issues with direct import.**
+
+The direct import method (Method 1) is now the recommended approach. Manual copy is provided as a fallback for edge cases.
+
+#### Web Browser Setup
 
 ```bash
-# Copy web bundle to your public directory
+# Only if direct import fails
 cp -r node_modules/html-layout-parser/web public/html-layout-parser
 ```
 
-2. **Your project structure should look like:**
+```typescript
+// Import from copied files
+import { HtmlLayoutParser } from 'html-layout-parser';
 
-```
-public/
-  html-layout-parser/
-    html_layout_parser.js    # WASM loader
-    html_layout_parser.wasm  # WASM binary
-    index.js                 # TypeScript compiled code
-    index.d.ts               # Type definitions
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init('/html-layout-parser/html_layout_parser.mjs');
+  // ... rest of the code
+}
 ```
 
-3. **Load WASM globally in your HTML:**
+#### Node.js Setup
+
+```bash
+# Only if direct import fails
+cp -r node_modules/html-layout-parser/node ./lib/html-layout-parser
+```
+
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser/node';
+
+async function example() {
+  const parser = new HtmlLayoutParser();
+  await parser.init('./lib/html-layout-parser/html_layout_parser.mjs');
+  // ... rest of the code
+}
+```
+
+## CDN Usage
+
+You can also use the package directly from CDN:
 
 ```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Your App</title>
-</head>
-<body>
-  <div id="app"></div>
-  <!-- Load WASM module globally -->
-  <script src="/html-layout-parser/html_layout_parser.js"></script>
-  <script type="module" src="/src/main.js"></script>
-</body>
-</html>
+<script type="module">
+  import { HtmlLayoutParser } from 'https://unpkg.com/html-layout-parser@latest/dist/index.js';
+  
+  const parser = new HtmlLayoutParser();
+  await parser.init('https://unpkg.com/html-layout-parser@latest/dist/html_layout_parser.mjs');
+  
+  // Use parser...
+</script>
 ```
 
-4. **Import in your code:**
+## TypeScript Support
+
+Full TypeScript support is included:
 
 ```typescript
-// Import from the copied files
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { 
+  HtmlLayoutParser, 
+  CharLayout, 
+  ParseOptions,
+  MemoryMetrics,
+  detectEnvironment 
+} from 'html-layout-parser';
 
-async function example() {
-  const parser = new HtmlLayoutParser();
-  await parser.init(); // Will use globally loaded WASM module
-  
-  // Load font and parse...
-}
+const env = detectEnvironment(); // 'web' | 'worker' | 'node' | 'unknown'
+const parser = new HtmlLayoutParser();
+
+const layouts: CharLayout[] = parser.parse(html, {
+  viewportWidth: 800
+} satisfies ParseOptions);
 ```
 
-### Node.js Setup
+## Browser Support
 
-1. **Copy the Node.js bundle:**
+- Chrome 57+ (ES6 modules)
+- Firefox 60+ (ES6 modules)
+- Safari 11+ (ES6 modules)
+- Edge 16+ (ES6 modules)
 
-```bash
-# Copy to your project's lib directory
-cp -r node_modules/html-layout-parser/node ./src/lib/html-layout-parser
-```
+## Node.js Support
 
-2. **Import in your Node.js code:**
+- Node.js 16+ (ESM support)
+- Node.js 14+ (with `--experimental-modules`)
 
-```typescript
-import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+## Next Steps
 
-async function example() {
-  const parser = new HtmlLayoutParser();
-  await parser.init('./lib/html-layout-parser/html_layout_parser.js');
-  
-  // Load font and parse...
-}
-```
+After installation:
 
-### Web Worker Setup
-
-1. **Copy the worker bundle:**
-
-```bash
-# Copy to your workers directory
-cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
-```
-
-2. **Import in your worker:**
-
-```typescript
-// In your worker file
-import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
-
-async function example() {
-  const parser = new HtmlLayoutParser();
-  await parser.init('/workers/html-layout-parser/html_layout_parser.js');
-  
-  // Load font and parse...
-}
-```
-
-## Why Manual Copy?
-
-We recommend manual copying because:
-
-- **🔒 Reliable**: Works with all bundlers and deployment environments
-- **📦 Predictable**: WASM files are served as static assets
-- **⚡ Fast**: No complex module resolution or dynamic imports
-- **🌐 Compatible**: Works with CDNs, static hosting, and any web server
-- **🎯 Simple**: Clear file locations and import paths
+1. 📖 Read the [Getting Started Guide](./getting-started.md)
+2. 🎯 Try the [Quick Start](../guides/quick-start.md)
+3. 📚 Explore [Examples](../examples/index.md)

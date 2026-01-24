@@ -19,7 +19,7 @@ Basic setup and usage in Node.js.
 ```typescript
 // basic-node.ts
 
-import { HtmlLayoutParser, CharLayout } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/node';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -65,7 +65,7 @@ Using the Node.js-specific `loadFontFromFile` method.
 ```typescript
 // file-font-loading.ts
 
-import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/node';
 import * as path from 'path';
 
 async function fileFontLoadingExample() {
@@ -153,7 +153,7 @@ Processing multiple HTML files efficiently.
 ```typescript
 // batch-processing.ts
 
-import { HtmlLayoutParser, CharLayout } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/node';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -263,7 +263,7 @@ Using the parser in an Express.js server.
 // server.ts
 
 import express, { Request, Response } from 'express';
-import { HtmlLayoutParser, CharLayout, LayoutDocument } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout, LayoutDocument } from 'html-layout-parser/node';
 import * as path from 'path';
 
 // Parser singleton with lazy initialization
@@ -496,7 +496,7 @@ A command-line tool for parsing HTML files.
 #!/usr/bin/env node
 // cli.ts
 
-import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/node';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 

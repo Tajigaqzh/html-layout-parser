@@ -1,6 +1,6 @@
 # Quick Start Guide
 
-Get started with HTML Layout Parser in minutes using the manual copy approach.
+Get started with HTML Layout Parser in minutes.
 
 ## Installation
 
@@ -8,43 +8,16 @@ Get started with HTML Layout Parser in minutes using the manual copy approach.
 npm install html-layout-parser
 ```
 
-## Setup
-
-### For Web Applications
-
-1. **Copy the web bundle:**
-
-```bash
-cp -r node_modules/html-layout-parser/web public/html-layout-parser
-```
-
-2. **Load WASM in your HTML:**
-
-```html
-<!DOCTYPE html>
-<html>
-<head>
-  <title>Your App</title>
-</head>
-<body>
-  <div id="app"></div>
-  <!-- Load WASM module globally -->
-  <script src="/html-layout-parser/html_layout_parser.js"></script>
-  <script type="module" src="/src/main.js"></script>
-</body>
-</html>
-```
-
 ## Basic Usage
 
 ### Step 1: Import and Initialize
 
 ```typescript
-// Import from copied files
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+// Import directly from npm package
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
-await parser.init(); // Uses globally loaded WASM
+await parser.init(); // Automatically loads WASM from node_modules
 ```
 
 ### Step 2: Load a Font
@@ -88,7 +61,7 @@ parser.destroy();
 ## Complete Example
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 async function main() {
   const parser = new HtmlLayoutParser();
@@ -129,35 +102,72 @@ async function main() {
 main().catch(console.error);
 ```
 
-## Environment-Specific Setup
+## Environment-Specific Usage
 
-### Node.js
+### Auto-detect (Recommended)
+```typescript
+import { HtmlLayoutParser, detectEnvironment } from 'html-layout-parser';
+
+console.log(`Running in ${detectEnvironment()} environment`);
+const parser = new HtmlLayoutParser();
+await parser.init();
+```
+
+### Explicit Environment
+```typescript
+// Web browser
+import { HtmlLayoutParser } from 'html-layout-parser/web';
+
+// Node.js
+import { HtmlLayoutParser } from 'html-layout-parser/node';
+
+// Web Worker
+import { HtmlLayoutParser } from 'html-layout-parser/worker';
+```
+
+### Node.js with File Loading
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser/node';
+
+const parser = new HtmlLayoutParser();
+await parser.init();
+
+// Load font from file (Node.js only)
+const fontId = await parser.loadFontFromFile('./fonts/arial.ttf', 'Arial');
+parser.setDefaultFont(fontId);
+```
+
+## Alternative: Manual Copy Setup
+
+If you encounter bundler issues, you can still use the manual copy approach:
+
+### For Web Applications
 
 ```bash
-# Copy Node.js bundle
-cp -r node_modules/html-layout-parser/node ./src/lib/html-layout-parser
+# Copy the web bundle
+cp -r node_modules/html-layout-parser/web public/html-layout-parser
 ```
 
 ```typescript
-import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+// Import from copied files
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
-await parser.init('./lib/html-layout-parser/html_layout_parser.js');
+await parser.init('/html-layout-parser/html_layout_parser.mjs');
 ```
 
-### Web Worker
+### For Node.js Applications
 
 ```bash
-# Copy worker bundle
-cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
+# Copy the Node.js bundle
+cp -r node_modules/html-layout-parser/node ./lib/html-layout-parser
 ```
 
 ```typescript
-// In worker file
-import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/node';
 
 const parser = new HtmlLayoutParser();
-await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+await parser.init('./lib/html-layout-parser/html_layout_parser.mjs');
 ```
 
 ## Next Steps
@@ -166,201 +176,3 @@ await parser.init('/workers/html-layout-parser/html_layout_parser.js');
 - 🎨 Check out [Web Examples](../examples/web.md) for canvas rendering
 - 🔧 Learn about [Memory Management](../examples/memory.md)
 - 📚 Browse all [Examples](../examples/index.md)
-
-### Step 4: Clean Up
-
-```typescript
-// Always destroy when done
-parser.destroy();
-```
-
-## Complete Example
-
-```typescript
-import { HtmlLayoutParser, CharLayout } from '/html-layout-parser/index.js';
-
-async function main() {
-  // Initialize parser
-  const parser = new HtmlLayoutParser();
-  await parser.init();
-
-  try {
-    // Load font
-    const fontResponse = await fetch('/fonts/arial.ttf');
-    const fontData = new Uint8Array(await fontResponse.arrayBuffer());
-    const fontId = parser.loadFont(fontData, 'Arial');
-    parser.setDefaultFont(fontId);
-
-    // Parse HTML
-    const html = `
-      <div style="font-size: 24px; color: blue;">
-        Hello World
-      </div>
-    `;
-
-    const layouts = parser.parse(html, { viewportWidth: 800 });
-
-    // Render to canvas
-    const canvas = document.getElementById('canvas') as HTMLCanvasElement;
-    const ctx = canvas.getContext('2d')!;
-
-    for (const char of layouts) {
-      ctx.font = `${char.fontSize}px ${char.fontFamily}`;
-      ctx.fillStyle = char.color;
-      ctx.fillText(char.character, char.x, char.baseline);
-    }
-
-  } finally {
-    parser.destroy();
-  }
-}
-
-main();
-```
-
-## Using External CSS
-
-Separate your HTML and CSS:
-
-```typescript
-const html = '<div class="title">Hello World</div>';
-const css = `
-  .title {
-    color: red;
-    font-size: 24px;
-    font-weight: bold;
-  }
-`;
-
-const layouts = parser.parse(html, {
-  viewportWidth: 800,
-  css: css
-});
-```
-
-Or use the convenience method:
-
-```typescript
-const layouts = parser.parseWithCSS(html, css, { viewportWidth: 800 });
-```
-
-## Output Modes
-
-### Flat Mode (Default)
-
-Returns a flat array of characters:
-
-```typescript
-const chars: CharLayout[] = parser.parse(html, { viewportWidth: 800 });
-```
-
-### By Row Mode
-
-Groups characters by row:
-
-```typescript
-const rows = parser.parse<'byRow'>(html, { 
-  viewportWidth: 800, 
-  mode: 'byRow' 
-});
-
-for (const row of rows) {
-  console.log(`Row ${row.rowIndex} at y=${row.y}`);
-  for (const char of row.children) {
-    console.log(`  ${char.character}`);
-  }
-}
-```
-
-### Full Mode
-
-Returns complete document hierarchy:
-
-```typescript
-const doc = parser.parse<'full'>(html, { 
-  viewportWidth: 800, 
-  mode: 'full' 
-});
-
-for (const page of doc.pages) {
-  for (const block of page.blocks) {
-    console.log(`Block: ${block.type}`);
-    for (const line of block.lines) {
-      console.log(`  Line at y=${line.y}`);
-    }
-  }
-}
-```
-
-## Error Handling
-
-Use `parseWithDiagnostics` for detailed error information:
-
-```typescript
-const result = parser.parseWithDiagnostics(html, { viewportWidth: 800 });
-
-if (result.success) {
-  console.log('Parsed:', result.data);
-} else {
-  console.error('Errors:', result.errors);
-}
-
-if (result.warnings?.length) {
-  console.warn('Warnings:', result.warnings);
-}
-```
-
-## Multi-Font Support
-
-Load multiple fonts for font-family fallback:
-
-```typescript
-// Load multiple fonts
-const arialId = parser.loadFont(arialData, 'Arial');
-const timesId = parser.loadFont(timesData, 'Times New Roman');
-const georgiaId = parser.loadFont(georgiaData, 'Georgia');
-
-// Set default
-parser.setDefaultFont(arialId);
-
-// HTML with font-family
-const html = `
-  <div style="font-family: 'Times New Roman', Georgia, Arial;">
-    This text uses Times New Roman
-  </div>
-`;
-
-const layouts = parser.parse(html, { viewportWidth: 800 });
-```
-
-## Environment-Specific Usage
-
-### Web Browser
-
-```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
-```
-
-### Web Worker
-
-```typescript
-import { HtmlLayoutParser } from '/workers/html-layout-parser/index.js';
-```
-
-### Node.js
-
-```typescript
-import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
-
-const parser = new HtmlLayoutParser();
-await parser.init('./lib/html-layout-parser/html_layout_parser.js');
-
-// Node.js can load fonts from files
-const fontId = await parser.loadFontFromFile('./fonts/arial.ttf', 'Arial');
-```
-
-## Next Steps
-
-- [Memory Management Guide](./memory-management.md) - Best practices for memory
-- [Performance Guide](./performance.md) - Optimization techniques
-- [API Reference](../README.md#api-reference) - Complete API documentation

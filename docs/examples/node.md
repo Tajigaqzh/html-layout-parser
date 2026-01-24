@@ -15,7 +15,7 @@ cp -r node_modules/html-layout-parser/node ./src/lib/html-layout-parser
 
 ```typescript
 // Import from copied files
-import { HtmlLayoutParser, CharLayout } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/node';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -55,7 +55,7 @@ basicNodeExample().catch(console.error);
 Using the Node.js-specific `loadFontFromFile` method.
 
 ```typescript
-import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/node';
 import * as path from 'path';
 
 async function fileFontLoadingExample() {
@@ -117,7 +117,7 @@ async function fileFontLoadingExample() {
 Processing multiple HTML files efficiently.
 
 ```typescript
-import { HtmlLayoutParser, CharLayout } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/node';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 
@@ -203,7 +203,7 @@ async function batchProcessingExample() {
 
 ```typescript
 import express, { Request, Response } from 'express';
-import { HtmlLayoutParser, CharLayout } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser, CharLayout } from 'html-layout-parser/node';
 import * as path from 'path';
 
 // Parser singleton
@@ -298,7 +298,7 @@ process.on('SIGTERM', () => {
 
 ```typescript
 #!/usr/bin/env node
-import { HtmlLayoutParser } from './lib/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser/node';
 import * as fs from 'fs/promises';
 import * as path from 'path';
 

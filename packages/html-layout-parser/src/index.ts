@@ -40,43 +40,19 @@
  */
 
 import { HtmlLayoutParser as BaseParser } from './HtmlLayoutParser';
+import { loadWasmModule, detectEnvironment as detectEnv } from './wasm-loader';
 import type { Environment, CreateHtmlLayoutParserModule } from './types';
 
 // Re-export all types
 export * from './types';
 export { BaseParser as HtmlLayoutParserBase };
+export { isESMSupported, isCJSSupported } from './wasm-loader';
 
 /**
  * Detect the current runtime environment
  */
 export function detectEnvironment(): Environment {
-  // Check Node.js first (most specific)
-  if (
-    typeof globalThis !== 'undefined' &&
-    typeof (globalThis as any).process !== 'undefined' &&
-    (globalThis as any).process.versions?.node !== undefined
-  ) {
-    return 'node';
-  }
-
-  // Check Worker before Web (Worker has self but no window.document)
-  if (
-    typeof self !== 'undefined' &&
-    typeof (self as any).WorkerGlobalScope !== 'undefined' &&
-    self instanceof (self as any).WorkerGlobalScope
-  ) {
-    return 'worker';
-  }
-
-  // Check Web browser
-  if (
-    typeof window !== 'undefined' &&
-    typeof window.document !== 'undefined'
-  ) {
-    return 'web';
-  }
-
-  return 'unknown';
+  return detectEnv();
 }
 
 /**
@@ -100,97 +76,14 @@ export class HtmlLayoutParser extends BaseParser {
       return;
     }
 
-    const env = this.getEnvironment();
-    const jsPath = wasmPath || './html_layout_parser.js';
-
-    switch (env) {
-      case 'node':
-        await this.initNode(jsPath);
-        break;
-      case 'worker':
-        await this.initWorker(jsPath);
-        break;
-      case 'web':
-        await this.initWeb(jsPath);
-        break;
-      default:
-        throw new Error(`Unsupported environment: ${env}`);
-    }
-  }
-
-  private async initWeb(jsPath: string): Promise<void> {
     try {
-      const wasmModule = await import(/* @vite-ignore */ jsPath);
-      const createModule: CreateHtmlLayoutParserModule = 
-        wasmModule.default || wasmModule.createModule || wasmModule;
-
-      if (typeof createModule === 'function') {
-        this.setModuleLoader(async () => createModule());
-        await super.init();
-        return;
-      }
-    } catch {
-      // Fall back to global
-    }
-
-    const globalCreateModule = (globalThis as any).createHtmlLayoutParserModule;
-    if (typeof globalCreateModule === 'function') {
-      this.setModuleLoader(async () => globalCreateModule());
+      // Use the new WASM loader that handles both ESM and CJS
+      const wasmModule = await loadWasmModule(wasmPath);
+      this.setModuleLoader(async () => wasmModule);
       await super.init();
-      return;
-    }
-
-    throw new Error('Failed to load WASM module in web environment');
-  }
-
-  private async initWorker(jsPath: string): Promise<void> {
-    try {
-      const wasmModule = await import(/* @vite-ignore */ jsPath);
-      const createModule: CreateHtmlLayoutParserModule = 
-        wasmModule.default || wasmModule.createModule || wasmModule;
-
-      if (typeof createModule === 'function') {
-        this.setModuleLoader(async () => createModule());
-        await super.init();
-        return;
-      }
-    } catch {
-      // Fall back to importScripts
-    }
-
-    if (typeof self !== 'undefined' && typeof (self as any).importScripts === 'function') {
-      try {
-        (self as any).importScripts(jsPath);
-        const globalCreateModule = (self as any).createHtmlLayoutParserModule;
-        if (typeof globalCreateModule === 'function') {
-          this.setModuleLoader(async () => globalCreateModule());
-          await super.init();
-          return;
-        }
-      } catch {
-        // importScripts failed
-      }
-    }
-
-    throw new Error('Failed to load WASM module in worker environment');
-  }
-
-  private async initNode(jsPath: string): Promise<void> {
-    try {
-      const wasmModule = await import(/* @vite-ignore */ jsPath);
-      const createModule: CreateHtmlLayoutParserModule = 
-        wasmModule.default || wasmModule.createModule || wasmModule;
-
-      if (typeof createModule === 'function') {
-        this.setModuleLoader(async () => createModule());
-        await super.init();
-        return;
-      }
     } catch (error) {
-      throw new Error(`Failed to load WASM module in Node.js: ${error}`);
+      throw new Error(`Failed to initialize WASM module: ${error}`);
     }
-
-    throw new Error('Failed to load WASM module factory function in Node.js');
   }
 
   /**

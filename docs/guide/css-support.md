@@ -309,7 +309,7 @@ Use basic, well-supported CSS properties. Avoid cutting-edge features.
 Always test your HTML/CSS with HTML Layout Parser to ensure it renders correctly:
 
 ```typescript
-import { HtmlLayoutParser } from '/html-layout-parser/index.js';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
 await parser.initFont('/fonts/arial.ttf');

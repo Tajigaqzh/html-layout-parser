@@ -525,7 +525,7 @@ enum ErrorCode {
 Create a new parser instance.
 
 ```typescript
-import { createParser } from '/html-layout-parser/index.js';
+import { createParser } from 'html-layout-parser';
 
 const parser = createParser();
 await parser.init();
@@ -540,7 +540,7 @@ await parser.init();
 Detect the current runtime environment.
 
 ```typescript
-import { detectEnvironment } from '/html-layout-parser/index.js';
+import { detectEnvironment } from 'html-layout-parser';
 
 const env = detectEnvironment(); // 'web' | 'worker' | 'node' | 'unknown'
 ```

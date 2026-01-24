@@ -132,8 +132,48 @@ echo ""
 
 # Create output directory and copy final files
 mkdir -p "${OUTPUT_DIR}"
-cp "${BUILD_DIR}/html_layout_parser.js" "${OUTPUT_DIR}/"
-cp "${BUILD_DIR}/html_layout_parser.wasm" "${OUTPUT_DIR}/"
+
+# Copy ESM files
+if [ -f "${BUILD_DIR}/html_layout_parser_esm.mjs" ]; then
+    cp "${BUILD_DIR}/html_layout_parser_esm.mjs" "${OUTPUT_DIR}/html_layout_parser.mjs"
+    echo "ESM module: html_layout_parser.mjs"
+fi
+
+# Copy CommonJS files  
+if [ -f "${BUILD_DIR}/html_layout_parser_cjs.js" ]; then
+    cp "${BUILD_DIR}/html_layout_parser_cjs.js" "${OUTPUT_DIR}/html_layout_parser.cjs"
+    echo "CommonJS module: html_layout_parser.cjs"
+fi
+
+# Use ESM WASM file as the unified WASM file (they're identical in content)
+if [ -f "${BUILD_DIR}/html_layout_parser_esm.wasm" ]; then
+    cp "${BUILD_DIR}/html_layout_parser_esm.wasm" "${OUTPUT_DIR}/html_layout_parser.wasm"
+    echo "Unified WASM binary: html_layout_parser.wasm"
+fi
+
+# Copy original WASM file for backward compatibility if different
+if [ -f "${BUILD_DIR}/html_layout_parser.wasm" ] && [ ! -f "${OUTPUT_DIR}/html_layout_parser.wasm" ]; then
+    cp "${BUILD_DIR}/html_layout_parser.wasm" "${OUTPUT_DIR}/html_layout_parser.wasm"
+    echo "Original WASM binary: html_layout_parser.wasm"
+fi
+
+# Copy TypeScript declaration files
+if [ -f "${BUILD_DIR}/html_layout_parser_esm.d.ts" ]; then
+    cp "${BUILD_DIR}/html_layout_parser_esm.d.ts" "${OUTPUT_DIR}/html_layout_parser.d.ts"
+    echo "TypeScript declarations: html_layout_parser.d.ts"
+fi
+
+# Also copy our custom TypeScript declarations
+if [ -f "${SRC_DIR}/html_layout_parser.d.ts" ]; then
+    cp "${SRC_DIR}/html_layout_parser.d.ts" "${OUTPUT_DIR}/html_layout_parser_types.d.ts"
+    echo "Custom TypeScript declarations: html_layout_parser_types.d.ts"
+fi
+
+# Create legacy symlinks for backward compatibility
+if [ -f "${OUTPUT_DIR}/html_layout_parser.mjs" ]; then
+    ln -sf html_layout_parser.mjs "${OUTPUT_DIR}/html_layout_parser.js"
+    echo "Legacy symlink: html_layout_parser.js -> html_layout_parser.mjs"
+fi
 
 if [ "${RUN_WASM_OPT}" = "ON" ]; then
     WASM_OPT_BIN="${WASM_OPT_BIN:-}"

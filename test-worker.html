@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Worker Test</title>
+</head>
+<body>
+    <h1>Worker Environment Test</h1>
+    <div id="status">Testing...</div>
+    <div id="result"></div>
+
+    <script type="module">
+        async function testWorker() {
+            const statusDiv = document.getElementById('status');
+            const resultDiv = document.getElementById('result');
+            
+            try {
+                statusDiv.textContent = 'Creating worker...';
+                
+                // Create worker with module type
+                const worker = new Worker('/test-worker.js', { type: 'module' });
+                
+                worker.onmessage = (event) => {
+                    const { type, success, error, data } = event.data;
+                    
+                    if (success) {
+                        statusDiv.textContent = `${type} successful!`;
+                        if (data) {
+                            resultDiv.innerHTML = `
+                                <h2>Worker Test Results:</h2>
+                                <p>Parsed ${data.length} layout items</p>
+                                <pre>${JSON.stringify(data.slice(0, 3), null, 2)}</pre>
+                            `;
+                        }
+                    } else {
+                        statusDiv.textContent = `${type} failed!`;
+                        resultDiv.innerHTML = `
+                            <h2>Error:</h2>
+                            <p style="color: red;">${error}</p>
+                        `;
+                    }
+                };
+                
+                worker.onerror = (error) => {
+                    statusDiv.textContent = 'Worker error!';
+                    resultDiv.innerHTML = `
+                        <h2>Worker Error:</h2>
+                        <p style="color: red;">${error.message}</p>
+                    `;
+                };
+                
+                // Test worker
+                worker.postMessage({
+                    type: 'test',
+                    html: '<div style="font-size: 24px;">Hello from Worker!</div>',
+                    viewportWidth: 800
+                });
+                
+            } catch (error) {
+                statusDiv.textContent = 'Test failed!';
+                resultDiv.innerHTML = `
+                    <h2>Error:</h2>
+                    <p style="color: red;">${error.message}</p>
+                `;
+            }
+        }
+        
+        testWorker();
+    </script>
+</body>
+</html>

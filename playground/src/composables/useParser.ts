@@ -18,11 +18,11 @@ export function useParser() {
       // Create parser instance from npm package
       parser = new HtmlLayoutParser()
       
-      // Initialize with WASM files served by Vite plugin from npm package
-      console.log('Loading WASM from npm package via Vite plugin...')
-      await parser.init('/wasm/html_layout_parser.js')
+      // Initialize - WASM will be loaded automatically
+      console.log('Loading WASM from npm package via direct import...')
+      await parser.init()
       
-      console.log('HTML Layout Parser initialized successfully from npm package v0.0.3')
+      console.log('HTML Layout Parser initialized successfully from npm package v0.1.0 with direct import')
       return parser
     } catch (err: any) {
       console.error('Failed to initialize parser:', err)
