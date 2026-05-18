@@ -50,7 +50,7 @@ export default defineConfig({
 **For Vite users, make sure you've configured `optimizeDeps.exclude` first!**
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web'
+import { HtmlLayoutParser } from 'html-layout-parser'
 
 async function example() {
   const parser = new HtmlLayoutParser()
@@ -74,7 +74,10 @@ async function example() {
 }
 ```
 
-### Different Environments
+### Optional Explicit Environment Imports
+
+The default import auto-detects Web, Worker, and Node.js. Use these only when
+you want to force a specific runtime entry point.
 
 #### Web Browser
 ```typescript
@@ -91,37 +94,12 @@ import { HtmlLayoutParser } from 'html-layout-parser/node'
 import { HtmlLayoutParser } from 'html-layout-parser/worker'
 ```
 
-### Manual Copy (Fallback Option)
-
-If direct import doesn't work with your bundler, you can manually copy files:
-
-### Manual Copy (Fallback Option)
-
-If direct import doesn't work with your bundler:
-
-1. **Copy files to your project:**
-
-```bash
-# Copy web bundle to your public directory
-cp -r node_modules/html-layout-parser/web public/wasm
-```
-
-2. **Use in your code:**
-
-```typescript
-// Import from the copied files
-import { HtmlLayoutParser } from '/wasm/index.js'
-
-const parser = new HtmlLayoutParser()
-await parser.init() // Will use the copied WASM files
-```
-
 ## API Reference
 
 ### Basic Usage
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web'
+import { HtmlLayoutParser } from 'html-layout-parser'
 
 // Create parser instance
 const parser = new HtmlLayoutParser()
@@ -273,7 +251,7 @@ export default defineConfig({
 Then initialize the parser with the custom path:
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web'
+import { HtmlLayoutParser } from 'html-layout-parser'
 
 const parser = new HtmlLayoutParser()
 await parser.init('/wasm/html_layout_parser.mjs') // Use custom path
@@ -281,7 +259,7 @@ await parser.init('/wasm/html_layout_parser.mjs') // Use custom path
 
 ### Other common issues
 
-- **Module not found errors**: Make sure you're importing from the correct entry point (`html-layout-parser/web`, `html-layout-parser/node`, etc.)
+- **Module not found errors**: Import from `html-layout-parser` unless you explicitly need `html-layout-parser/web`, `html-layout-parser/node`, or `html-layout-parser/worker`
 - **MIME type errors**: Use the custom middleware shown above
 - **Build errors**: Make sure WASM files are included in your build assets
 

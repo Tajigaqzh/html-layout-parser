@@ -20,27 +20,11 @@ export default defineConfig({
 
 ```typescript
 // 直接从 npm 包导入
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 // 在 worker 中
 const parser = new HtmlLayoutParser();
 await parser.init(); // 自动从 node_modules 加载 WASM
-```
-
-### 方法 2：手动复制（备选）
-
-如果遇到打包器问题，复制 worker bundle：
-
-```bash
-# 复制 worker bundle 到 workers 目录
-cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
-```
-
-```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/worker';
-
-const parser = new HtmlLayoutParser();
-await parser.init('/workers/html-layout-parser/html_layout_parser.mjs'); // 自定义路径
 ```
 
 ## 基础 Worker 设置
@@ -146,7 +130,7 @@ self.onmessage = async (event: MessageEvent) => {
     switch (type) {
       case 'init':
         parser = new HtmlLayoutParser();
-        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+        await parser.init();
         result = true;
         break;
 
@@ -323,7 +307,7 @@ self.onmessage = async (event: MessageEvent) => {
         canvas.height = payload.height;
         ctx = canvas.getContext('2d');
         parser = new HtmlLayoutParser();
-        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+        await parser.init();
         break;
 
       case 'loadFont':

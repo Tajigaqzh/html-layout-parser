@@ -24,11 +24,9 @@ export default defineConfig({
 
 **Why?** Vite's dependency pre-bundling breaks WASM modules. This configuration prevents that.
 
-## Usage Methods
+## Usage
 
-HTML Layout Parser now supports both **direct import** and **manual copy** approaches:
-
-### Method 1: Direct Import (Recommended)
+### Direct Import (Recommended)
 
 You can now directly import and use the package without manual file copying:
 
@@ -66,7 +64,8 @@ async function example() {
 
 #### Environment-Specific Imports
 
-For better tree-shaking and explicit targeting:
+The default import auto-detects the runtime. These entry points are optional
+when you want to force a specific target:
 
 ```typescript
 // Web browser
@@ -89,47 +88,6 @@ import createModule from 'html-layout-parser/wasm';
 
 const wasmModule = await createModule();
 // Use low-level WASM API directly
-```
-
-### Method 2: Manual Copy (Fallback)
-
-⚠️ **Only use this method if you encounter bundler issues with direct import.**
-
-The direct import method (Method 1) is now the recommended approach. Manual copy is provided as a fallback for edge cases.
-
-#### Web Browser Setup
-
-```bash
-# Only if direct import fails
-cp -r node_modules/html-layout-parser/web public/html-layout-parser
-```
-
-```typescript
-// Import from copied files
-import { HtmlLayoutParser } from 'html-layout-parser';
-
-async function example() {
-  const parser = new HtmlLayoutParser();
-  await parser.init('/html-layout-parser/html_layout_parser.mjs');
-  // ... rest of the code
-}
-```
-
-#### Node.js Setup
-
-```bash
-# Only if direct import fails
-cp -r node_modules/html-layout-parser/node ./lib/html-layout-parser
-```
-
-```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/node';
-
-async function example() {
-  const parser = new HtmlLayoutParser();
-  await parser.init('./lib/html-layout-parser/html_layout_parser.mjs');
-  // ... rest of the code
-}
 ```
 
 ## CDN Usage

@@ -80,11 +80,11 @@ Place font files in the `public` directory (not in `src`) to prevent build tools
 :::
 
 ```typescript
-// Direct import from npm package (web environment)
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+// Direct import from npm package
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
-await parser.init(); // Uses globally loaded WASM
+await parser.init(); // Automatically loads the package WASM
 
 // Load font from public directory
 const fontData = await fetch('/fonts/arial.ttf').then(r => r.arrayBuffer());

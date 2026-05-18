@@ -97,7 +97,15 @@ for (const char of layouts) {
 parser.destroy();
 ```
 
-## 环境特定导入
+## 导入方式
+
+默认入口会自动检测 Web、Worker 和 Node.js 环境，推荐统一使用：
+
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser';
+```
+
+如果需要强制指定运行环境，也可以使用环境特定入口：
 
 ```typescript
 // Web 浏览器
@@ -108,9 +116,6 @@ import { HtmlLayoutParser } from 'html-layout-parser/worker';
 
 // Node.js
 import { HtmlLayoutParser } from 'html-layout-parser/node';
-
-// 自动检测环境
-import { HtmlLayoutParser } from 'html-layout-parser';
 ```
 
 ## API 参考

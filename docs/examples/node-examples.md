@@ -25,7 +25,7 @@ import * as path from 'path';
 
 async function basicNodeExample() {
   const parser = new HtmlLayoutParser();
-  await parser.init('./lib/html-layout-parser/html_layout_parser.js');
+  await parser.init();
 
   try {
     // Load font from file
@@ -70,7 +70,7 @@ import * as path from 'path';
 
 async function fileFontLoadingExample() {
   const parser = new HtmlLayoutParser();
-  await parser.init('./lib/html-layout-parser/html_layout_parser.js');
+  await parser.init();
 
   try {
     // Use the convenience method for Node.js
@@ -167,7 +167,7 @@ interface ProcessingResult {
 
 async function batchProcessingExample() {
   const parser = new HtmlLayoutParser();
-  await parser.init('./lib/html-layout-parser/html_layout_parser.js');
+  await parser.init();
 
   try {
     // Load font once
@@ -287,7 +287,7 @@ class ParserService {
 
   private async initialize(): Promise<void> {
     this.parser = new HtmlLayoutParser();
-    await this.parser.init('./lib/html-layout-parser/html_layout_parser.js');
+    await this.parser.init();
 
     // Load default fonts
     const fontsDir = path.join(__dirname, 'fonts');
@@ -601,7 +601,7 @@ async function main(): Promise<void> {
   const parser = new HtmlLayoutParser();
 
   try {
-    await parser.init('./lib/html-layout-parser/html_layout_parser.js');
+    await parser.init();
 
     // Load font
     if (options.font) {

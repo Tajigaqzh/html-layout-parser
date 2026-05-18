@@ -47,7 +47,7 @@ export default defineConfig({
 ### 第1步：导入并初始化
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
 await parser.init(); // 自动从 node_modules 加载 WASM
@@ -94,7 +94,7 @@ parser.destroy();
 ## 完整示例
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 async function main() {
   const parser = new HtmlLayoutParser();
@@ -168,40 +168,6 @@ await parser.init();
 // 从文件加载字体（仅 Node.js）
 const fontId = await parser.loadFontFromFile('./fonts/arial.ttf', 'Arial');
 parser.setDefaultFont(fontId);
-```
-
-## 故障排除：手动复制设置
-
-⚠️ **仅在直接导入失败时使用此方法。**
-
-推荐方法是直接导入（如上所示）。手动复制是备用解决方案。
-
-### Web 应用
-
-```bash
-# 仅在直接导入不工作时
-cp -r node_modules/html-layout-parser/web public/html-layout-parser
-```
-
-```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web';
-
-const parser = new HtmlLayoutParser();
-await parser.init('/html-layout-parser/html_layout_parser.mjs');
-```
-
-### Node.js 应用
-
-```bash
-# 仅在直接导入不工作时
-cp -r node_modules/html-layout-parser/node ./lib/html-layout-parser
-```
-
-```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/node';
-
-const parser = new HtmlLayoutParser();
-await parser.init('./lib/html-layout-parser/html_layout_parser.mjs');
 ```
 
 ## 字体文件设置

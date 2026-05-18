@@ -20,32 +20,11 @@ export default defineConfig({
 
 ```typescript
 // 直接从 npm 包导入
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 async function basicParsing() {
   const parser = new HtmlLayoutParser();
   await parser.init(); // 自动从 node_modules 加载 WASM
-  // ... 其余代码
-}
-```
-
-### 方法 2：手动复制（备选）
-
-⚠️ **仅在直接导入遇到打包器问题时使用。**
-
-直接导入方法（方法1）现在是推荐方法。手动复制作为边缘情况的备选方案。
-
-```bash
-# 仅在直接导入不工作时
-cp -r node_modules/html-layout-parser/web public/html-layout-parser
-```
-
-```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web';
-
-async function basicParsing() {
-  const parser = new HtmlLayoutParser();
-  await parser.init('/html-layout-parser/html_layout_parser.mjs'); // 自定义路径
   // ... 其余代码
 }
 ```

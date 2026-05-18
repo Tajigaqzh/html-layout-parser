@@ -80,11 +80,11 @@ export default defineConfig({
 :::
 
 ```typescript
-// 直接从 npm 包导入（web环境）
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+// 直接从 npm 包导入
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
-await parser.init(); // 使用全局加载的 WASM
+await parser.init(); // 自动加载包内 WASM
 
 // 从 public 目录加载字体
 const fontData = await fetch('/fonts/arial.ttf').then(r => r.arrayBuffer());

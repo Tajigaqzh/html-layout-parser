@@ -4,12 +4,8 @@ Complete examples for using HTML Layout Parser in Web Worker environments.
 
 ## Setup
 
-Before using these examples, copy the worker bundle to your project:
-
-```bash
-# Copy worker bundle to your workers directory
-cp -r node_modules/html-layout-parser/worker public/workers/html-layout-parser
-```
+Install the npm package and import it directly from your module worker. The
+package loads its WASM file from `dist/` automatically.
 
 ## Basic Worker Setup
 
@@ -115,7 +111,7 @@ self.onmessage = async (event: MessageEvent) => {
       case 'init':
         parser = new HtmlLayoutParser();
         // Initialize with explicit WASM path
-        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+        await parser.init();
         result = true;
         break;
 
@@ -292,7 +288,7 @@ self.onmessage = async (event: MessageEvent) => {
         canvas.height = payload.height;
         ctx = canvas.getContext('2d');
         parser = new HtmlLayoutParser();
-        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+        await parser.init();
         break;
 
       case 'loadFont':

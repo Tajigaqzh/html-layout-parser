@@ -48,7 +48,7 @@
  */
 
 import { HtmlLayoutParser as BaseParser } from './HtmlLayoutParser';
-import type { CreateHtmlLayoutParserModule } from './types';
+import { createWasmModule } from './module-loader';
 
 // Re-export all types
 export * from './types';
@@ -72,51 +72,9 @@ export class HtmlLayoutParser extends BaseParser {
       return;
     }
 
-    // Try different loading strategies for Node.js
-    const loadingStrategies = [
-      // 1. Custom path provided by user
-      wasmPath,
-      // 2. Try ESM version first
-      './html_layout_parser.mjs',
-      // 3. Try CJS version
-      './html_layout_parser.cjs',
-      // 4. Try legacy .js version
-      './html_layout_parser.js',
-    ].filter(Boolean) as string[];
-
-    for (const jsPath of loadingStrategies) {
-      try {
-        // In Node.js, use dynamic import
-        const wasmModule = await import(/* @vite-ignore */ jsPath);
-        const createModule: CreateHtmlLayoutParserModule = 
-          wasmModule.default || wasmModule.createHtmlLayoutParserModule || wasmModule;
-
-        if (typeof createModule === 'function') {
-          this.setModuleLoader(async () => {
-            return createModule({
-              locateFile: (path: string) => {
-                console.debug(`[Node.js] locateFile called with path: ${path}`);
-                if (path.endsWith('.wasm')) {
-                  // Use absolute path to the unified WASM file
-                  const url = new URL('html_layout_parser.wasm', import.meta.url);
-                  const wasmPath = url.pathname;
-                  console.debug(`[Node.js] Resolved WASM path: ${wasmPath}`);
-                  return wasmPath;
-                }
-                return path;
-              }
-            });
-          });
-          await super.init();
-          return;
-        }
-      } catch (error) {
-        console.debug(`Failed to load WASM from ${jsPath}:`, error);
-        // Continue to next strategy
-      }
-    }
-
-    throw new Error('Failed to load WASM module in Node.js: No compatible WASM module found');
+    const wasmModule = await createWasmModule(wasmPath, 'node');
+    this.setModuleLoader(async () => wasmModule);
+    await super.init();
   }
 
   /**

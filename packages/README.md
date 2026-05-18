@@ -22,24 +22,22 @@ cd html-layout-parser
 npm publish
 ```
 
-The main package includes pre-built bundles for all environments:
-- `web/` - Web browser bundle (copy to your public directory)
-- `node/` - Node.js bundle (copy to your project)
-- `worker/` - Web Worker bundle (copy to your workers directory)
+The main package publishes a single `dist/` directory with all JavaScript
+entry points and one shared WASM file.
 
 ## Usage
 
-After installing the package, copy the appropriate bundle to your project:
+After installing the package, import it directly:
 
-```bash
-# For web applications
-cp -r node_modules/html-layout-parser/web public/wasm
+```typescript
+import { HtmlLayoutParser } from 'html-layout-parser'
 
-# For Node.js applications  
-cp -r node_modules/html-layout-parser/node ./lib/wasm
-
-# For Web Workers
-cp -r node_modules/html-layout-parser/worker public/workers
+const parser = new HtmlLayoutParser()
+await parser.init()
 ```
 
-Then import from the copied files instead of the npm package directly.
+Optional explicit entry points are still available:
+
+- `html-layout-parser/web`
+- `html-layout-parser/node`
+- `html-layout-parser/worker`

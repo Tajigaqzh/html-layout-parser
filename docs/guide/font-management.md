@@ -30,7 +30,7 @@ if (fontId > 0) {
 import { HtmlLayoutParser } from 'html-layout-parser/node';
 
 const parser = new HtmlLayoutParser();
-await parser.init('./lib/html-layout-parser/html_layout_parser.js');
+await parser.init();
 
 // Load font from file
 const fontId = await parser.loadFontFromFile('./fonts/arial.ttf', 'Arial');

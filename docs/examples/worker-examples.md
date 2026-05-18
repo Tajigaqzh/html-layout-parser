@@ -139,7 +139,7 @@ self.onmessage = async (event: MessageEvent<WorkerMessage>) => {
     switch (type) {
       case 'init':
         parser = new HtmlLayoutParser();
-        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+        await parser.init();
         result = true;
         break;
 
@@ -386,7 +386,7 @@ self.onmessage = async (event: MessageEvent<Message>) => {
         ctx = canvas.getContext('2d');
         
         parser = new HtmlLayoutParser();
-        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+        await parser.init();
         break;
 
       case 'loadFont':
@@ -662,7 +662,7 @@ self.onmessage = async (event: MessageEvent) => {
     switch (type) {
       case 'init':
         parser = new HtmlLayoutParser();
-        await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+        await parser.init();
         self.postMessage({ type: 'ready' });
         break;
 

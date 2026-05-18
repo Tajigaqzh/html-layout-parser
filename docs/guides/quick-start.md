@@ -137,39 +137,6 @@ const fontId = await parser.loadFontFromFile('./fonts/arial.ttf', 'Arial');
 parser.setDefaultFont(fontId);
 ```
 
-## Alternative: Manual Copy Setup
-
-If you encounter bundler issues, you can still use the manual copy approach:
-
-### For Web Applications
-
-```bash
-# Copy the web bundle
-cp -r node_modules/html-layout-parser/web public/html-layout-parser
-```
-
-```typescript
-// Import from copied files
-import { HtmlLayoutParser } from 'html-layout-parser';
-
-const parser = new HtmlLayoutParser();
-await parser.init('/html-layout-parser/html_layout_parser.mjs');
-```
-
-### For Node.js Applications
-
-```bash
-# Copy the Node.js bundle
-cp -r node_modules/html-layout-parser/node ./lib/html-layout-parser
-```
-
-```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/node';
-
-const parser = new HtmlLayoutParser();
-await parser.init('./lib/html-layout-parser/html_layout_parser.mjs');
-```
-
 ## Next Steps
 
 - 📖 Read the [Installation Guide](../guide/installation.md) for detailed setup

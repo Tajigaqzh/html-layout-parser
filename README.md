@@ -33,19 +33,6 @@ Extract character-level layout data with multi-font support, rich text attribute
 npm install html-layout-parser
 ```
 
-### Platform-Specific Packages (Smaller Bundle Size)
-
-```bash
-# Web browser only
-npm install html-layout-parser-web
-
-# Web Worker only
-npm install html-layout-parser-worker
-
-# Node.js only
-npm install html-layout-parser-node
-```
-
 ## 🚀 Quick Start
 
 ```typescript
@@ -162,7 +149,7 @@ Benchmarks from `pnpm bench:performance` (Apple M4, 16GB RAM, Node v25.2.1):
 // Auto-detect environment
 import { HtmlLayoutParser } from 'html-layout-parser';
 
-// Or use platform-specific imports for smaller bundle size
+// Optional explicit imports
 import { HtmlLayoutParser } from 'html-layout-parser/web';    // Web browser
 import { HtmlLayoutParser } from 'html-layout-parser/worker'; // Web Worker
 import { HtmlLayoutParser } from 'html-layout-parser/node';   // Node.js
@@ -171,7 +158,7 @@ import { HtmlLayoutParser } from 'html-layout-parser/node';   // Node.js
 ### Node.js Specific Features
 
 ```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/node';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 const parser = new HtmlLayoutParser();
 await parser.init();

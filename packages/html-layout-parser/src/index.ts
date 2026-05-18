@@ -40,8 +40,9 @@
  */
 
 import { HtmlLayoutParser as BaseParser } from './HtmlLayoutParser';
-import { loadWasmModule, detectEnvironment as detectEnv } from './wasm-loader';
-import type { Environment, CreateHtmlLayoutParserModule } from './types';
+import { detectEnvironment as detectEnv } from './wasm-loader';
+import { createWasmModule } from './module-loader';
+import type { Environment } from './types';
 
 // Re-export all types
 export * from './types';
@@ -77,8 +78,7 @@ export class HtmlLayoutParser extends BaseParser {
     }
 
     try {
-      // Use the new WASM loader that handles both ESM and CJS
-      const wasmModule = await loadWasmModule(wasmPath);
+      const wasmModule = await createWasmModule(wasmPath, this.getEnvironment());
       this.setModuleLoader(async () => wasmModule);
       await super.init();
     } catch (error) {

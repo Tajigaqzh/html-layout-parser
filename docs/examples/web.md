@@ -20,32 +20,11 @@ Then use direct imports:
 
 ```typescript
 // Import directly from npm package
-import { HtmlLayoutParser } from 'html-layout-parser/web';
+import { HtmlLayoutParser } from 'html-layout-parser';
 
 async function basicParsing() {
   const parser = new HtmlLayoutParser();
   await parser.init(); // Automatically loads WASM from node_modules
-  // ... rest of your code
-}
-```
-
-### Method 2: Manual Copy (Fallback)
-
-⚠️ **Only use this if you encounter bundler issues with direct import.**
-
-The direct import method (Method 1) is now the recommended approach. Manual copy is provided as a fallback for edge cases.
-
-```bash
-# Only if direct import doesn't work
-cp -r node_modules/html-layout-parser/web public/html-layout-parser
-```
-
-```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/web';
-
-async function basicParsing() {
-  const parser = new HtmlLayoutParser();
-  await parser.init('/html-layout-parser/html_layout_parser.mjs'); // Custom path
   // ... rest of your code
 }
 ```

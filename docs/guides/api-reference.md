@@ -23,7 +23,7 @@ Initialize the WASM module.
 ```typescript
 await parser.init();
 // or with custom path
-await parser.init('/path/to/html_layout_parser.js');
+await parser.init('/custom/path/html_layout_parser.mjs');
 ```
 
 #### `isInitialized(): boolean`

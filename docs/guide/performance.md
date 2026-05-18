@@ -791,7 +791,7 @@ self.onmessage = async (e) => {
   switch (type) {
     case 'init':
       parser = new HtmlLayoutParser();
-      await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+      await parser.init();
       self.postMessage({ type: 'ready' });
       break;
       

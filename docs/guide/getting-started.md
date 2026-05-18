@@ -251,41 +251,6 @@ const html = `
 const layouts = parser.parse(html, { viewportWidth: 800 });
 ```
 
-## Troubleshooting: Manual Copy Setup
-
-⚠️ **Only use this if direct import fails with your bundler.**
-
-The recommended approach is direct import (shown above). Manual copy is a fallback solution.
-
-### For Web Applications
-
-```bash
-# Only if direct import doesn't work
-cp -r node_modules/html-layout-parser/web public/html-layout-parser
-```
-
-```typescript
-// Import from copied files
-import { HtmlLayoutParser } from 'html-layout-parser';
-
-const parser = new HtmlLayoutParser();
-await parser.init('/html-layout-parser/html_layout_parser.mjs');
-```
-
-### For Node.js Applications
-
-```bash
-# Only if direct import doesn't work
-cp -r node_modules/html-layout-parser/node ./lib/html-layout-parser
-```
-
-```typescript
-import { HtmlLayoutParser } from 'html-layout-parser/node';
-
-const parser = new HtmlLayoutParser();
-await parser.init('./lib/html-layout-parser/html_layout_parser.mjs');
-```
-
 ## Next Steps
 
 - [Memory Management Guide](./memory-management.md) - Best practices for memory

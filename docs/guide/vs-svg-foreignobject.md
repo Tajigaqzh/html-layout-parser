@@ -152,7 +152,7 @@ import { HtmlLayoutParser } from 'html-layout-parser/worker';
 
 self.onmessage = async (e) => {
   const parser = new HtmlLayoutParser();
-  await parser.init('/workers/html-layout-parser/html_layout_parser.js');
+  await parser.init();
   
   // Load font
   const fontData = e.data.fontData;
