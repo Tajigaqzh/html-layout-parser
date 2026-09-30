@@ -1,8 +1,8 @@
-import { ref } from 'vue'
+import { ref, shallowRef } from 'vue'
 import { HtmlLayoutParser } from 'html-layout-parser/web'
 
 export function useMultiFontParser() {
-  const parser = ref<HtmlLayoutParser | null>(null)
+  const parser = shallowRef<HtmlLayoutParser | null>(null)
   const isLoading = ref(false)
   const error = ref<string | null>(null)
   const loadedFonts = ref<Map<string, number>>(new Map())
@@ -67,7 +67,8 @@ export function useMultiFontParser() {
       
       const options: any = {
         viewportWidth,
-        mode
+        mode,
+        isDebug: true
       }
       
       if (css && css.trim()) {

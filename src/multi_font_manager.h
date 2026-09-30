@@ -24,6 +24,7 @@
 // FreeType headers
 #include <ft2build.h>
 #include FT_FREETYPE_H
+#include <hb.h>
 
 namespace wasm_litehtml_v2 {
 
@@ -45,9 +46,20 @@ struct FontEntry {
     int id;                         // Unique font ID (字体唯一 ID)
     std::string name;               // Font name (字体名称)
     FT_Face face;                   // FreeType face handle (FreeType 字体句柄)
+    hb_font_t* hbFont;              // HarfBuzz font tied to the FreeType face (HarfBuzz 字体)
     std::vector<uint8_t> data;      // Font binary data (FreeType 依赖的字体数据)
     size_t memoryUsage;             // Tracked memory usage in bytes (内存占用字节数)
     int currentSize;                // Current set font size (当前缓存字号)
+};
+
+/**
+ * @brief One visible character after HarfBuzz shaping (HarfBuzz 切出的可见字符)
+ */
+struct ShapedCluster {
+    std::string text;               // UTF-8 grapheme/cluster text (簇对应原文)
+    int width = 0;                  // Advance width in pixels (像素宽度)
+    bool missing = false;           // True when primary font used .notdef (主字体缺字)
+    int fontId = 0;                 // Font actually used for this cluster (实际使用的字体)
 };
 
 /**
@@ -232,6 +244,15 @@ public:
      */
     int getTextWidth(int fontId, const char* text, int fontSize);
 
+    /**
+     * @brief Shape UTF-8 text into visible character clusters (用 HarfBuzz 切分并量宽)
+     * @param fontId Primary font ID
+     * @param text UTF-8 encoded text
+     * @param fontSize Font size in pixels
+     * @return Cluster list in visual order
+     */
+    std::vector<ShapedCluster> shapeText(int fontId, const char* text, int fontSize);
+
     // ========================================================================
     // Font Handle Management (for litehtml integration)
     // ========================================================================
@@ -326,6 +347,41 @@ private:
      */
     static std::string normalizeFontName(const std::string& name);
 
+    /**
+     * @brief Create or refresh the HarfBuzz font after FreeType size changes.
+     */
+    bool ensureHbFont(FontEntry& entry, int fontSize);
+
+    /**
+     * @brief Destroy HarfBuzz font before releasing the FreeType face.
+     */
+    static void destroyHbFont(FontEntry& entry);
+
+    /**
+     * @brief Shape with one font, no fallback (单字体 shaping，不含回退)
+     */
+    std::vector<ShapedCluster> shapeWithFont(int fontId, const char* text, int textLen, int fontSize);
+
+    /**
+     * @brief Font IDs to try after the primary font (主字体之后的回退顺序)
+     */
+    std::vector<int> buildFallbackFontIds(int primaryFontId) const;
+
+    /**
+     * @brief Whether a loaded font has a cmap glyph for this codepoint.
+     */
+    bool fontHasGlyph(int fontId, uint32_t codepoint) const;
+
+    /**
+     * @brief Pick a font for an already-segmented run, emoji-aware like browsers.
+     */
+    int selectFontForRun(int primaryFontId, const uint32_t* codepoints, int count, bool emojiRun) const;
+
+    /**
+     * @brief Convert HarfBuzz 26.6 advance to CSS pixels.
+     */
+    static int hbAdvanceToPx(int xAdvance);
+
 private:
     FT_Library m_library;                           // FreeType library instance (FreeType 库实例)
     std::map<int, FontEntry> m_fonts;               // Loaded fonts by ID (已加载字体表)
@@ -335,7 +391,16 @@ private:
     // Font handle management
     std::map<uint64_t, FontInstance> m_fontInstances; // Font handle -> instance (字体句柄映射)
     uint64_t m_nextFontHandle;                        // Next handle value (下一个句柄值)
-    
+
+    struct ShapeCache {
+        int fontId = 0;
+        int fontSize = 0;
+        std::string text;
+        std::vector<ShapedCluster> clusters;
+        int totalWidth = 0;
+    };
+    ShapeCache m_shapeCache;                          // Last shaped run, reused by text_width/draw_text
+
     // Memory warning flag (to avoid repeated warnings)
     mutable bool m_memoryWarningIssued;            // Warning flag to avoid repeats (内存警告标记)
 };

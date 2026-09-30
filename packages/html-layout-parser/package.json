@@ -73,8 +73,8 @@
   ],
   "scripts": {
     "build": "tsup && pnpm run copy:wasm",
-    "copy:wasm": "cp ../../wasm-output/html_layout_parser.wasm dist/ && cp ../../wasm-output/html_layout_parser.mjs dist/html_layout_parser.mjs && cp ../../wasm-output/html_layout_parser.cjs dist/html_layout_parser.cjs && if [ -f ../../wasm-output/html_layout_parser.d.ts ]; then cp ../../wasm-output/html_layout_parser.d.ts dist/; fi && if [ -f ../../wasm-output/html_layout_parser_types.d.ts ]; then cp ../../wasm-output/html_layout_parser_types.d.ts dist/; fi",
-    "clean": "rm -rf dist web node worker",
+    "copy:wasm": "node ../../scripts/copy-wasm-to-package.mjs",
+    "clean": "node ../../scripts/clean-artifacts.mjs packages/html-layout-parser/dist packages/html-layout-parser/web packages/html-layout-parser/node packages/html-layout-parser/worker",
     "prepublishOnly": "pnpm run clean && pnpm run build",
     "typecheck": "tsc --noEmit"
   },

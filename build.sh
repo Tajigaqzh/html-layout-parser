@@ -112,19 +112,38 @@ mkdir -p "${BUILD_DIR}"
 # Enter build directory
 cd "${BUILD_DIR}"
 
-# Run CMake configuration
-echo "Running CMake configuration..."
-emcmake cmake "${SRC_DIR}" \
-    -DCMAKE_BUILD_TYPE=Release \
-    -DBUILD_MINIMAL="${BUILD_MINIMAL}" \
-    -DOPTIMIZATION_LEVEL="${OPTIMIZATION_LEVEL}" \
-    -DENABLE_LTO="${ENABLE_LTO}" \
-    -DENABLE_EXCEPTIONS="${ENABLE_EXCEPTIONS}"
+JOBS="$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo "${NUMBER_OF_PROCESSORS:-4}")"
+IS_WINDOWS=0
+case "$(uname -s 2>/dev/null)" in
+    MINGW*|MSYS*|CYGWIN*) IS_WINDOWS=1 ;;
+esac
+if [ "${OS:-}" = "Windows_NT" ]; then
+    IS_WINDOWS=1
+fi
 
-# Compile
-echo ""
-echo "Compiling WASM module..."
-emmake make -j$(nproc 2>/dev/null || sysctl -n hw.ncpu 2>/dev/null || echo 4)
+echo "Running CMake configuration..."
+if command -v ninja >/dev/null 2>&1; then
+    emcmake cmake "${SRC_DIR}" \
+        -G Ninja \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_MINIMAL="${BUILD_MINIMAL}" \
+        -DOPTIMIZATION_LEVEL="${OPTIMIZATION_LEVEL}" \
+        -DENABLE_LTO="${ENABLE_LTO}" \
+        -DENABLE_EXCEPTIONS="${ENABLE_EXCEPTIONS}"
+    echo ""
+    echo "Compiling WASM module..."
+    cmake --build . -j"${JOBS}"
+else
+    emcmake cmake "${SRC_DIR}" \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DBUILD_MINIMAL="${BUILD_MINIMAL}" \
+        -DOPTIMIZATION_LEVEL="${OPTIMIZATION_LEVEL}" \
+        -DENABLE_LTO="${ENABLE_LTO}" \
+        -DENABLE_EXCEPTIONS="${ENABLE_EXCEPTIONS}"
+    echo ""
+    echo "Compiling WASM module..."
+    emmake make -j"${JOBS}"
+fi
 
 echo ""
 echo "=== Build Complete ==="
@@ -169,10 +188,15 @@ if [ -f "${SRC_DIR}/html_layout_parser.d.ts" ]; then
     echo "Custom TypeScript declarations: html_layout_parser_types.d.ts"
 fi
 
-# Create legacy symlinks for backward compatibility
+# Create legacy alias for backward compatibility
 if [ -f "${OUTPUT_DIR}/html_layout_parser.mjs" ]; then
-    ln -sf html_layout_parser.mjs "${OUTPUT_DIR}/html_layout_parser.js"
-    echo "Legacy symlink: html_layout_parser.js -> html_layout_parser.mjs"
+    if [ "${IS_WINDOWS}" = "1" ]; then
+        cp -f "${OUTPUT_DIR}/html_layout_parser.mjs" "${OUTPUT_DIR}/html_layout_parser.js"
+        echo "Legacy copy: html_layout_parser.js"
+    else
+        ln -sf html_layout_parser.mjs "${OUTPUT_DIR}/html_layout_parser.js"
+        echo "Legacy symlink: html_layout_parser.js -> html_layout_parser.mjs"
+    fi
 fi
 
 if [ "${RUN_WASM_OPT}" = "ON" ]; then
@@ -223,8 +247,8 @@ WASM_SIZE=$(stat -f%z "${OUTPUT_DIR}/html_layout_parser.wasm" 2>/dev/null || sta
 JS_SIZE=$(stat -f%z "${OUTPUT_DIR}/html_layout_parser.js" 2>/dev/null || stat -c%s "${OUTPUT_DIR}/html_layout_parser.js" 2>/dev/null || echo "0")
 
 echo "File sizes:"
-echo "  WASM: $(echo "scale=2; ${WASM_SIZE}/1024" | bc) KB (${WASM_SIZE} bytes)"
-echo "  JS:   $(echo "scale=2; ${JS_SIZE}/1024" | bc) KB (${JS_SIZE} bytes)"
+echo "  WASM: $((WASM_SIZE / 1024)) KB (${WASM_SIZE} bytes)"
+echo "  JS:   $((JS_SIZE / 1024)) KB (${JS_SIZE} bytes)"
 echo ""
 
 # Check against targets

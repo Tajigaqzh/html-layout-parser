@@ -153,9 +153,171 @@ watch(() => props.layouts, async (layouts) => {
       }
       
       renderToCanvas(layouts)
+      compareDomWithWasm(layouts)
     }
   }
 }, { immediate: true })
+
+interface DomCharacterMeasurement {
+  character: string
+  x: number
+  y: number
+  width: number
+  height: number
+  fontFamily: string
+  fontSize: string
+  nodeIndex: number
+}
+
+function collectDomCharacterMeasurements(container: HTMLElement): {
+  rootRect: DOMRect
+  characters: DomCharacterMeasurement[]
+} {
+  const rootRect = container.getBoundingClientRect()
+  const characters: DomCharacterMeasurement[] = []
+  const walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT, {
+    acceptNode(node) {
+      const parent = node.parentElement
+      if (!parent || parent.closest('style, script')) {
+        return NodeFilter.FILTER_REJECT
+      }
+      return NodeFilter.FILTER_ACCEPT
+    }
+  })
+
+  let node: Node | null
+  let nodeIndex = 0
+  while ((node = walker.nextNode())) {
+    const text = node.textContent || ''
+    let offset = 0
+
+    for (const character of Array.from(text)) {
+      const end = offset + character.length
+      const range = document.createRange()
+      range.setStart(node, offset)
+      range.setEnd(node, end)
+      const rect = range.getBoundingClientRect()
+      const parent = node.parentElement
+
+      // Collapsed source whitespace between block elements has no useful
+      // glyph rectangle and should not be matched to a WASM character.
+      if (parent && (rect.width > 0 || rect.height > 0)) {
+        const style = getComputedStyle(parent)
+        characters.push({
+          character,
+          x: rect.left - rootRect.left,
+          y: rect.top - rootRect.top,
+          width: rect.width,
+          height: rect.height,
+          fontFamily: style.fontFamily,
+          fontSize: style.fontSize,
+          nodeIndex
+        })
+      }
+
+      offset = end
+    }
+
+    nodeIndex++
+  }
+
+  return { rootRect, characters }
+}
+
+function compareDomWithWasm(layouts: any[]) {
+  if (!domContainer.value) {
+    console.warn('[DOM/WASM] DOM container is not available')
+    return
+  }
+
+  const { rootRect, characters: domCharacters } =
+    collectDomCharacterMeasurements(domContainer.value)
+  const comparisons: Array<Record<string, unknown>> = []
+  let domCursor = 0
+  const maxLookahead = 80
+
+  for (let wasmIndex = 0; wasmIndex < layouts.length; wasmIndex++) {
+    const layout = layouts[wasmIndex]
+    const wasmCharacter = Array.from(String(layout.character))[0] || ''
+    let domIndex = -1
+
+    for (
+      let candidate = domCursor;
+      candidate < Math.min(domCharacters.length, domCursor + maxLookahead);
+      candidate++
+    ) {
+      if (domCharacters[candidate].character === wasmCharacter) {
+        domIndex = candidate
+        break
+      }
+    }
+
+    if (domIndex < 0) {
+      comparisons.push({
+        wasmIndex,
+        character: wasmCharacter,
+        wasmFont: layout.fontFamily,
+        status: 'DOM character not matched'
+      })
+      continue
+    }
+
+    const dom = domCharacters[domIndex]
+    const dx = dom.x - layout.x
+    const dy = dom.y - layout.y
+    const dw = dom.width - layout.width
+    const dh = dom.height - layout.height
+
+    comparisons.push({
+      wasmIndex,
+      domIndex,
+      character: wasmCharacter,
+      wasmFont: layout.fontFamily,
+      domFont: dom.fontFamily,
+      wasmX: Number(layout.x.toFixed(2)),
+      domX: Number(dom.x.toFixed(2)),
+      dx: Number(dx.toFixed(2)),
+      wasmY: Number(layout.y.toFixed(2)),
+      domY: Number(dom.y.toFixed(2)),
+      dy: Number(dy.toFixed(2)),
+      wasmWidth: Number(layout.width.toFixed(2)),
+      domWidth: Number(dom.width.toFixed(2)),
+      widthDiff: Number(dw.toFixed(2)),
+      wasmHeight: Number(layout.height.toFixed(2)),
+      domHeight: Number(dom.height.toFixed(2)),
+      heightDiff: Number(dh.toFixed(2)),
+      domFontSize: dom.fontSize,
+      domNode: dom.nodeIndex
+    })
+
+    domCursor = domIndex + 1
+  }
+
+  const matched = comparisons.filter(row => row.status !== 'DOM character not matched')
+  const abs = (key: string) =>
+    matched.map(row => Math.abs(Number(row[key]))).filter(Number.isFinite)
+  const average = (values: number[]) =>
+    values.length === 0 ? 0 : values.reduce((sum, value) => sum + value, 0) / values.length
+  const dxValues = abs('dx')
+  const dyValues = abs('dy')
+  const widthValues = abs('widthDiff')
+
+  console.groupCollapsed('[DOM/WASM] Character layout comparison')
+  console.log('DOM root rect:', rootRect.toJSON())
+  console.log('WASM characters:', layouts.length)
+  console.log('DOM measurable characters:', domCharacters.length)
+  console.log('Matched characters:', matched.length)
+  console.log('Summary:', {
+    averageAbsXDiff: Number(average(dxValues).toFixed(2)),
+    maxAbsXDiff: Number(Math.max(0, ...dxValues).toFixed(2)),
+    averageAbsYDiff: Number(average(dyValues).toFixed(2)),
+    maxAbsYDiff: Number(Math.max(0, ...dyValues).toFixed(2)),
+    averageAbsWidthDiff: Number(average(widthValues).toFixed(2)),
+    maxAbsWidthDiff: Number(Math.max(0, ...widthValues).toFixed(2))
+  })
+  console.table(comparisons)
+  console.groupEnd()
+}
 
 function renderToCanvas(layouts: any[]) {
   const canvas = canvasRef.value

@@ -167,38 +167,35 @@ void WasmContainer::draw_text(litehtml::uint_ptr /*hdc*/, const char* text,
     // Get decoration thickness (default to 1.0 if not specified or invalid, 获取装饰线粗细)
     float decorationThickness = fontInfo.decorationThickness > 0 ? fontInfo.decorationThickness : 1.0f;
     
-    // Iterate through each character (逐字符处理)
-    const char* p = text;
+    // Shape the whole run so ZWJ emoji and kerning stay as one cluster.
+    const std::vector<ShapedCluster> clusters = manager.shapeText(fontInfo.fontId, text, fontInfo.fontSize);
     int currentX = static_cast<int>(pos.x);
     int baseY = static_cast<int>(pos.y);
-    
-    while (*p) {
-        std::string charStr;
-        uint32_t codepoint = decodeUtf8Char(p, charStr);
-        
-        if (codepoint == 0) {
+
+    for (const ShapedCluster& cluster : clusters) {
+        if (cluster.text.empty()) {
             continue;
         }
-        
-        // Calculate character width (计算字符宽度)
-        int charWidth = manager.getCharWidth(fontInfo.fontId, codepoint, fontInfo.fontSize);
-        
-        // Create character layout with all properties (构建字符布局)
+
         CharLayout layout;
-        
+
         // Basic position properties (基础位置)
-        layout.character = charStr;
+        layout.character = cluster.text;
         layout.x = currentX;
         layout.y = baseY;
-        layout.width = charWidth;
+        layout.width = cluster.width;
         layout.height = metrics.height;
         
         // Font properties (字体属性)
-        layout.fontFamily = fontInfo.fontFamily;
+        const int usedFontId = cluster.fontId != 0 ? cluster.fontId : fontInfo.fontId;
+        layout.fontFamily = manager.getFontName(usedFontId);
+        if (layout.fontFamily.empty()) {
+            layout.fontFamily = fontInfo.fontFamily;
+        }
         layout.fontSize = fontInfo.fontSize;
         layout.fontWeight = fontInfo.fontWeight;
         layout.fontStyle = fontInfo.italic ? "italic" : "normal";
-        layout.fontId = fontInfo.fontId;
+        layout.fontId = usedFontId;
         
         // Color (Req 2.1)
         layout.color = colorHex;
@@ -239,9 +236,8 @@ void WasmContainer::draw_text(litehtml::uint_ptr /*hdc*/, const char* text,
         layout.direction = "ltr";
         
         m_charLayouts.push_back(layout);
-        
-        // Update X position
-        currentX += charWidth;
+
+        currentX += cluster.width;
     }
 }
 

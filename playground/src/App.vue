@@ -72,7 +72,7 @@ import LogSaver from './components/LogSaver.vue'
 }
 
 body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-family: "aliBaBaFont65";
   background-color: var(--bg-color);
   color: var(--text-color);
   line-height: 1.5;

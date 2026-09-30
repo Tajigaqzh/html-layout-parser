@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.11)
+cmake_minimum_required(VERSION 3.14)
 
 project(html_layout_parser LANGUAGES C CXX)
 
@@ -28,8 +28,18 @@ option(ENABLE_LTO "Enable Link-Time Optimization" ON)
 # Enable exception handling (required by litehtml)
 option(ENABLE_EXCEPTIONS "Enable C++ exception handling" ON)
 
-# FreeType configuration - using Emscripten ports
+# FreeType / HarfBuzz: Emscripten official ports, not vendored source
 set(USE_FREETYPE ON)
+
+# litehtml: not an Emscripten port. Fetch a pinned tag at configure time
+# instead of copying the tree into third_party/. Override with
+# -DLITEHTML_SOURCE_DIR=... to use a local checkout.
+set(LITEHTML_GIT_REPOSITORY "https://github.com/litehtml/litehtml.git" CACHE STRING
+    "litehtml git repository")
+set(LITEHTML_GIT_TAG "v0.10" CACHE STRING
+    "litehtml git tag or commit")
+set(LITEHTML_SOURCE_DIR "" CACHE PATH
+    "Optional local litehtml source directory; skips git fetch")
 
 # Define compile definitions based on build type
 if(BUILD_MINIMAL)
@@ -42,111 +52,52 @@ else()
     message(STATUS "Building FULL version")
 endif()
 
-# litehtml root (allows override via -DLITEHTML_ROOT=... or env)
-if(NOT DEFINED LITEHTML_ROOT)
-    if(DEFINED ENV{LITEHTML_ROOT})
-        set(LITEHTML_ROOT "$ENV{LITEHTML_ROOT}")
-    else()
-        set(_third_party_root "${CMAKE_CURRENT_SOURCE_DIR}/../third_party/litehtml")
-        set(_lib_root "${CMAKE_CURRENT_SOURCE_DIR}/../lib/litehtml")
-        set(_local_root "${CMAKE_CURRENT_SOURCE_DIR}/..")
-        set(_legacy_root "${CMAKE_CURRENT_SOURCE_DIR}/../..")
-        if(EXISTS "${_third_party_root}/src/gumbo" AND EXISTS "${_third_party_root}/include")
-            set(LITEHTML_ROOT "${_third_party_root}")
-        elseif(EXISTS "${_lib_root}/src/gumbo" AND EXISTS "${_lib_root}/include")
-            set(LITEHTML_ROOT "${_lib_root}")
-        elseif(EXISTS "${_local_root}/src/gumbo" AND EXISTS "${_local_root}/include")
-            set(LITEHTML_ROOT "${_local_root}")
-        elseif(EXISTS "${_legacy_root}/src/gumbo" AND EXISTS "${_legacy_root}/include")
-            set(LITEHTML_ROOT "${_legacy_root}")
-        else()
-            set(LITEHTML_ROOT "${_third_party_root}")
-        endif()
-    endif()
+if(ENABLE_EXCEPTIONS)
+    set(EXCEPTION_COMPILE_FLAG "-fexceptions")
+    set(EXCEPTION_LINK_FLAG "SHELL:-s DISABLE_EXCEPTION_CATCHING=0")
+else()
+    set(EXCEPTION_COMPILE_FLAG "-fno-exceptions")
+    set(EXCEPTION_LINK_FLAG "SHELL:-s DISABLE_EXCEPTION_CATCHING=1")
 endif()
 
-# Gumbo source files
-set(GUMBO_DIR ${LITEHTML_ROOT}/src/gumbo)
-set(SOURCE_GUMBO
-    ${GUMBO_DIR}/attribute.c
-    ${GUMBO_DIR}/char_ref.c
-    ${GUMBO_DIR}/error.c
-    ${GUMBO_DIR}/parser.c
-    ${GUMBO_DIR}/string_buffer.c
-    ${GUMBO_DIR}/string_piece.c
-    ${GUMBO_DIR}/tag.c
-    ${GUMBO_DIR}/tokenizer.c
-    ${GUMBO_DIR}/utf8.c
-    ${GUMBO_DIR}/util.c
-    ${GUMBO_DIR}/vector.c
-)
+# ============================================================================
+# litehtml (FetchContent, same idea as Emscripten ports: not committed)
+# ============================================================================
 
-# litehtml source files
-set(LITEHTML_DIR ${LITEHTML_ROOT}/src)
-set(SOURCE_LITEHTML
-    ${LITEHTML_DIR}/codepoint.cpp
-    ${LITEHTML_DIR}/css_length.cpp
-    ${LITEHTML_DIR}/css_selector.cpp
-    ${LITEHTML_DIR}/css_tokenizer.cpp
-    ${LITEHTML_DIR}/css_parser.cpp
-    ${LITEHTML_DIR}/document.cpp
-    ${LITEHTML_DIR}/document_container.cpp
-    ${LITEHTML_DIR}/el_anchor.cpp
-    ${LITEHTML_DIR}/el_base.cpp
-    ${LITEHTML_DIR}/el_before_after.cpp
-    ${LITEHTML_DIR}/el_body.cpp
-    ${LITEHTML_DIR}/el_break.cpp
-    ${LITEHTML_DIR}/el_cdata.cpp
-    ${LITEHTML_DIR}/el_comment.cpp
-    ${LITEHTML_DIR}/el_div.cpp
-    ${LITEHTML_DIR}/element.cpp
-    ${LITEHTML_DIR}/el_font.cpp
-    ${LITEHTML_DIR}/el_image.cpp
-    ${LITEHTML_DIR}/el_link.cpp
-    ${LITEHTML_DIR}/el_para.cpp
-    ${LITEHTML_DIR}/el_script.cpp
-    ${LITEHTML_DIR}/el_space.cpp
-    ${LITEHTML_DIR}/el_style.cpp
-    ${LITEHTML_DIR}/el_table.cpp
-    ${LITEHTML_DIR}/el_td.cpp
-    ${LITEHTML_DIR}/el_text.cpp
-    ${LITEHTML_DIR}/el_title.cpp
-    ${LITEHTML_DIR}/el_tr.cpp
-    ${LITEHTML_DIR}/encodings.cpp
-    ${LITEHTML_DIR}/html.cpp
-    ${LITEHTML_DIR}/html_tag.cpp
-    ${LITEHTML_DIR}/html_microsyntaxes.cpp
-    ${LITEHTML_DIR}/iterators.cpp
-    ${LITEHTML_DIR}/media_query.cpp
-    ${LITEHTML_DIR}/style.cpp
-    ${LITEHTML_DIR}/stylesheet.cpp
-    ${LITEHTML_DIR}/table.cpp
-    ${LITEHTML_DIR}/tstring_view.cpp
-    ${LITEHTML_DIR}/url.cpp
-    ${LITEHTML_DIR}/url_path.cpp
-    ${LITEHTML_DIR}/utf8_strings.cpp
-    ${LITEHTML_DIR}/web_color.cpp
-    ${LITEHTML_DIR}/num_cvt.cpp
-    ${LITEHTML_DIR}/strtod.cpp
-    ${LITEHTML_DIR}/string_id.cpp
-    ${LITEHTML_DIR}/css_properties.cpp
-    ${LITEHTML_DIR}/line_box.cpp
-    ${LITEHTML_DIR}/css_borders.cpp
-    ${LITEHTML_DIR}/render_item.cpp
-    ${LITEHTML_DIR}/render_block_context.cpp
-    ${LITEHTML_DIR}/render_block.cpp
-    ${LITEHTML_DIR}/render_inline_context.cpp
-    ${LITEHTML_DIR}/render_table.cpp
-    ${LITEHTML_DIR}/render_flex.cpp
-    ${LITEHTML_DIR}/render_image.cpp
-    ${LITEHTML_DIR}/formatting_context.cpp
-    ${LITEHTML_DIR}/flex_item.cpp
-    ${LITEHTML_DIR}/flex_line.cpp
-    ${LITEHTML_DIR}/background.cpp
-    ${LITEHTML_DIR}/gradient.cpp
-)
+set(LITEHTML_BUILD_TESTING OFF CACHE BOOL "Disable litehtml tests" FORCE)
+set(LITEHTML_ENABLE_LINT OFF CACHE BOOL "Disable litehtml clang-tidy" FORCE)
 
-# WASM v2 module source files
+if(LITEHTML_SOURCE_DIR)
+    message(STATUS "Using local litehtml: ${LITEHTML_SOURCE_DIR}")
+    add_subdirectory("${LITEHTML_SOURCE_DIR}" "${CMAKE_BINARY_DIR}/litehtml")
+else()
+    include(FetchContent)
+    message(STATUS "Fetching litehtml ${LITEHTML_GIT_TAG}")
+    FetchContent_Declare(litehtml
+        GIT_REPOSITORY ${LITEHTML_GIT_REPOSITORY}
+        GIT_TAG ${LITEHTML_GIT_TAG}
+        GIT_SHALLOW TRUE
+    )
+    FetchContent_MakeAvailable(litehtml)
+endif()
+
+foreach(dep litehtml gumbo)
+    if(TARGET ${dep})
+        target_compile_options(${dep} PRIVATE
+            -${OPTIMIZATION_LEVEL}
+            ${EXCEPTION_COMPILE_FLAG}
+        )
+        if(ENABLE_LTO)
+            target_compile_options(${dep} PRIVATE -flto)
+            target_link_options(${dep} PRIVATE -flto)
+        endif()
+    endif()
+endforeach()
+
+# ============================================================================
+# WASM module sources
+# ============================================================================
+
 set(SOURCE_WASM_V2
     html_layout_parser.cpp
     multi_font_manager.cpp
@@ -156,169 +107,82 @@ set(SOURCE_WASM_V2
     font_metrics_cache.cpp
 )
 
-# Create executable (Emscripten will generate .wasm and .js)
-add_executable(${PROJECT_NAME}
-    ${SOURCE_GUMBO}
-    ${SOURCE_LITEHTML}
-    ${SOURCE_WASM_V2}
-)
-
-# Include directories
-target_include_directories(${PROJECT_NAME} PRIVATE
-    ${LITEHTML_ROOT}/include
-    ${LITEHTML_ROOT}/include/litehtml
-    ${LITEHTML_DIR}
-    ${GUMBO_DIR}/include
-    ${GUMBO_DIR}/include/gumbo
-)
-
-# Add FreeType include directories for Emscripten port
-if(USE_FREETYPE)
-    target_include_directories(${PROJECT_NAME} PRIVATE
-        ${EMSCRIPTEN_ROOT_PATH}/cache/sysroot/include/freetype2
-    )
-endif()
-
-# Emscripten compile options
-set_target_properties(${PROJECT_NAME} PROPERTIES
-    SUFFIX ".js"
-)
-
-# Build optimization and exception flags
-if(ENABLE_EXCEPTIONS)
-    set(EXCEPTION_COMPILE_FLAG "-fexceptions")
-    set(EXCEPTION_LINK_FLAG "SHELL:-s DISABLE_EXCEPTION_CATCHING=0")
-else()
-    set(EXCEPTION_COMPILE_FLAG "-fno-exceptions")
-    set(EXCEPTION_LINK_FLAG "SHELL:-s DISABLE_EXCEPTION_CATCHING=1")
-endif()
-
-# Common Emscripten link options
 set(COMMON_LINK_OPTIONS
-    # Use FreeType port
     "SHELL:-s USE_FREETYPE=1"
-    # Exported functions (v2 API)
+    "SHELL:-s USE_HARFBUZZ=1"
     "SHELL:-s EXPORTED_FUNCTIONS=['_loadFont','_unloadFont','_setDefaultFont','_getLoadedFonts','_clearAllFonts','_parseHTML','_parseHTMLWithDiagnostics','_getLastParseResult','_freeString','_getVersion','_getMetrics','_getDetailedMetrics','_getTotalMemoryUsage','_checkMemoryThreshold','_getMemoryMetrics','_destroy','_setDebugMode','_getDebugMode','_getCacheStats','_resetCacheStats','_clearCache','_malloc','_free']"
-    # Exported runtime methods
     "SHELL:-s EXPORTED_RUNTIME_METHODS=['ccall','cwrap','UTF8ToString','stringToUTF8','lengthBytesUTF8','HEAPU8']"
-    # Allow memory growth
     "SHELL:-s ALLOW_MEMORY_GROWTH=1"
-    # Initial memory size (16MB)
     "SHELL:-s INITIAL_MEMORY=16777216"
-    # Environment settings - support web and node
     "SHELL:-s ENVIRONMENT='web,node'"
-    # Disable filesystem (not needed)
     "SHELL:-s FILESYSTEM=0"
-    # Disable assertions for release builds
     "SHELL:-s ASSERTIONS=0"
-    # Exception handling
     ${EXCEPTION_LINK_FLAG}
     ${EXCEPTION_COMPILE_FLAG}
-    # Optimization level
     -${OPTIMIZATION_LEVEL}
 )
 
-# Add link options for original target
-target_link_options(${PROJECT_NAME} PRIVATE
-    ${COMMON_LINK_OPTIONS}
-)
+function(configure_html_layout_parser_target target_name)
+    target_link_libraries(${target_name} PRIVATE litehtml)
 
-# Create ESM version
-add_executable(${PROJECT_NAME}_esm
-    ${SOURCE_GUMBO}
-    ${SOURCE_LITEHTML}
-    ${SOURCE_WASM_V2}
-)
+    if(USE_FREETYPE)
+        target_include_directories(${target_name} PRIVATE
+            ${EMSCRIPTEN_ROOT_PATH}/cache/sysroot/include/freetype2
+            ${EMSCRIPTEN_ROOT_PATH}/cache/sysroot/include/harfbuzz
+        )
+    endif()
 
-target_include_directories(${PROJECT_NAME}_esm PRIVATE
-    ${LITEHTML_ROOT}/include
-    ${LITEHTML_ROOT}/include/litehtml
-    ${LITEHTML_DIR}
-    ${GUMBO_DIR}/include
-    ${GUMBO_DIR}/include/gumbo
-)
-
-# Add FreeType include directories for ESM target
-if(USE_FREETYPE)
-    target_include_directories(${PROJECT_NAME}_esm PRIVATE
-        ${EMSCRIPTEN_ROOT_PATH}/cache/sysroot/include/freetype2
+    target_compile_options(${target_name} PRIVATE
+        -${OPTIMIZATION_LEVEL}
+        -Wall
+        "SHELL:-s USE_FREETYPE=1"
+        "SHELL:-s USE_HARFBUZZ=1"
+        ${EXCEPTION_COMPILE_FLAG}
     )
-endif()
 
+    if(ENABLE_LTO)
+        target_compile_options(${target_name} PRIVATE -flto)
+        target_link_options(${target_name} PRIVATE -flto)
+    endif()
+endfunction()
+
+# Original / legacy JS glue
+add_executable(${PROJECT_NAME} ${SOURCE_WASM_V2})
+set_target_properties(${PROJECT_NAME} PROPERTIES SUFFIX ".js")
+target_link_options(${PROJECT_NAME} PRIVATE ${COMMON_LINK_OPTIONS})
+configure_html_layout_parser_target(${PROJECT_NAME})
+
+# ESM glue
+add_executable(${PROJECT_NAME}_esm ${SOURCE_WASM_V2})
 set_target_properties(${PROJECT_NAME}_esm PROPERTIES
     SUFFIX ".mjs"
     OUTPUT_NAME "html_layout_parser_esm"
 )
-
 target_link_options(${PROJECT_NAME}_esm PRIVATE
     ${COMMON_LINK_OPTIONS}
-    # Modular output
     "SHELL:-s MODULARIZE=1"
-    # Export name
     "SHELL:-s EXPORT_NAME='createHtmlLayoutParserModule'"
-    # ES6 module format
     "SHELL:-s EXPORT_ES6=1"
-    # ES6 module format (USE_ES6_IMPORT_META is deprecated)
 )
+configure_html_layout_parser_target(${PROJECT_NAME}_esm)
 
-# Create CommonJS version
-add_executable(${PROJECT_NAME}_cjs
-    ${SOURCE_GUMBO}
-    ${SOURCE_LITEHTML}
-    ${SOURCE_WASM_V2}
-)
-
-target_include_directories(${PROJECT_NAME}_cjs PRIVATE
-    ${LITEHTML_ROOT}/include
-    ${LITEHTML_ROOT}/include/litehtml
-    ${LITEHTML_DIR}
-    ${GUMBO_DIR}/include
-    ${GUMBO_DIR}/include/gumbo
-)
-
-# Add FreeType include directories for CJS target
-if(USE_FREETYPE)
-    target_include_directories(${PROJECT_NAME}_cjs PRIVATE
-        ${EMSCRIPTEN_ROOT_PATH}/cache/sysroot/include/freetype2
-    )
-endif()
-
+# CommonJS glue
+add_executable(${PROJECT_NAME}_cjs ${SOURCE_WASM_V2})
 set_target_properties(${PROJECT_NAME}_cjs PROPERTIES
     SUFFIX ".js"
     OUTPUT_NAME "html_layout_parser_cjs"
 )
-
 target_link_options(${PROJECT_NAME}_cjs PRIVATE
     ${COMMON_LINK_OPTIONS}
-    # Modular output
     "SHELL:-s MODULARIZE=1"
-    # Export name
     "SHELL:-s EXPORT_NAME='createHtmlLayoutParserModule'"
-    # CommonJS format (default)
 )
+configure_html_layout_parser_target(${PROJECT_NAME}_cjs)
 
-# Add LTO flag separately if enabled for both targets
-if(ENABLE_LTO)
-    target_link_options(${PROJECT_NAME}_esm PRIVATE -flto)
-    target_compile_options(${PROJECT_NAME}_esm PRIVATE -flto)
-    target_link_options(${PROJECT_NAME}_cjs PRIVATE -flto)
-    target_compile_options(${PROJECT_NAME}_cjs PRIVATE -flto)
-endif()
-
-# Compile options for both targets
-foreach(target ${PROJECT_NAME}_esm ${PROJECT_NAME}_cjs ${PROJECT_NAME})
-    target_compile_options(${target} PRIVATE
-        -${OPTIMIZATION_LEVEL}
-        -Wall
-        "SHELL:-s USE_FREETYPE=1"
-        ${EXCEPTION_COMPILE_FLAG}
-    )
-endforeach()
-
-# Print build configuration summary
 message(STATUS "=== Build Configuration ===")
 message(STATUS "Build Type: ${CMAKE_BUILD_TYPE}")
 message(STATUS "Minimal Build: ${BUILD_MINIMAL}")
 message(STATUS "Optimization: -${OPTIMIZATION_LEVEL}")
 message(STATUS "LTO Enabled: ${ENABLE_LTO}")
 message(STATUS "Exceptions: ${ENABLE_EXCEPTIONS}")
+message(STATUS "litehtml: ${LITEHTML_GIT_TAG}")
